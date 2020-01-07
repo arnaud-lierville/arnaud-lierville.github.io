@@ -247,7 +247,7 @@ function onKeyDown(event) {
     if (event.key == 'right') { if (activeRod) { activeRod.position.x += gridSize; }; };
 
     // Unactive rod
-    if (event.key = 'enter') {
+    if (event.key = 'u') {
         if (activeRod) { 
             activeRod.shadowColor = null;
             activeRod = null;
