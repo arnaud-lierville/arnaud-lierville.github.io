@@ -1,0 +1,12 @@
+TODO :
+
+/*
+larg et long du plan de travail
+Options et paramètres dans les fonctions
+config (stairs, carpet)
+Commandes : affichage des shortcuts
+log
+refactor
+
+Mise en ligne
+*/
