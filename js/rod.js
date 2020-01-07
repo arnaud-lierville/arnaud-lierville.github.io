@@ -21,7 +21,6 @@ gridSetup(gridSize, gridFillColor);
 setupRodMenu(xTopLegend, yTopLegend, gridSize);
 
 // functions //
-
 function gridSetup(gridSize, gridFillColor) {
     for (var y = 0; y < 50; y++) {
     	for(var x = 0; x < 50; x++) {
@@ -271,3 +270,14 @@ function onKeyDown(event) {
         };
     };
 };
+
+//Legend
+
+var legend = new PointText({
+    point: [12*gridSize, 2*gridSize],
+    content: 'Espace : pivoter la réglette',
+    fillColor: 'black',
+    fontFamily: 'Courier New',
+    fontWeight: 'bold',
+    fontSize: 25
+});
