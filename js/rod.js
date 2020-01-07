@@ -17,6 +17,7 @@ var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
 var activeRod = null;
 var isGridVisible = true;
+var isHelpVisible = true;
 gridSetup(gridSize, gridFillColor);
 setupRodMenu(xTopLegend, yTopLegend, gridSize);
 
@@ -269,6 +270,16 @@ function onKeyDown(event) {
             activeRod = null;
         };
     };
+
+    if (event.key == 'h') {
+        if (isHelpVisible) { 
+            isHelpVisible = false;
+            legend.visible = false;
+        } else {
+            isHelpVisible = true;
+            legend.visible = true;  
+        };
+    };
 };
 
 //Legend
@@ -276,6 +287,8 @@ function onKeyDown(event) {
 var legend = new PointText({
     point: [12*gridSize, 2*gridSize],
     content: 
+    'Création et déplacement à la souris et\n'  +
+    '\n'  +
     'Flèches : déplace la réglette\n'  +
     'Espace : pivote la réglette\n' +
     'Entrer : désactive la réglette\n'  +
