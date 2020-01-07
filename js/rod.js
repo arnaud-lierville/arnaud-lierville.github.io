@@ -243,4 +243,22 @@ function onKeyDown(event) {
             activeRod.position.y -= gridSize;
         };
     };
+
+    if (event.key == 'down') {
+        if (activeRod) {
+            activeRod.position.y += gridSize;
+        };
+    };
+
+    if (event.key == 'left') {
+        if (activeRod) {
+            activeRod.position.x -= gridSize;
+        };
+    };
+
+    if (event.key == 'right') {
+        if (activeRod) {
+            activeRod.position.x += gridSize;
+        };
+    };
 };
