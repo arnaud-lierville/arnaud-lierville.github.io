@@ -263,12 +263,11 @@ function onKeyDown(event) {
         };
     };
 
-    /*
     // Unactive rod
-    if (event.key = 'enter') {
+    if (event.key == 'enter') {
         if (activeRod) { 
             activeRod.shadowColor = null;
             activeRod = null;
         };
-    };*/
+    };
 };
