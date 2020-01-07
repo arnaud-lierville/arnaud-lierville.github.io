@@ -195,8 +195,7 @@ function onMouseUp(event) {
 };
 
 function onKeyDown(event) {
-    console.log('onKeyDown');
-    console.log(event.key)
+    console.log(event.key);
     // Flip a rod
     if (event.key == 'space') {
         if (activeRod) {
@@ -240,14 +239,32 @@ function onKeyDown(event) {
         };
     };
 
-    // Moving Rods with keyboard
-    if (event.key == 'up') { if (activeRod) { activeRod.position.y -= gridSize; }; };
-    if (event.key == 'down') { if (activeRod) { activeRod.position.y += gridSize; }; };
-    if (event.key == 'left') { if (activeRod) { activeRod.position.x -= gridSize; }; };
-    if (event.key == 'right') { if (activeRod) { activeRod.position.x += gridSize; }; };
+    if (event.key == 'up') {
+        if (activeRod) {
+            activeRod.position.y -= gridSize;
+        };
+    };
+
+    if (event.key == 'down') {
+        if (activeRod) {
+            activeRod.position.y += gridSize;
+        };
+    };
+
+    if (event.key == 'left') {
+        if (activeRod) {
+            activeRod.position.x -= gridSize;
+        };
+    };
+
+    if (event.key == 'right') {
+        if (activeRod) {
+            activeRod.position.x += gridSize;
+        };
+    };
 
     // Unactive rod
-    if (event.key = 'u') {
+    if (event.key = 'enter') {
         if (activeRod) { 
             activeRod.shadowColor = null;
             activeRod = null;
