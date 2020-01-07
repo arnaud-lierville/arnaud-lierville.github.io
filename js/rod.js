@@ -275,7 +275,8 @@ function onKeyDown(event) {
 
 var legend = new PointText({
     point: [12*gridSize, 2*gridSize],
-    content: 'Espace : pivoter la réglette',
+    content: 'Espace : pivoter la réglette\n' +
+             'Supprimer : supprime la réglette\n'  ,
     fillColor: 'black',
     fontFamily: 'Courier New',
     fontWeight: 'bold',
