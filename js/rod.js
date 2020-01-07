@@ -237,4 +237,10 @@ function onKeyDown(event) {
             gridSetup(gridSize, gridFillColor);
         };
     };
+
+    if (event.key == 'up') {
+        if (activeRod) {
+            activeRod.position.y -= gridSize;
+        };
+    };
 };
