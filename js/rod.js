@@ -275,8 +275,14 @@ function onKeyDown(event) {
 
 var legend = new PointText({
     point: [12*gridSize, 2*gridSize],
-    content: 'Espace : pivoter la réglette\n' +
-             'Supprimer : supprime la réglette\n'  ,
+    content: 
+    'Flèches : déplace la réglette\n'  +
+    'Espace : pivote la réglette\n' +
+    'Entrer : désactive la réglette\n'  +
+    'Supprimer : supprime la réglette\n'  +
+    'g : active/désactive la grille\n'  +
+    'r : efface tout\n'  +
+    'h : affiche l\'aide\n',
     fillColor: 'black',
     fontFamily: 'Courier New',
     fontWeight: 'bold',
