@@ -1,5 +1,7 @@
 console.clear();
 
+var planWidth = 25;
+var planHeight = 17;
 var gridSize = 50;
 var gridFillColor = '#e9e9ff';
 var xTopLegend = gridSize;
@@ -23,8 +25,8 @@ setupRodMenu(xTopLegend, yTopLegend, gridSize);
 
 // functions //
 function gridSetup(gridSize, gridFillColor) {
-    for (var y = 0; y < 50; y++) {
-    	for(var x = 0; x < 50; x++) {
+    for (var y = 0; y < planHeight; y++) {
+    	for(var x = 0; x < planWidth; x++) {
             var circle = new Path.Circle({
                 center: new Point(x, y)*gridSize,
                 radius: 2,
@@ -156,9 +158,9 @@ function onMouseDown(event) {
 	if (!hitResult) { return; }
 		
 	if (hitResult.type == 'fill') {
-	    thisRod = hitResult.item;
+        thisRod = hitResult.item;
         var y = thisRod.position.y;
-        if (y != yTopLegend*1.5) {
+        if (y != yTopLegend*1.5 && !thisRod.content) {
             if (activeRod) { activeRod.shadowColor = null; };
             activeRod = thisRod;
             activeRod.bringToFront();
@@ -177,42 +179,58 @@ function onMouseDrag(event) {
 
 function onMouseUp(event) {
     if (activeRod) {
-        var x = activeRod.position.x;
-        var y = activeRod.position.y;
-        // alt = 1 => barre impaire, alt = 0 => barre paire
-        var alt = Math.floor(activeRod.area*1.05/(gridSize*gridSize))%2;
-        var isRodUP = Math.abs(activeRod.bounds.width - gridSize) < 0.01;
-        // Espace de sécurité pour ne pas recouvrir la barre des menus
-        var spaceMenu = Math.floor(activeRod.bounds.height/(2*gridSize))+3;
-        if (isRodUP) {
-            activeRod.position.x = (Math.floor(x/gridSize) + 0.5)*gridSize;
-            activeRod.position.y = (Math.max((Math.floor(y/gridSize)),spaceMenu) + alt*.5)*gridSize;
+        // no move detect
+        if (event.delta.x == 0 && event.delta.y == 0) {
+            // flip rod
+            // not in MenuRod
+            if (event.point.y > 2*gridSize) {
+                flipRod(activeRod);
+            }  
+        // move detect
         } else {
-            activeRod.position.x = (Math.floor(x/gridSize) + alt*0.5)*gridSize;
-            activeRod.position.y = (Math.max((Math.floor(y/gridSize)),spaceMenu) + 0.5)*gridSize;
+            // move rod
+            var x = activeRod.position.x;
+            var y = activeRod.position.y;
+            // alt = 1 => barre impaire, alt = 0 => barre paire
+            var alt = Math.floor(activeRod.area*1.05/(gridSize*gridSize))%2;
+            var isRodUP = Math.abs(activeRod.bounds.width - gridSize) < 0.01;
+            // Espace de sécurité pour ne pas recouvrir la barre des rods
+            var spaceMenu = Math.floor(activeRod.bounds.height/(2*gridSize))+3;
+            if (isRodUP) {
+                activeRod.position.x = (Math.floor(x/gridSize) + 0.5)*gridSize;
+                activeRod.position.y = (Math.max((Math.floor(y/gridSize)),spaceMenu) + alt*.5)*gridSize;
+            } else {
+                activeRod.position.x = (Math.floor(x/gridSize) + alt*0.5)*gridSize;
+                activeRod.position.y = (Math.max((Math.floor(y/gridSize)),spaceMenu) + 0.5)*gridSize;
+            };
+        };
+
+
+    };
+};
+
+function flipRod(rod) {
+    // test1 = true => barre blanche
+    var isWhiteRod = Math.abs(rod.bounds.width - rod.bounds.height) < 0.01;
+    if (!isWhiteRod) {
+        // test2 : pour déterminer le sens de rotation
+        var isRodUP = Math.abs(rod.bounds.width - gridSize) < 0.01;
+        if (isRodUP) {
+            var point = rod.bounds.bottomLeft;
+            rod.rotate(90, point);
+        } else {
+            var point = rod.bounds.topLeft;
+            rod.rotate(-90, point);
         };
     };
+    return;
 };
 
 function onKeyDown(event) {
     console.log(event.key);
     // Flip a rod
     if (event.key == 'space') {
-        if (activeRod) {
-            // test1 = true => barre blanche
-            var isWhiteRod = Math.abs(activeRod.bounds.width - activeRod.bounds.height) < 0.01;
-            if (!isWhiteRod) {
-                // test2 : pour déterminer le sens de rotation
-                var isRodUP = Math.abs(activeRod.bounds.width - gridSize) < 0.01;
-                if (isRodUP) {
-                    var point = activeRod.bounds.bottomLeft;
-                    activeRod.rotate(90, point);
-                } else {
-                    var point = activeRod.bounds.topLeft;
-                    activeRod.rotate(-90, point);
-                };
-            };
-        };
+        if (activeRod) { flipRod(activeRod); };
     };
     
     // Remove a rod
@@ -285,9 +303,9 @@ function onKeyDown(event) {
 //Legend
 
 var legend = new PointText({
-    point: [12*gridSize, 2*gridSize],
+    point: [15*gridSize, 1*gridSize],
     content: 
-    'Création et déplacement à la souris et\n'  +
+    'Raccourcis claviers :\n'  +
     '\n'  +
     'Flèches : déplace la réglette\n'  +
     'Espace : pivote la réglette\n' +
@@ -297,7 +315,10 @@ var legend = new PointText({
     'r : efface tout\n'  +
     'h : affiche l\'aide\n',
     fillColor: 'black',
-    fontFamily: 'Courier New',
+    fontFamily: 'fantasy',
     fontWeight: 'bold',
-    fontSize: 25
+    fontSize: 25,
+    shadowColor: new Color(0, 0, 0),
+    shadowBlur: 12,
+    shadowOffset: new Point(5, 5)
 });

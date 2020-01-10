@@ -1,5 +1,7 @@
 TODO :
 
+python -m SimpleHTTPServer
+
 /*
 larg et long du plan de travail
 Options et paramètres dans les fonctions
