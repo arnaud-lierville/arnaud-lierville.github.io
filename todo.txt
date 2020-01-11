@@ -1,17 +1,23 @@
-TODO :
-
 python -m SimpleHTTPServer
 
-/*
-larg et long du plan de travail
-Options et paramètres dans les fonctions
+
+TODO :
+
+
 config (stairs, carpet)
-Commandes : affichage des shortcuts
 log
 refactor
 
-Mise en ligne
-*/
+
+
+
+TESTS : 
+- larg et long du plan de travail
+
+
+Notes 
+
+classe statiques et privée
 
 Number.prototype.countDecimals = function () {
     if(Math.floor(this.valueOf()) === this.valueOf()) return 0;

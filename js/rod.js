@@ -1,8 +1,8 @@
 console.clear();
 
-var planWidth = 25;
-var planHeight = 16;
-var gridScale = 50;
+var planWidth = 28;
+var planHeight = 18;
+var gridScale = 45;
 var gridFillColor = 'grey';
 var xTopLegend = gridScale;
 var yTopLegend = gridScale;
@@ -25,7 +25,7 @@ var isMenuVisible = true;
 gridSetup(gridScale, gridFillColor);
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
 
-// functions //
+// gridSetup
 function gridSetup(gridScale, gridFillColor) {
     for (var y = 3; y < planHeight; y++) {
     	for(var x = 1; x < planWidth; x++) {
@@ -40,6 +40,7 @@ function gridSetup(gridScale, gridFillColor) {
     gridGroup.sendToBack();
 };
 
+// setupRodMenu
 function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     
     activeRod = null;
@@ -153,10 +154,9 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     orange.isSelectable = false;
     orange.onMouseDown = function(event) { activeRod = createRod(10); };
     menuGroup.addChild(orange);
-
 };
 
-
+// createRod
 function createRod(l) {
     if (activeRod) { activeRod.shadowColor = null; };
     var x = Math.floor(Math.random() * 10);
@@ -175,9 +175,21 @@ function createRod(l) {
     rod.rodLength = l;
     rod.parity = l%2;
     rodGroup.addChild(rod);
+    rod.flip = function() {
+        if (this.rodLength !=1) {
+            if (this.isUP) {
+                this.rotate(90, this.bounds.bottomLeft);
+                this.isUP = false;
+            } else {
+                this.rotate(-90, this.bounds.topLeft);
+                this.isUP = true;
+            };
+        };
+    };
     return rod;
 };
 
+//onMouseDown
 function onMouseDown(event) {
     
     var hitResult = project.hitTest(event.point, hitOptions);
@@ -208,31 +220,32 @@ function onMouseDown(event) {
     };
 };
 
+// onMouseDrag
 function onMouseDrag(event) {
 	if (activeRod) {
 	    activeRod.position += event.delta;
 	};
 };
 
+// onMouseUp
 function onMouseUp(event) {
     if (activeRod) {
-        // no move detect
+        // no moving detect
         if (event.delta.x == 0 && event.delta.y == 0) {
             // flip rod
-            // not in MenuRod
+            // onMouseUp not in MenuRod
             if (event.point.y > 2*gridScale) {
-                flipRod(activeRod);
+                activeRod.flip();
             }  
-        // move detect
+        // moving detect
         } else {
-            // move rod
             var x = activeRod.position.x;
             var y = activeRod.position.y;
-            // Espace de sécurité pour ne pas recouvrir la barre des rods
-            var spaceMenu = Math.floor(activeRod.rodLength/2)+3;
+            // shiftSpaceForMenu
+            var shiftSpaceForMenu = Math.floor(activeRod.rodLength/2)+3;
             if (activeRod.isUP) {
                 activeRod.position.x = (Math.floor(x/gridScale) + 0.5)*gridScale;
-                activeRod.position.y = (Math.max((Math.floor(y/gridScale)), spaceMenu) + activeRod.parity*.5)*gridScale;
+                activeRod.position.y = (Math.max((Math.floor(y/gridScale)), shiftSpaceForMenu) + activeRod.parity*.5)*gridScale;
             } else {
                 activeRod.position.x = (Math.floor(x/gridScale) + activeRod.parity*0.5)*gridScale;
                 activeRod.position.y = (Math.max((Math.floor(y/gridScale)), 3) + 0.5)*gridScale;
@@ -243,24 +256,10 @@ function onMouseUp(event) {
     };
 };
 
-function flipRod(rod) {
-    if (rod.rodLength !=1) {
-        if (rod.isUP) {
-            var point = rod.bounds.bottomLeft;
-            rod.rotate(90, point);
-            rod.isUP = false;
-        } else {
-            var point = rod.bounds.topLeft;
-            rod.rotate(-90, point);
-            rod.isUP = true;
-        };
-    };
-    return;
-};
-
+// onKeyDown
 function onKeyDown(event) {
 
-    console.log(event.key);
+    console.log('key: ' + event.key);
 
     if (event.key == 'up') {
         if (activeRod) {
@@ -288,10 +287,10 @@ function onKeyDown(event) {
 
     // Flip a rod
     if (event.key == 'space') {
-        if (activeRod) { flipRod(activeRod); };
+        if (activeRod) { activeRod.flip(); };
     };
     
-    // Remove a rod
+    // Delete a rod
     if (event.key == 'backspace') {
         if (activeRod) { 
             activeRod.remove(); 
@@ -368,5 +367,3 @@ var legend = new PointText({
     shadowBlur: 12,
     shadowOffset: new Point(5, 5)
 });
-
-legend.visible = false;
