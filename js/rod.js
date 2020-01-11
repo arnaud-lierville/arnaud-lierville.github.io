@@ -3,7 +3,7 @@ console.clear();
 var planWidth = 28;
 var planHeight = 18;
 var gridScale = 45;
-var gridFillColor = 'grey';
+var gridFillColor = '#74abb5';
 var xTopLegend = gridScale;
 var yTopLegend = gridScale;
 var rodStrokeWidth = gridScale/15;
@@ -19,8 +19,6 @@ var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
 var activeRod = null;
 var isGridVisible = true;
-var isHelpVisible = true;
-var isMenuVisible = true;
 
 gridSetup(gridScale, gridFillColor);
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
@@ -158,6 +156,10 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
 
 // createRod
 function createRod(l) {
+
+    legend.visible = false;
+    legendBackground.visible = false;
+
     if (activeRod) { activeRod.shadowColor = null; };
     var x = Math.floor(Math.random() * 10);
     var y = Math.floor(Math.random() * 6);
@@ -199,15 +201,6 @@ function onMouseDown(event) {
     } else {
         if (hitResult.type == 'fill') {
             thisItem = hitResult.item;
-            if (thisItem.content) {
-                if (activeRod) {
-                    activeRod.shadowColor = null;
-                    activeRod = null;
-                };
-                isHelpVisible = false;
-                legend.visible = false;
-                return;
-            };
             if (thisItem.isSelectable) {
                 if (activeRod) { activeRod.shadowColor = null; };
                 activeRod = thisItem;
@@ -299,7 +292,7 @@ function onKeyDown(event) {
     };
     
     // Reset the scene
-    if (event.key == 'r') {
+    if (event.key == 'c') {
         rodGroup.removeChildren();
     };
     
@@ -324,46 +317,172 @@ function onKeyDown(event) {
 
     // h : legend
     if (event.key == 'h') {
-        if (isHelpVisible) { 
-            isHelpVisible = false;
-            legend.visible = false;
-        } else {
-            isHelpVisible = true;
-            legend.visible = true;  
-        };
+        legend.visible = !legend.visible;
+        legendBackground.visible = !legendBackground.visible;
     };
 
     // m : menu
     if (event.key == 'm') {
-        if (isMenuVisible) { 
-            isMenuVisible = false;
-            menuGroup.visible = false;
-        } else {
-            isMenuVisible = true;
-            menuGroup.visible = true;  
-        };
+        menuGroup.visible = !menuGroup.visible;
     };
+
+    // Flip a rod
+    if (event.key == 's') {
+        stairs();
+    };
+
+
+    if (event.key == '1') { activeRod = createRod(1); };
+    if (event.key == '2') { activeRod = createRod(2); };
+    if (event.key == '3') { activeRod = createRod(3); };
+    if (event.key == '4') { activeRod = createRod(4); };
+    if (event.key == '5') { activeRod = createRod(5); };
+    if (event.key == '6') { activeRod = createRod(6); };
+    if (event.key == '7') { activeRod = createRod(7); };
+    if (event.key == '8') { activeRod = createRod(8); };
+    if (event.key == '9') { activeRod = createRod(9); };
+    if (event.key == '0') { activeRod = createRod(10); };
+
+    if (event.key == 'a') { carpet(1); };
+    if (event.key == 'z') { carpet(2); };
+    if (event.key == 'e') { carpet(3); };
+    if (event.key == 'r') { carpet(4); };
+    if (event.key == 't') { carpet(5); };
+    if (event.key == 'y') { carpet(6); };
+    if (event.key == 'u') { carpet(7); };
+    if (event.key == 'i') { carpet(8); };
+    if (event.key == 'o') { carpet(9); };
+    if (event.key == 'p') { carpet(10); };
+
 };
+
+
+
 
 // Legend
 var legend = new PointText({
     point: [3.5*gridScale, 3.5*gridScale],
     content: 
-    'Raccourcis claviers :\n'  +
+    'Souris et raccourcis claviers :\n'  +
     '\n'  +
-    'Flèches : déplace la réglette\n'  +
-    'Espace : pivote la réglette\n' +
-    'Entrer : désactive la réglette\n'  +
-    'Supprimer : supprime la réglette\n'  +
-    'g : active/désactive la grille\n'  +
-    'r : efface tout\n'  +
+    'h : affiche l\'aide\n' +
     'm : affiche le menu\n' +
-    'h : affiche l\'aide\n',
-    fillColor: 'black',
+    'g : active/désactive la grille\n' +
+    'Flèches : déplace la réglette\n' +
+    'Espace : pivote la réglette\n' +
+    'Entrer : désactive la réglette\n' +
+    'Supprimer : supprime la réglette\n' +
+    '1, 2, 3, ... : crée la réglette 1, 2, 3, ...\n' +
+    'a, z, e, r, t, y, ... : crée le tapis 1, 2, 3, ...\n' +
+    's : crée l\'escalier\n'  +
+    'c : efface tout\n',
+    fillColor: '#0c6675',
     fontFamily: 'fantasy',
     fontWeight: 'bold',
     fontSize: 25,
-    shadowColor: new Color(0, 0, 0),
-    shadowBlur: 12,
-    shadowOffset: new Point(5, 5)
+    //shadowColor: new Color(0, 0, 0),
+    //shadowBlur: 12,
+    //shadowOffset: new Point(5, 5)
 });
+
+legend.onMouseDown = function(event) { 
+    if (activeRod) {
+        activeRod.shadowColor = null;
+        activeRod = null;
+    };
+    legend.visible = !legend.visible;
+    legendBackground.visible = !legendBackground.visible;
+};
+
+//var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size));
+var legendBackground = new Path.Rectangle(new Rectangle(new Point(2.9*gridScale, 2.6*gridScale), new Point(13.1*gridScale, 12.1*gridScale)));
+legendBackground.fillColor = '#ffefd6';
+legend.bringToFront();
+
+
+function carpet(n) {
+    for (i = 0; i < n+1; i++)
+    {
+        // left rod
+        if (i !=0 ) {
+            var size = new Size(i*gridScale, gridScale);
+            var point = new Point(4*gridScale ,(4+i)*gridScale);
+            var rod = new Path.Rectangle(new Rectangle(point, size));
+            rod.fillColor = colorRod[i-1];
+            rod.strokeColor = rodStrokeColor;
+            rod.strokeWidth = rodStrokeWidth;
+            rod.selected = false;
+            rod.isSelectable = true;
+            rod.isUP = false;
+            rod.rodLength = i;
+            rod.parity = i%2;
+            rodGroup.addChild(rod);
+            rod.flip = function() {
+                if (this.rodLength !=1) {
+                    if (this.isUP) {
+                        this.rotate(90, this.bounds.bottomLeft);
+                        this.isUP = false;
+                    } else {
+                        this.rotate(-90, this.bounds.topLeft);
+                        this.isUP = true;
+                    };
+                };
+            };
+        };
+
+        // right rod
+        if ( (n-i) != 0) {
+            var size = new Size((n-i)*gridScale, gridScale);
+            var point = new Point((4+i)*gridScale ,(4+i)*gridScale);
+            var rod = new Path.Rectangle(new Rectangle(point, size));
+            rod.fillColor = colorRod[n-i-1];
+            rod.strokeColor = rodStrokeColor;
+            rod.strokeWidth = rodStrokeWidth;
+            rod.selected = false;
+            rod.isSelectable = true;
+            rod.isUP = false;
+            rod.rodLength = n-i;
+            rod.parity = (n-i)%2;
+            rodGroup.addChild(rod);
+            rod.flip = function() {
+                if (this.rodLength !=1) {
+                    if (this.isUP) {
+                        this.rotate(90, this.bounds.bottomLeft);
+                        this.isUP = false;
+                    } else {
+                        this.rotate(-90, this.bounds.topLeft);
+                        this.isUP = true;
+                    };
+                };
+            };
+        };
+    };
+};
+
+function stairs() {
+    for (i = 1; i < 11; i++) {
+        var size = new Size(i*gridScale, gridScale);
+        var point = new Point(4*gridScale ,(3+i)*gridScale);
+        var rod = new Path.Rectangle(new Rectangle(point, size));
+        rod.fillColor = colorRod[i-1];
+        rod.strokeColor = rodStrokeColor;
+        rod.strokeWidth = rodStrokeWidth;
+        rod.selected = false;
+        rod.isSelectable = true;
+        rod.isUP = false;
+        rod.rodLength = i;
+        rod.parity = i%2;
+        rodGroup.addChild(rod);
+        rod.flip = function() {
+            if (this.rodLength !=1) {
+                if (this.isUP) {
+                    this.rotate(90, this.bounds.bottomLeft);
+                    this.isUP = false;
+                } else {
+                    this.rotate(-90, this.bounds.topLeft);
+                    this.isUP = true;
+                };
+            };
+        };
+    };
+};
