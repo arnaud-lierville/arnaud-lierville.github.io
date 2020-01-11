@@ -17,17 +17,17 @@ var gridGroup = new Group();
 var menuGroup = new Group();
 var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
-
 var activeRod = null;
 var isGridVisible = true;
 var isHelpVisible = true;
 var isMenuVisible = true;
+
 gridSetup(gridScale, gridFillColor);
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
 
 // functions //
 function gridSetup(gridScale, gridFillColor) {
-    for (var y = 1; y < planHeight; y++) {
+    for (var y = 3; y < planHeight; y++) {
     	for(var x = 1; x < planWidth; x++) {
             var circle = new Path.Circle({
                 center: new Point(x, y)*gridScale,
@@ -40,7 +40,6 @@ function gridSetup(gridScale, gridFillColor) {
     gridGroup.sendToBack();
 };
 
-
 function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     
     activeRod = null;
@@ -52,6 +51,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     white.strokeColor = rodStrokeColor;
     white.strokeWidth = rodStrokeWidth;
     white.selected = false;
+    white.isSelectable = false;
     white.onMouseDown = function(event) { activeRod = createRod(1); };
     menuGroup.addChild(white);
     
@@ -62,6 +62,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     red.strokeColor = rodStrokeColor;
     red.strokeWidth = rodStrokeWidth;
     red.selected = false;
+    red.isSelectable = false;
     red.onMouseDown = function(event) { activeRod = createRod(2); };
     menuGroup.addChild(red);
 
@@ -72,6 +73,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     liteGreen.strokeColor = rodStrokeColor;
     liteGreen.strokeWidth = rodStrokeWidth;
     liteGreen.selected = false;
+    liteGreen.isSelectable = false;
     liteGreen.onMouseDown = function(event) { activeRod = createRod(3); };
     menuGroup.addChild(liteGreen);
 
@@ -82,6 +84,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     pink.strokeColor = rodStrokeColor;
     pink.strokeWidth = rodStrokeWidth;
     pink.selected = false;
+    pink.isSelectable = false;
     pink.onMouseDown = function(event) { activeRod = createRod(4); };
     menuGroup.addChild(pink);
 
@@ -92,6 +95,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     yellow.strokeColor = rodStrokeColor;
     yellow.strokeWidth = rodStrokeWidth;
     yellow.selected = false;
+    yellow.isSelectable = false;
     yellow.onMouseDown = function(event) { activeRod = createRod(5); };
     menuGroup.addChild(yellow);
 
@@ -102,6 +106,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     darkGreen.strokeColor = rodStrokeColor;
     darkGreen.strokeWidth = rodStrokeWidth;
     darkGreen.selected = false;
+    darkGreen.isSelectable = false;
     darkGreen.onMouseDown = function(event) { activeRod = createRod(6); };
     menuGroup.addChild(darkGreen);
 
@@ -112,6 +117,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     dark.strokeColor = rodStrokeColor;
     dark.strokeWidth = rodStrokeWidth;
     dark.selected = false;
+    dark.isSelectable = false;
     dark.onMouseDown = function(event) { activeRod = createRod(7); };
     menuGroup.addChild(dark);
 
@@ -122,6 +128,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     brown.strokeColor = rodStrokeColor;
     brown.strokeWidth = rodStrokeWidth;
     brown.selected = false;
+    brown.isSelectable = false;
     brown.onMouseDown = function(event) { activeRod = createRod(8); };
     menuGroup.addChild(brown);
 
@@ -132,6 +139,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     blue.strokeColor = rodStrokeColor;
     blue.strokeWidth = rodStrokeWidth;
     blue.selected = false;
+    blue.isSelectable = false;
     blue.onMouseDown = function(event) { activeRod = createRod(9); };
     menuGroup.addChild(blue);
 
@@ -142,6 +150,7 @@ function setupRodMenu(xTopLegend, yTopLegend, gridScale) {
     orange.strokeColor = rodStrokeColor;
     orange.strokeWidth = rodStrokeWidth;
     orange.selected = false;
+    orange.isSelectable = false;
     orange.onMouseDown = function(event) { activeRod = createRod(10); };
     menuGroup.addChild(orange);
 
@@ -161,27 +170,42 @@ function createRod(l) {
     rod.shadowBlur = 12;
     rod.shadowOffset = new Point(5, 5);
     rod.selected = false;
+    rod.isSelectable = true;
+    rod.isUP = true;
+    rod.rodLength = l;
+    rod.parity = l%2;
     rodGroup.addChild(rod);
     return rod;
 };
 
 function onMouseDown(event) {
     
-	var hitResult = project.hitTest(event.point, hitOptions);
-	if (!hitResult) { return; }
-		
-	if (hitResult.type == 'fill') {
-        thisRod = hitResult.item;
-        var y = thisRod.position.y;
-        if (y != yTopLegend*1.5 && !thisRod.content) {
-            if (activeRod) { activeRod.shadowColor = null; };
-            activeRod = thisRod;
-            activeRod.bringToFront();
-            activeRod.shadowColor = new Color(0, 0, 0);
-            activeRod.shadowBlur = 12;
-            activeRod.shadowOffset = new Point(5, 5);
+    var hitResult = project.hitTest(event.point, hitOptions);
+    if (!hitResult) { 
+        activeRod = null;
+        return; 
+    } else {
+        if (hitResult.type == 'fill') {
+            thisItem = hitResult.item;
+            if (thisItem.content) {
+                if (activeRod) {
+                    activeRod.shadowColor = null;
+                    activeRod = null;
+                };
+                isHelpVisible = false;
+                legend.visible = false;
+                return;
+            };
+            if (thisItem.isSelectable) {
+                if (activeRod) { activeRod.shadowColor = null; };
+                activeRod = thisItem;
+                activeRod.bringToFront();
+                activeRod.shadowColor = new Color(0, 0, 0);
+                activeRod.shadowBlur = 12;
+                activeRod.shadowOffset = new Point(5, 5);
+            };
         };
-	};
+    };
 };
 
 function onMouseDrag(event) {
@@ -196,7 +220,7 @@ function onMouseUp(event) {
         if (event.delta.x == 0 && event.delta.y == 0) {
             // flip rod
             // not in MenuRod
-            if (event.point.y > 2*gridScale && activeRod.position.y>3) {
+            if (event.point.y > 2*gridScale) {
                 flipRod(activeRod);
             }  
         // move detect
@@ -204,17 +228,14 @@ function onMouseUp(event) {
             // move rod
             var x = activeRod.position.x;
             var y = activeRod.position.y;
-            // alt = 1 => barre impaire, alt = 0 => barre paire
-            var alt = Math.floor(activeRod.area*1.05/(gridScale*gridScale))%2;
-            var isRodUP = Math.abs(activeRod.bounds.width - gridScale) < 0.01;
             // Espace de sécurité pour ne pas recouvrir la barre des rods
-            var spaceMenu = Math.floor(activeRod.bounds.height/(2*gridScale))+3;
-            if (isRodUP) {
+            var spaceMenu = Math.floor(activeRod.rodLength/2)+3;
+            if (activeRod.isUP) {
                 activeRod.position.x = (Math.floor(x/gridScale) + 0.5)*gridScale;
-                activeRod.position.y = (Math.max((Math.floor(y/gridScale)),spaceMenu) + alt*.5)*gridScale;
+                activeRod.position.y = (Math.max((Math.floor(y/gridScale)), spaceMenu) + activeRod.parity*.5)*gridScale;
             } else {
-                activeRod.position.x = (Math.floor(x/gridScale) + alt*0.5)*gridScale;
-                activeRod.position.y = (Math.max((Math.floor(y/gridScale)),spaceMenu) + 0.5)*gridScale;
+                activeRod.position.x = (Math.floor(x/gridScale) + activeRod.parity*0.5)*gridScale;
+                activeRod.position.y = (Math.max((Math.floor(y/gridScale)), 3) + 0.5)*gridScale;
             };
         };
 
@@ -223,24 +244,48 @@ function onMouseUp(event) {
 };
 
 function flipRod(rod) {
-    // test1 = true => barre blanche
-    var isWhiteRod = Math.abs(rod.bounds.width - rod.bounds.height) < 0.01;
-    if (!isWhiteRod) {
-        // test2 : pour déterminer le sens de rotation
-        var isRodUP = Math.abs(rod.bounds.width - gridScale) < 0.01;
-        if (isRodUP) {
+    if (rod.rodLength !=1) {
+        if (rod.isUP) {
             var point = rod.bounds.bottomLeft;
             rod.rotate(90, point);
+            rod.isUP = false;
         } else {
             var point = rod.bounds.topLeft;
             rod.rotate(-90, point);
+            rod.isUP = true;
         };
     };
     return;
 };
 
 function onKeyDown(event) {
+
     console.log(event.key);
+
+    if (event.key == 'up') {
+        if (activeRod) {
+            activeRod.position.y -= gridScale;
+        };
+    };
+
+    if (event.key == 'down') {
+        if (activeRod) {
+            activeRod.position.y += gridScale;
+        };
+    };
+
+    if (event.key == 'left') {
+        if (activeRod) {
+            activeRod.position.x -= gridScale;
+        };
+    };
+
+    if (event.key == 'right') {
+        if (activeRod) {
+            activeRod.position.x += gridScale;
+        };
+    };
+
     // Flip a rod
     if (event.key == 'space') {
         if (activeRod) { flipRod(activeRod); };
@@ -270,31 +315,7 @@ function onKeyDown(event) {
         };
     };
 
-    if (event.key == 'up') {
-        if (activeRod) {
-            activeRod.position.y -= gridScale;
-        };
-    };
-
-    if (event.key == 'down') {
-        if (activeRod) {
-            activeRod.position.y += gridScale;
-        };
-    };
-
-    if (event.key == 'left') {
-        if (activeRod) {
-            activeRod.position.x -= gridScale;
-        };
-    };
-
-    if (event.key == 'right') {
-        if (activeRod) {
-            activeRod.position.x += gridScale;
-        };
-    };
-
-    // Unactive rod
+    // enter : unactive rod
     if (event.key == 'enter') {
         if (activeRod) { 
             activeRod.shadowColor = null;
@@ -325,8 +346,7 @@ function onKeyDown(event) {
     };
 };
 
-//Legend
-
+// Legend
 var legend = new PointText({
     point: [3.5*gridScale, 3.5*gridScale],
     content: 
@@ -338,7 +358,7 @@ var legend = new PointText({
     'Supprimer : supprime la réglette\n'  +
     'g : active/désactive la grille\n'  +
     'r : efface tout\n'  +
-    'm : affiche le menu' +
+    'm : affiche le menu\n' +
     'h : affiche l\'aide\n',
     fillColor: 'black',
     fontFamily: 'fantasy',
@@ -348,3 +368,5 @@ var legend = new PointText({
     shadowBlur: 12,
     shadowOffset: new Point(5, 5)
 });
+
+legend.visible = false;
