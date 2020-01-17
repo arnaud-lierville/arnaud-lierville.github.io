@@ -1,5 +1,5 @@
 /* Settings */
-var scale = 65;
+var scale = 45;
 
 var tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78'];
 var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922'];
