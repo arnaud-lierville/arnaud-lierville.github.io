@@ -1,25 +1,23 @@
 python -m SimpleHTTPServer
 
 
-TODO :
+ANIMATIONS : ? https://stackoverflow.com/questions/22824214/assign-onframe-animation-function-to-play-on-mouseevent
 
+svg
 
-config (stairs, carpet)
-log
-refactor
+***
 
+ROD : 
+- STOP SCROLLING
+- mettre les barres crées à l'horizontale
+- selection bug
 
+FAIRE ABAQUE-SOUSTRACTION
+FAIRE multibase
+FAIRE ABAQUE comme SimpleAbakTouch GGB
+FAIRE MONNAIE
+FAIRE AXE NUMÉRIQUE (avec bande unité et début)
+FAIRE CARRELAGE
+Horloge + rod
 
-
-TESTS : 
-- larg et long du plan de travail
-
-
-Notes 
-
-classe statiques et privée
-
-Number.prototype.countDecimals = function () {
-    if(Math.floor(this.valueOf()) === this.valueOf()) return 0;
-    return this.toString().split(".")[1].length || 0; 
-};
+IDEE : js + pdf 2pages x 2 versions + vidéos

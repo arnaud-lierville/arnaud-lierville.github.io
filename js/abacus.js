@@ -27,7 +27,6 @@ var tokensToMove = [];
 var animationFired = false;
 
 /* Main */
-console.clear();
 disableScroll();
 createAbacus(abacusBottomRight.x, abacusBottomRight.y, nbDigits, abacusStrech);
 var toggleButton = toggleButton(operationBottomRight.x + 1, operationBottomRight.y - .25, .5, '#fc5c5e', '#C0C0C0');

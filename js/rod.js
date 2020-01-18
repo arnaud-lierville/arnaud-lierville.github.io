@@ -1,5 +1,3 @@
-console.clear();
-
 var planWidth = 28;
 var planHeight = 18;
 var gridScale = 45;
@@ -18,9 +16,9 @@ var menuGroup = new Group();
 var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
 var activeRod = null;
-var isGridVisible = true;
+var isGridVisible = false;
 
-gridSetup(gridScale, gridFillColor);
+disableScroll();
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
 
 // gridSetup
@@ -36,6 +34,7 @@ function gridSetup(gridScale, gridFillColor) {
     	};
     };
     gridGroup.sendToBack();
+
 };
 
 // setupRodMenu
@@ -162,7 +161,7 @@ function createRod(l) {
 
     if (activeRod) { activeRod.shadowColor = null; };
     var x = Math.floor(Math.random() * 10);
-    var y = Math.floor(Math.random() * 6);
+    var y = Math.max(Math.floor(Math.random() * 3 - 2), 0);
     var rodRectangle = new Rectangle(new Point((x+1)*gridScale, (y+3)*gridScale), new Size(gridScale, l*gridScale));
     var rod = new Path.Rectangle(rodRectangle);
     rod.fillColor = colorRod[l-1];
@@ -188,6 +187,7 @@ function createRod(l) {
             };
         };
     };
+    rod.flip();
     return rod;
 };
 
@@ -196,7 +196,14 @@ function onMouseDown(event) {
     
     var hitResult = project.hitTest(event.point, hitOptions);
     if (!hitResult) { 
-        activeRod = null;
+        if (activeRod) {
+            activeRod.shadowColor = null;
+            activeRod = null;
+        }
+        if (legend.visible) {
+            legend.visible = !legend.visible;
+            legendBackground.visible = !legendBackground.visible;
+        }
         return; 
     } else {
         if (hitResult.type == 'fill') {
@@ -251,6 +258,11 @@ function onMouseUp(event) {
 
 // onKeyDown
 function onKeyDown(event) {
+
+    if (legend.visible && event.key != 'h') {
+        legend.visible = !legend.visible;
+        legendBackground.visible = !legendBackground.visible;
+    }
 
     console.log('key: ' + event.key);
 
@@ -326,7 +338,7 @@ function onKeyDown(event) {
         menuGroup.visible = !menuGroup.visible;
     };
 
-    // Flip a rod
+    // create stair
     if (event.key == 's') {
         stairs();
     };
@@ -401,6 +413,10 @@ legend.bringToFront();
 
 
 function carpet(n) {
+    if (activeRod) {
+        activeRod.shadowColor = null;
+        activeRod = null;
+    }
     for (i = 0; i < n+1; i++)
     {
         // left rod
@@ -460,16 +476,20 @@ function carpet(n) {
 };
 
 function stairs() {
+    if (activeRod) {
+        activeRod.shadowColor = null;
+        activeRod = null;
+    }
     for (i = 1; i < 11; i++) {
-        var size = new Size(i*gridScale, gridScale);
-        var point = new Point(4*gridScale ,(3+i)*gridScale);
+        var size = new Size(gridScale, i*gridScale);
+        var point = new Point((3+i)*gridScale ,(14-i)*gridScale);
         var rod = new Path.Rectangle(new Rectangle(point, size));
         rod.fillColor = colorRod[i-1];
         rod.strokeColor = rodStrokeColor;
         rod.strokeWidth = rodStrokeWidth;
         rod.selected = false;
         rod.isSelectable = true;
-        rod.isUP = false;
+        rod.isUP = true;
         rod.rodLength = i;
         rod.parity = i%2;
         rodGroup.addChild(rod);
@@ -486,3 +506,17 @@ function stairs() {
         };
     };
 };
+
+
+/* Other tools */
+
+function disableScroll() { 
+    // Get the current page scroll position 
+    scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+    scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
+  
+        // if any scroll is attempted, set this to the previous value 
+        window.onscroll = function() { 
+            window.scrollTo(scrollLeft, scrollTop); 
+        }; 
+}
