@@ -65,6 +65,7 @@ function onMouseDrag(event) {
 	    cursor.position.x += event.delta.x;
 };
 
+// onMouseUp
 function onMouseUp(event) {
     var detectedStem = 5-Math.floor((event.point.x)/scale-.5);
     if (detectedStem < 0) {detectedStem = 0}
@@ -154,7 +155,7 @@ function toggleButton(x, y, size, colorUP, colorDOWN) {
 function onKeyDown(event) {
     if (!animationFired) {
 
-        if (event.key != 'h') {
+        if (event.key != 'a') {
             legend.visible = false;
             legendBackground.visible = false;
         }
@@ -252,8 +253,8 @@ function onKeyDown(event) {
             }
         }
 
-        // h : legend
-        if (event.key == 'h') {
+        // a : legend
+        if (event.key == 'a') {
             legend.visible = !legend.visible;
             legendBackground.visible = !legendBackground.visible;
         };
@@ -301,7 +302,7 @@ var legend = new PointText({
     content: 
     'Souris et raccourcis claviers :\n'  +
     '\n'  +
-    'h : affiche l\'aide\n' +
+    'a : affiche l\'aide\n' +
     'Flèches gauche et droite : déplace le curseur\n' +
     'Flèches haut et bas : ajoute et enlève un jeton\n' +
     '1, 2, 3, ... : crée des jetons\n' +
@@ -544,7 +545,7 @@ function updateStacks() {
 
 function fireAnimation(stem) {
 
-    // tokens to move TODO -> 10
+    // tokens to move
     var numberOfTokens = stackToGroup.children.length;
     for (var n = 0; n < 10; n++) {
         tokensToMove[n] = stackToGroup.children[numberOfTokens - (n + 1)];
@@ -579,6 +580,7 @@ var moveTokens = function onFrame(event) {
     if (Math.max.apply(Math, vectorsLengthList)<1.5) {
         stackToGroup = new Group();
         tokenDestination = new Point();
+        // TODO : Usefull ?
         for (var n = 0; n < 10; n++) {
             tokensToMove[0].remove();
         }
@@ -606,7 +608,6 @@ function createToken(stem, level, color) {
 // updatePointTextDigit
 function updatePointTextDigit(digit, pointTextDigit, stem, line, color) {
 
-    // TODO: typer digit...
     if (digit == " ") { 
         pointTextDigit.content = digit; 
     } else {
