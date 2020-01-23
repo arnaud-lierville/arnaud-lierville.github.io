@@ -161,7 +161,7 @@ function createRod(l) {
 
     if (activeRod) { activeRod.shadowColor = null; };
     var x = Math.floor(Math.random() * 10);
-    var y = Math.max(Math.floor(Math.random() * 3 - 2), 0);
+    var y = 0;
     var rodRectangle = new Rectangle(new Point((x+1)*gridScale, (y+3)*gridScale), new Size(gridScale, l*gridScale));
     var rod = new Path.Rectangle(rodRectangle);
     rod.fillColor = colorRod[l-1];
@@ -188,6 +188,7 @@ function createRod(l) {
         };
     };
     rod.flip();
+    if (l > 5) {rod.position.y -= 5*gridScale }
     return rod;
 };
 
@@ -392,9 +393,6 @@ var legend = new PointText({
     fontFamily: 'fantasy',
     fontWeight: 'bold',
     fontSize: 25,
-    //shadowColor: new Color(0, 0, 0),
-    //shadowBlur: 12,
-    //shadowOffset: new Point(5, 5)
 });
 
 legend.onMouseDown = function(event) { 
@@ -406,8 +404,7 @@ legend.onMouseDown = function(event) {
     legendBackground.visible = !legendBackground.visible;
 };
 
-//var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size));
-var legendBackground = new Path.Rectangle(new Rectangle(new Point(2.9*gridScale, 2.6*gridScale), new Point(13.1*gridScale, 12.1*gridScale)));
+var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft*0.8, legend.bounds.size*1.1));
 legendBackground.fillColor = '#ffefd6';
 legend.bringToFront();
 
@@ -422,7 +419,7 @@ function carpet(n) {
         // left rod
         if (i !=0 ) {
             var size = new Size(i*gridScale, gridScale);
-            var point = new Point(4*gridScale ,(4+i)*gridScale);
+            var point = new Point(2*gridScale ,(3+i)*gridScale);
             var rod = new Path.Rectangle(new Rectangle(point, size));
             rod.fillColor = colorRod[i-1];
             rod.strokeColor = rodStrokeColor;
@@ -449,7 +446,7 @@ function carpet(n) {
         // right rod
         if ( (n-i) != 0) {
             var size = new Size((n-i)*gridScale, gridScale);
-            var point = new Point((4+i)*gridScale ,(4+i)*gridScale);
+            var point = new Point((2+i)*gridScale ,(3+i)*gridScale);
             var rod = new Path.Rectangle(new Rectangle(point, size));
             rod.fillColor = colorRod[n-i-1];
             rod.strokeColor = rodStrokeColor;
@@ -482,7 +479,7 @@ function stairs() {
     }
     for (i = 1; i < 11; i++) {
         var size = new Size(gridScale, i*gridScale);
-        var point = new Point((3+i)*gridScale ,(14-i)*gridScale);
+        var point = new Point((1+i)*gridScale ,(13-i)*gridScale);
         var rod = new Path.Rectangle(new Rectangle(point, size));
         rod.fillColor = colorRod[i-1];
         rod.strokeColor = rodStrokeColor;
