@@ -354,6 +354,16 @@ var divideByTen = function() {
 
 var multiplyByTen = function() {
 
+    if(comaPosition == 0) {
+        if(digitMatrix[5] == 0) {
+            for(var stem = 5; stem > 0; stem--) {
+                digitMatrix[stem] = digitMatrix[stem - 1];
+            }
+            digitMatrix[0] = 0;
+        }
+        updateStacks();
+    }
+
     if (comaPosition > 0) {
         comaPosition--;
         moveElements('left');
