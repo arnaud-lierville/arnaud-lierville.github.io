@@ -12,11 +12,18 @@
 		<title>Maths en classe !</title>
 
 	</head>
+
+	<script>
+		var randomLogo = function() {
+			var letter = 'ABCDEF'.substr(Math.floor(Math.random()*6), 1);
+			return '/img/logo-' + letter + '.png';
+		}
+	</script>
+
 	<body>
 		<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 			<h1 class="display-4">Maths en classe !</h1>
-			<!--img src="/img/logo-mathsenclasse.png" height="85"-->
-
+			<img src="/img/logo-A.png" height="100" onload="this.onload = null; this.src = randomLogo();">
 			<p class="lead">Des outils numériques pour <strong>"manipuler"</strong> au tableau.</p>
 		</div>
 		<div class="container">
