@@ -9,7 +9,11 @@
 	<!-- Load external PaperScript and associate it with myCanvas -->
 	<script type="text/paperscript" src="./js/substraction.js" canvas="myCanvas"></script>
 </head>
+<script>
+	var randomLogo = function() { return '/img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
+</script>
 <body>
 	<canvas id="myCanvas" resize="true"></canvas>
+	<img src="/img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo">
 </body>
 </html>

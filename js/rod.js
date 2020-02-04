@@ -158,6 +158,7 @@ function createRod(l) {
 
     legend.visible = false;
     legendBackground.visible = false;
+    catPic.visible = false;
 
     if (activeRod) { activeRod.shadowColor = null; };
     var x = Math.floor(Math.random() * 10);
@@ -204,6 +205,7 @@ function onMouseDown(event) {
         if (legend.visible) {
             legend.visible = !legend.visible;
             legendBackground.visible = !legendBackground.visible;
+            catPic.visible = !catPic.visible;
         }
         return; 
     } else {
@@ -263,6 +265,7 @@ function onKeyDown(event) {
     if (legend.visible && event.key != 'h') {
         legend.visible = !legend.visible;
         legendBackground.visible = !legendBackground.visible;
+        catPic.visible = !catPic.visible;
     }
 
     console.log('key: ' + event.key);
@@ -332,6 +335,7 @@ function onKeyDown(event) {
     if (event.key == 'h') {
         legend.visible = !legend.visible;
         legendBackground.visible = !legendBackground.visible;
+        catPic.visible = !catPic.visible;
     };
 
     // m : menu
@@ -402,12 +406,18 @@ legend.onMouseDown = function(event) {
     };
     legend.visible = !legend.visible;
     legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
 };
 
 var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft*0.8, legend.bounds.size*1.1));
 legendBackground.fillColor = '#ffefd6';
 legend.bringToFront();
 
+// logo
+var catPic = new Raster('logo');
+catPic.position = legend.bounds.topRight + new Point(-60, 80);
+catPic.scale(0.1);
+catPic.bringToFront();
 
 function carpet(n) {
     if (activeRod) {

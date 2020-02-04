@@ -70,6 +70,7 @@ var blockGenerator = function(type) {
 
     legend.visible = false;
     legendBackground.visible = false;
+    catPic.visible = false;
     alert.visible = false;
 
     var number = getNumber();
@@ -134,6 +135,7 @@ var getNumber = function() { return digitMatrix[0] + 10*digitMatrix[1] + 100*dig
 var displayAlert = function() {
     legend.visible = false;
     legendBackground.visible = false;
+    catPic.visible = false;
     alert.visible = true;
     alert.bringToFront();
 }
@@ -299,6 +301,7 @@ var UnitBlock = Base.extend({
             this.unitGroup.onMouseDown = function() { 
                 legend.visible = false;
                 legendBackground.visible = false;
+                catPic.visible = false;
                 alert.visible = false;
                 if (!selectedBlocks.isChild(that.unitGroup)) {
                     addToSelectedBlocks(that.unitGroup);
@@ -386,6 +389,7 @@ var TenBlock = Base.extend({
             this.tenGroup.onMouseDown = function() { 
                 legend.visible = false;
                 legendBackground.visible = false;
+                catPic.visible = false;
                 alert.visible = false;
                 if (!selectedBlocks.isChild(that.tenGroup)) {
                     addToSelectedBlocks(that.tenGroup);
@@ -475,6 +479,7 @@ var HundredBlock = Base.extend({
             this.hundredGroup.onMouseDown = function() { 
                 legend.visible = false;
                 legendBackground.visible = false;
+                catPic.visible = false;
                 alert.visible = false;
                if (!selectedBlocks.isChild(that.hundredGroup)) {
                     addToSelectedBlocks(that.hundredGroup);
@@ -685,6 +690,7 @@ tool.onMouseDown = function(event) {
         for(var block in blockList) { blockList[block].border.shadowColor = null; }
         selectedBlocks = new Group();
         alert.visible = false;
+        catPic.visible = false;
     }
 }
 
@@ -772,6 +778,7 @@ legend = new PointText({
 legend.onMouseDown = function(event) { 
     legend.visible = false;
     legendBackground.visible = false;
+    catPic.visible = false;
 };
 
 legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size));
@@ -779,6 +786,12 @@ var legendBackground = new Path.Rectangle(new Rectangle(new Point((legendTopLeft
 legendBackground.fillColor = '#ffffff';
 legendBackground.bringToFront();
 legend.bringToFront();
+
+// logo
+var catPic = new Raster('logo');
+catPic.position = legend.bounds.topRight + new Point(-3*scale, 2*scale);
+catPic.scale(0.1);
+catPic.bringToFront();
 
 var line = new Path(new Point(13, 0.5)*scale, new Point(13, 38.5)*scale);
 line.strokeColor = 'black';
@@ -804,6 +817,7 @@ function onKeyDown(event) {
     if (event.key != 'a') {
         legend.visible = false;
         legendBackground.visible = false;
+        catPic.visible = false;
     };
     if(event.key == 'left') {
         selectedBlocks.position -= new Point(scale, 0);
@@ -849,6 +863,7 @@ function onKeyDown(event) {
         yu = 2, yt = yu + 4, yh = yu + 15;
         legend.visible = false;
         legendBackground.visible = false;
+        catPic.visible = false;
         alert.visible = false;
         displayResult();
     }
@@ -856,8 +871,10 @@ function onKeyDown(event) {
     if (event.key == 'a') {
         legend.visible = !legend.visible;
         legendBackground.visible = !legendBackground.visible;
+        catPic.visible = !catPic.visible;
         legendBackground.bringToFront();
         legend.bringToFront();
+        catPic.bringToFront();
     };
 }
 

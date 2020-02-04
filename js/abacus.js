@@ -329,7 +329,8 @@ var randomAbacus = function() {
 
 var displayHelp = function() {
     legend.visible = !legend.visible;
-    legendBackground.visible = !legendBackground.visible;
+    legendBackground.visible = !catPic.visible;
+    catPic.visible = !catPic.visible;
 }
 
 var addToken = function() {
@@ -384,9 +385,10 @@ var divideByTenButton = new Button(.5, 10, '#bad2d7', '#76A5AF', 0.5, '#ffffff',
 function onKeyDown(event) {
     if (!animationFired) {
 
-        if (event.key != 'l') {
+        if (event.key != 'a') {
             legend.visible = false;
             legendBackground.visible = false;
+            catPic.visible = false;
         }
 
         // moving cursor on abacus
@@ -470,7 +472,7 @@ function onKeyDown(event) {
         }
 
         // l : legend
-        if (event.key == 'l') {
+        if (event.key == 'a') {
             displayHelp();
         };
 
@@ -507,7 +509,7 @@ var legend = new PointText({
     content: 
     'Souris et raccourcis claviers :\n'  +
     '\n'  +
-    'l : affiche la légende\n' +
+    'a : affiche l\'aide\n' +
     'Flèches gauche et droite : déplace le curseur\n' +
     'Flèches haut et bas : ajoute et enlève un jeton\n' +
     '1, 2, 3, ... : crée des jetons\n' +
@@ -530,11 +532,18 @@ var legend = new PointText({
 legend.onMouseDown = function(event) { 
     legend.visible = !legend.visible;
     legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
 };
 
 var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size + new Size(scale, 1*scale)));
 legendBackground.fillColor = '#ffffff';
 legend.bringToFront();
+
+// logo
+var catPic = new Raster('logo');
+catPic.position = legend.bounds.topRight + new Point(-2*scale, .5*scale);
+catPic.scale(0.1);
+catPic.bringToFront();
 
 function displayResult() {
 
@@ -724,6 +733,7 @@ var moveElements = function(way) {
     helpButton.buttonGroup.position += new Point(epsilon*scale, 0);
     legend.position += new Point(epsilon*scale, 0);
     legendBackground.position += new Point(epsilon*scale, 0);
+    catPic.position += new Point(epsilon*scale, 0);
     cursor.position += new Point(epsilon*scale, 0);
     displayDecompositionGroup.position += new Point(epsilon*scale, 0);
     createAbacus(abacusBottomRight.x, abacusBottomRight.y, nbDigits, abacusStrech);

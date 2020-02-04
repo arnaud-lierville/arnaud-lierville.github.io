@@ -238,12 +238,19 @@ legend = new PointText({
 legend.onMouseDown = function(event) { 
     legend.visible = !legend.visible;
     legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
 };
 
 legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size));
 var legendBackground = new Path.Rectangle(new Rectangle(new Point(legendTopLeft.x*scale, (legendTopLeft.y-2)*scale), new Size(15*scale, 15*scale)));
 legendBackground.fillColor = '#ffffff';
 legend.bringToFront();
+
+// logo
+var catPic = new Raster('logo');
+catPic.position = legend.bounds.topRight + new Point(-2*scale, .5*scale);
+catPic.scale(0.1);
+catPic.bringToFront();
 
 /* Key functions */
 function onKeyDown(event) {
@@ -360,11 +367,13 @@ function onKeyDown(event) {
     if (event.key == 'a') {
         legend.visible = !legend.visible;
         legendBackground.visible = !legendBackground.visible;
+        catPic.visible = !catPic.visible;
     };
 
     if (event.key != 'a') {
         legend.visible = false;
         legendBackground.visible = false;
+        catPic.visible = false;
     };
 }
 
