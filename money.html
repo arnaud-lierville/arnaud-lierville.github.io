@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<meta charset="UTF-8">
+	<head>
+		<!-- Load the paper.css stylesheet-->
+		<link rel="stylesheet" type="text/css" href="./css/paper.css">
+		<!-- Load the Paper.js library -->
+		<!--script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.2/paper-full.js"></!--script!-->
+		<script type="text/javascript" src="./js/paper-full.js"></script>
+		<!-- Load external PaperScript and associate it with myCanvas -->
+		<script type="text/paperscript" src="./js/money.js" canvas="myCanvas"></script>
+	</head>
+	<script>
+		var randomLogo = function() { return '/img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
+	</script>
+	<body>
+		<canvas id="myCanvas" resize="true"></canvas>
+		<img src="/img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
+		<img src="/img/money/001R.png" id="001R" hidden>
+		<img src="/img/money/01R.png" id="01R" hidden >
+		<img src="/img/money/1R.png" id="1R" hidden >
+		<img src="/img/money/002R.png" id="002R" hidden >
+		<img src="/img/money/02R.png" id="02R" hidden >
+		<img src="/img/money/2R.png" id="2R" hidden >
+		<img src="/img/money/005R.png" id="005R" hidden >
+		<img src="/img/money/05R.png" id="05R" hidden >
+		<img src="/img/money/5R.png" id="5R" hidden >
+		<img src="/img/money/5V.png" id="5V" hidden >
+		<img src="/img/money/10R.png" id="10R" hidden >
+		<img src="/img/money/10V.png" id="10V" hidden >
+		<img src="/img/money/20R.jpg" id="20R" hidden >
+		<img src="/img/money/20V.jpg" id="20V" hidden >
+		<img src="/img/money/50R.png" id="50R" hidden >
+		<img src="/img/money/50V.png" id="50V" hidden >
+		<img src="/img/money/100R.jpg" id="100R" hidden >
+		<img src="/img/money/100V.jpg" id="100V" hidden >
+		<img src="/img/money/200R.jpg" id="200R" hidden >
+		<img src="/img/money/200V.jpg" id="200V" hidden >
+		<img src="/img/money/500R.jpg" id="500R" hidden>
+		<img src="/img/money/500V.jpg" id="500V" hidden>
+	</body>
+</html>
