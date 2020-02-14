@@ -37,7 +37,7 @@
 * Espace : grouper ou casser en cliquant
 * * ou f : multiplie par dix
 * : -> divise par dix
-* n : montre/cache le résultat
+* r : montre/cache le résultat
 * d : montre/cache la décomposition
 * m : active/désactive la couleur
 * h : crée un nombre au hasard
@@ -71,6 +71,7 @@
 * 1, 2, 3, ... : crée des jetons
 * Espace : change de nombre
 * r : montre/cache le résultat
+* m : active/désactive la couleur
 * e : efface tout
 * Cliquez sur une pile pour casser un jeton
 

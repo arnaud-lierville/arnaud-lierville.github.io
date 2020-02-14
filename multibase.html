@@ -10,10 +10,10 @@
 	<script type="text/paperscript" src="./js/multibase.js" canvas="myCanvas"></script>
 </head>
 <script>
-	var randomLogo = function() { return '/img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
+	var randomLogo = function() { return './img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
 </script>
 <body>
 	<canvas id="myCanvas" resize="true"></canvas>
-	<img src="/img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
+	<img src="./img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
 </body>
 </html>

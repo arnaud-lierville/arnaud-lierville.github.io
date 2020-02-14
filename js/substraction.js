@@ -1,9 +1,9 @@
 /* Settings */
 var scale = 45;
 
-var tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78']; // red, green, blue, orange
+var tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78', '#FFABD5']; // red, green, blue, orange
 var lowTokenColor = [ '#FDADAE', '#b3d8a3', '#a0d8fd', '#fed5bb']; // red, green, blue, orange
-var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922'];
+var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922', '#FF8FC8'];
 var lowTokenStrokeColor = ['#fd868d', '#9bcb8b', '#8ccdfd', '#fdb490'];
 
 var shortcuts = '0123456789';
@@ -80,11 +80,14 @@ function onMouseDrag(event) {
 // onMouseUp
 function onMouseUp(event) {
     var detectedStem = 5-Math.floor((event.point.x)/scale-.5);
-    if (detectedStem < 0) {detectedStem = 0}
-    if (detectedStem > 2) {detectedStem = 2}
-    cursor.position.x = abacusBottomRight.x*scale - detectedStem*scale;
-    cursor.stem = detectedStem
-    stem = detectedStem;
+    if(detectedStem < 3 && -1 < detectedStem) {
+        if (detectedStem < 0) {detectedStem = 0}
+        if (detectedStem > 2) {detectedStem = 2}
+        cursor.position.x = abacusBottomRight.x*scale - detectedStem*scale;
+        pathCursor.position.x = pathCursorRightPostion.x - detectedStem*scale;
+        cursor.stem = detectedStem
+        stem = detectedStem;
+    }
 }
 
 // createPathCursor
@@ -201,9 +204,186 @@ function switchToggleButton() {
     }     
 }
 
+/* Button */
+
+var Button = Base.extend({
+    initialize: function(x, y, color, strokeColor, fontSizeScale, textColor, caption, scale, refreshCallback) {
+
+        this.buttonText = new PointText();
+        this.buttonText.point = new Point(x*scale,y*scale);
+        this.buttonText.fillColor = textColor;
+        this.buttonText.fontFamily = 'sans-serif';
+        this.buttonText.fontWeight = 'normal';
+        this.buttonText.fontSize = fontSizeScale*scale;
+        this.buttonText.content = caption;
+
+        var buttonTextDimension = {
+            x: this.buttonText.bounds.size.width,
+            y: this.buttonText.bounds.size.height
+        }
+        var newTopLeft = new Point(this.buttonText.bounds.topLeft.x - buttonTextDimension.x*.1, this.buttonText.bounds.topLeft.y - buttonTextDimension.y*.1);
+        var newBottomRight = new Point(this.buttonText.bounds.bottomRight.x + buttonTextDimension.x*.1, this.buttonText.bounds.bottomRight.y + buttonTextDimension.y*.1);
+
+        this.button = new Path.Rectangle(new Rectangle(newTopLeft, newBottomRight), new Size(fontSizeScale*scale/9, fontSizeScale*scale/9));                
+        this.button.fillColor = color;
+        this.button.strokeColor = strokeColor;
+        this.button.strokeWidth = scale/15;
+        this.button.sendToBack();
+
+        this.buttonGroup = new Group();
+        this.buttonGroup.addChild(this.button);
+        this.buttonGroup.addChild(this.buttonText);
+        this.buttonGroup.onMouseDown = function() {
+            alert.visible = false;
+            refreshCallback()
+        }
+    }
+});
+
+var helpRefreshCallback = function() {
+    legend.visible = !legend.visible;
+    legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
+}
+
+var resetRefreshCallback = function() {
+    resetOperation();
+    stem = 0;
+    cursor.position.x = abacusBottomRight.x*scale;
+    pathCursor.position = pathCursorRightPostion;
+    cursor.stem = 1;
+    strikeGroup.removeChildren();
+    line = 2;
+    pathCursor.visible = false;
+    cursor.visible = true;
+    stemIsUpdated = [false, false, false];
+    updateFromLeft = false;
+    selectedButtonValue = 1;
+    radioButton0.shadowColor = null;
+    radioButton1.shadowColor = new Color(0, 0, 0);
+    radioButton1.shadowBlur = 12;
+    radioButton1.shadowOffset = new Point(5, 5);
+}
+
+var plusRefreshCallback = function() {
+    legend.visible = false;
+    legendBackground.visible = false;
+    catPic.visible = false;
+    if (!calculInProgress) {
+        updateDigitMatrix(line, stem, '+', 1)
+    } else { alert.visible = true; }
+}
+
+var minusRefreshCallback = function() {
+    legend.visible = false;
+    legendBackground.visible = false;
+    catPic.visible = false;
+    if (!calculInProgress) {
+        updateDigitMatrix(line, stem, '-', 1)
+    } else { alert.visible = true; }
+}
+
+// Button's instantiations
+var clearButton = new Button(operationBottomRight.x + 1, operationBottomRight.y + 2, tokenColor[2], tokenStrokeColor[2], .5, '#ffffff', 'Effacer', scale, resetRefreshCallback);
+var helpButton = new Button(operationBottomRight.x + 1.3, operationBottomRight.y + 3, tokenColor[4], tokenStrokeColor[4], .5, '#ffffff', 'Aide', scale, helpRefreshCallback);
+var plusButton = new Button(abacusBottomRight.x - 5.5, abacusBottomRight.y - 2, '#bfbfbf', '#808080', 0.5, '#ffffff' , ' PLUS ', scale, plusRefreshCallback);
+var minusButton = new Button(abacusBottomRight.x - 5.5, abacusBottomRight.y - 1, '#bfbfbf', '#808080', 0.5, '#ffffff', 'MOINS', scale, minusRefreshCallback);
+
+/* Toggle buttons */
+
+// ToggleButton Class
+var ToggleButton = Base.extend({
+
+    initialize: function (x, y, size, colorON, colorOFF, textON, textOFF, scale, refreshCallback, initState) {
+
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.colorON = colorON;
+        this.colorOFF = colorOFF;
+        this.scale = scale;
+        this.isON = initState;
+        this.textON = textON;
+        this.textOFF = textOFF;
+
+        var buttonScale = this.size*this.scale;
+        var rectangle = new Rectangle(new Point(this.x*this.scale, this.y*this.scale), new Size(1.75*buttonScale, 1*buttonScale));
+        var cornerSize = new Size(buttonScale/2, 2*buttonScale/3);
+        this.shape = new Shape.Rectangle(rectangle, cornerSize);
+        this.shape.fillColor = this.colorON;
+        this.shape.strokeWidth = 0;
+
+        this.circle = new Shape.Circle(new Point(this.x*this.scale +0.5*buttonScale, this.y*this.scale +0.5*buttonScale), .45*buttonScale);
+        this.circle.fillColor = "#ffffff";
+        this.circle.strokeWidth = 0;
+
+        this.caption = new PointText();
+        this.caption.point = this.shape.position+ new Point(1.5*buttonScale, .2*buttonScale);
+        if (this.isON) { this.caption.content = this.textON; } else { 
+            this.caption.content = this.textOFF;
+            this.shape.fillColor = this.colorOFF;
+            this.circle.position += new Point(.75*this.size*this.scale, 0);
+        }
+        this.caption.fillColor = '#696969';
+        this.caption.fontFamily = 'sans-serif';
+        this.caption.fontWeight = 'normal';
+        this.caption.fontSize = Math.floor(2*buttonScale/3);
+
+        this.toggleButtonGroup = new Group();
+        this.toggleButtonGroup.addChild(this.shape);
+        this.toggleButtonGroup.addChild(this.circle);
+        this.toggleButtonGroup.addChild(this.caption);
+
+        this.toggleButtonGroup.onMouseDown = function() { if (!animationFired) { refreshCallback(); } }
+
+        return this;
+    },
+    switch: function() {
+
+        if (this.isON) {
+            this.shape.fillColor = this.colorOFF;
+            this.circle.position += new Point(.75*this.size*this.scale, 0);
+            this.caption.content = this.textOFF;
+        } else {
+            this.shape.fillColor = this.colorON;
+            this.circle.position -= new Point(.75*this.size*this.scale, 0);
+            this.caption.content = this.textON;
+        }
+        this.isON = !this.isON;        
+    }
+});
+
+// toggleButton callback functions  - MUST BE DECLARED BEFORE TOGGLEBUTTON INSTANTIATAION
+
+var colorOrMonochromeSwitch = function() {
+
+    isMonochrome = !isMonochrome;
+    toggleButtonColorOrMonochrome.switch();
+    if (isMonochrome) {
+        tokenColor = [ '#008080', '#008080', '#008080', '#008080'];
+        tokenStrokeColor = ['#006666', '#006666', '#006666', '#006666'];
+        lowTokenColor = [ '#7fbfbf', '#7fbfbf', '#7fbfbf', '#7fbfbf']; // red, green, blue, orange
+        lowTokenStrokeColor = ['#7fb2b2', '#7fb2b2', '#7fb2b2', '#7fb2b2'];
+    } else {
+        tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78', '#FFABD5'];
+        tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922', '#FF8FC8'];
+        lowTokenColor = [ '#FDADAE', '#b3d8a3', '#a0d8fd', '#fed5bb']; // red, green, blue, orange
+        lowTokenStrokeColor = ['#fd868d', '#9bcb8b', '#8ccdfd', '#fdb490'];
+    }
+    updateDigits();
+    updateStacks();
+}
+
+var tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78', '#FFABD5']; // red, green, blue, orange
+var lowTokenColor = [ '#FDADAE', '#b3d8a3', '#a0d8fd', '#fed5bb']; // red, green, blue, orange
+var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922', '#FF8FC8'];
+var lowTokenStrokeColor = ['#fd868d', '#9bcb8b', '#8ccdfd', '#fdb490'];
+
+var toggleButtonColorOrMonochrome = new ToggleButton(operationBottomRight.x + 1.3, operationBottomRight.y + 3.5, .5, tokenColor[3], '#C0C0C0',  'Couleurs', 'Monochrome', scale, colorOrMonochromeSwitch, true);
+
 // alert calculInProgress
 alert = new PointText({
-    point: [(legendTopLeft.x+1)*scale, (legendTopLeft.y+5)*scale],
+    point: [(legendTopLeft.x+.5)*scale, (legendTopLeft.y+6)*scale],
     content: 
     'Échanges en cours ...\n\n'  +
     'Continuez les échanges ou \n'  +
@@ -227,6 +407,7 @@ legend = new PointText({
     '1, 2, 3, ... : crée des jetons\n' +
     'Espace : change de nombre\n' +
     'r : montre/cache le résultat\n' +
+    'm : active/désactive la couleur\n'  +
     'e : efface tout\n\n' +
     'Cliquez sur une pile pour casser un jeton',
     fillColor: '#0c6675',
@@ -304,6 +485,16 @@ function onKeyDown(event) {
     if (shortcuts.indexOf(event.key) >= 0) {
         if (!calculInProgress) {
             updateDigitMatrix(line, stem, null, parseInt(event.key));
+            pathCursor.position.x += scale;
+            cursor.position.x += scale;
+            cursor.stem -= 1
+            stem = stem - 1;
+            if (stem == -1) {
+                stem = 0;
+                cursor.position.x = abacusBottomRight.x*scale;
+                pathCursor.position = pathCursorRightPostion;
+                cursor.stem = 1
+            }
         }
     }
     // change number line
@@ -375,6 +566,11 @@ function onKeyDown(event) {
         legendBackground.visible = false;
         catPic.visible = false;
     };
+
+    // m : monochrome
+    if (event.key == 'm') {
+        colorOrMonochromeSwitch();
+    }
 }
 
 // resetOperation

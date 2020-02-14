@@ -374,6 +374,70 @@ function onKeyDown(event) {
 };
 
 
+var menuRefreshCallback = function() {
+    console.log('menuRefreshCallback');
+    menuGroup.visible = !menuGroup.visible;
+}
+
+var gridRefreshCallback = function() {
+    console.log('gridRefreshCallback');
+    if (isGridVisible) {
+        isGridVisible = false;
+        gridGroup.removeChildren();
+    } else {
+        isGridVisible = true;
+        gridSetup(gridScale, gridFillColor);
+    };
+}
+
+var rotateRefreshCallback = function() {
+    console.log('rotateRefreshCallback');
+    if (activeRod) { activeRod.flip(); };
+}
+
+var deleteRefreshCallback = function() {
+    console.log('deleteRefreshCallback');
+    if (activeRod) { 
+        activeRod.remove(); 
+        activeRod = null;
+    };
+}
+
+var trashRefreshCallback = function() {
+    console.log('trashRefreshCallback');
+    rodGroup.removeChildren();
+}
+
+var helpRefreshCallback = function() {
+    console.log('helpRefreshCallback');
+    legend.visible = !legend.visible;
+    legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
+}
+
+var IconMenu = Base.extend({
+    initialize: function(point, name, scale, refreshCallback) {
+
+        var picture = new Raster(name);
+        picture.position = point;
+        picture.scale(scale)
+        picture.onMouseDown = function() {
+            refreshCallback();
+        }
+        return IconMenu;
+    }
+})
+
+
+new IconMenu(new Point(13, 1.5)*gridScale, 'menu', .06, menuRefreshCallback)
+new IconMenu(new Point(14, 1.5)*gridScale, 'grid', .08, gridRefreshCallback)
+new IconMenu(new Point(15, 1.5)*gridScale, 'rotate', .08, rotateRefreshCallback)
+new IconMenu(new Point(16, 1.5)*gridScale, 'delete', .08, deleteRefreshCallback)
+new IconMenu(new Point(17, 1.5)*gridScale, 'trash', .08, trashRefreshCallback)
+new IconMenu(new Point(18, 1.5)*gridScale, 'help', .08, helpRefreshCallback)
+
+
+
 
 
 // Legend

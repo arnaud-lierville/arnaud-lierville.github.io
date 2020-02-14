@@ -518,7 +518,7 @@ var legend = new PointText({
     'Espace : grouper ou casser en cliquant\n' +
     '* ou f : multiplie par dix\n'  +
     ': -> divise par dix\n'  +
-    'n : montre/cache le résultat\n' +
+    'r : montre/cache le résultat\n' +
     'd : montre/cache la décomposition\n' +
     'm : active/désactive la couleur\n'  +
     'h : crée un nombre au hasard\n'  +

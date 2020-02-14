@@ -76,8 +76,8 @@ var addMouseToolsToPicture = function(moneyObject) { // pass parameter this
     moneyObject.picture.onMouseUp = function() {
         if(!that.currentlyDragging) { 
             if(!that.picture.isGenerator) { that.switch(); } else {
-                var aleaX = 7 + Math.floor(Math.random()*8);
-                var aleaY = 2 + Math.floor(Math.random()*7);
+                var aleaX = 10 + Math.floor(Math.random()*8);
+                var aleaY = 4 + Math.floor(Math.random()*5);
                 var newMoney = new Money(new Point(aleaX, aleaY)*globalScale,
                 that.picture.value, that.side, that.type, that.scale, false);
             } 
@@ -489,9 +489,9 @@ line.strokeColor = 'grey';
 line.strokeWidth = globalScale/10;
 line.strokeCap = 'round';
 
-var toggleButtonDisplayNumber = new ToggleButton(22, 1, 1, '#133337', '#C0C0C0', globalScale, displayNumberSwitch, true);
-var groupButton = new Button(21.8, 3, '#68b147', '#389818', .5, '#ffffff', 'Echanges', globalScale, groupSelectedMoney);
-var helpButton = new Button(22.4, 4, '#FFABD5', '#FF8FC8', .5, '#ffffff', 'Aide', globalScale, displayHelp);
+var toggleButtonDisplayNumber = new ToggleButton(6, 1, 1, '#133337', '#C0C0C0', globalScale, displayNumberSwitch, true);
+var groupButton = new Button(5.8, 3, '#68b147', '#389818', .5, '#ffffff', 'Echanges', globalScale, groupSelectedMoney);
+var helpButton = new Button(6.4, 4, '#FFABD5', '#FF8FC8', .5, '#ffffff', 'Aide', globalScale, displayHelp);
 
 // legend
 legend = new PointText({
@@ -546,11 +546,11 @@ var twoHundredEuros = new Money(new Point(1.5, 9.45)*globalScale, 200, 'R', 'not
 var fiveHundredEuros = new Money(new Point(1.5, 11.1)*globalScale, 500, 'R', 'note', .16, true);
 
 /* coins */
-var twoEuros = new Money(new Point(4, 1.5)*globalScale, 2, 'R', 'coin', .06, true);
-var oneEuro = new Money(new Point(4, 3)*globalScale, 1, 'R', 'coin', .05, true);
-var fiftyCents = new Money(new Point(4, 4.5)*globalScale, 0.5, 'R', 'coin', .1, true);
-var twentyCents = new Money(new Point(4, 6)*globalScale, 0.2, 'R', 'coin', .10, true);
-var tenCents = new Money(new Point(4, 7.35)*globalScale, 0.1, 'R', 'coin', .10, true);
+var twoEuros = new Money(new Point(4, 1.3)*globalScale, 2, 'R', 'coin', .13, true);
+var oneEuro = new Money(new Point(4, 2.9)*globalScale, 1, 'R', 'coin', .13, true);
+var fiftyCents = new Money(new Point(4, 4.5)*globalScale, 0.5, 'R', 'coin', .13, true);
+var twentyCents = new Money(new Point(4, 6)*globalScale, 0.2, 'R', 'coin', .13, true);
+var tenCents = new Money(new Point(4, 7.35)*globalScale, 0.1, 'R', 'coin', .13, true);
 var fiveCents = new Money(new Point(4, 8.7)*globalScale, 0.05, 'R', 'coin', .13, true);
 var twoCents = new Money(new Point(4, 10)*globalScale, 0.02, 'R', 'coin', .12, true);
 var oneCents = new Money(new Point(4, 11)*globalScale, 0.01, 'R', 'coin', .1, true);

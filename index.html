@@ -16,14 +16,14 @@
 	<script>
 		var randomLogo = function() {
 			var letter = 'ABCDEF'.substr(Math.floor(Math.random()*6), 1);
-			return '/img/logo-' + letter + '.png';
+			return './img/logo-' + letter + '.png';
 		}
 	</script>
 
 	<body>
 		<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
 			<h1 class="display-4">Maths en classe !</h1>
-			<img src="/img/logo-A.png" height="100" onload="this.onload = null; this.src = randomLogo();">
+			<img src="./img/logo-A.png" height="100" onload="this.onload = null; this.src = randomLogo();">
 			<p class="lead">Des outils numériques pour <strong>"manipuler"</strong> au tableau.</p>
 		</div>
 		<div class="container">
@@ -56,7 +56,7 @@
 					</div>
 				</div>
 			</div>	
-						<div class="card-deck mb-3 text-center">
+			<div class="card-deck mb-3 text-center">
 				<div class="card mb-4 shadow-sm">
 					<div class="card-body">
 						<h2 class="card-title pricing-card-title">La soustraction posée</h2>
@@ -86,19 +86,22 @@
 					
 				</div>
 			</div>
-			<footer class="pt-4 my-md-5 pt-md-5 border-top">
-				<div class="row">
-					<div class="col-4 col-md"></div>
-					<div class="col-2 col-md text-center">
-						<img class="mb-2" src="./img/logo-D.png" alt="" width="24">
-							<small class="d-block mb-3 text-muted">
-								<strong>Contact : </strong><a href="mailto:arnaud.lierville@gmail.com">arnaud.lierville@gmail.com</a>
-							</small>
-					</div>
-				  <div class="col-4 col-md">
-				</div>
-			  </footer>
 		</div>
+		<footer class="pt-4 my-md-5 pt-md-5 border-top">
+			<div class="row">
+				<div class="col-4 col-md"></div>
+				<div class="col-2 col-md text-center">
+					<img class="mb-2" src="./img/logo-D.png" alt="" width="24">
+					<small class="d-block mb-3 text-muted">
+						<strong>Contact : </strong><a href="mailto:arnaud.lierville@gmail.com">arnaud.lierville@gmail.com</a>
+					</small>
+					<small class="d-block mb-3 text-muted">
+						<a href="./licence.html" target="_blank"><strong>Licences</strong></a>
+					</small>
+				</div>
+			<div class="col-4 col-md">
+			</div>
+		</footer>
 		<!-- Optional JavaScript -->
 		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

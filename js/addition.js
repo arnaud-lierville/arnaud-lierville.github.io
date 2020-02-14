@@ -1,8 +1,8 @@
 /* Settings */
 var scale = 45;
 
-var tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78'];
-var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922'];
+var tokenColor = ['#fc5c5e', '#68b147', '#41b1fc', '#fdab78', '#FFABD5'];
+var tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922', '#FF8FC8'];
 
 var shortcuts = '0123456789';
 
@@ -25,6 +25,7 @@ var stackToGroup = new Group();
 var tokenDestination = new Point();
 var tokensToMove = [];
 var animationFired = false;
+var alert = new PointText();
 
 /* Main */
 disableScroll();
@@ -68,11 +69,14 @@ function onMouseDrag(event) {
 // onMouseUp
 function onMouseUp(event) {
     var detectedStem = 5-Math.floor((event.point.x)/scale-.5);
-    if (detectedStem < 0) {detectedStem = 0}
-    if (detectedStem > 2) {detectedStem = 2}
-    cursor.position.x = abacusBottomRight.x*scale - detectedStem*scale;
-    cursor.stem = detectedStem
-    stem = detectedStem;
+    if(detectedStem < 4 && -1 < detectedStem) {
+        alert.visible = false;
+        if (detectedStem < 0) {detectedStem = 0}
+        if (detectedStem > 2) {detectedStem = 2}
+        cursor.position.x = abacusBottomRight.x*scale - detectedStem*scale;
+        cursor.stem = detectedStem
+        stem = detectedStem;
+    }
 }
 
 // Plus symbol (+)
@@ -105,6 +109,7 @@ radioButton0.shadowColor = new Color(0, 0, 0);
 radioButton0.shadowBlur = 12;
 radioButton0.shadowOffset = new Point(5, 5);
 radioButton0.onMouseDown = function() {
+    alert.visible = false;
     if (line == 1) { line = 2; } else  { line = 1; };
     selectedButtonValue = 0;
     radioButton1.shadowColor = null;
@@ -118,6 +123,7 @@ radioButton1.fillColor = tokenColor[2];
 radioButton1.strokeColor = tokenStrokeColor[2];
 radioButton1.strokeWidth = scale/15;
 radioButton1.onMouseDown = function() {
+    alert.visible = false;
     if (line == 1) { line = 2; } else  { line = 1; };
     selectedButtonValue = 1;
     radioButton0.shadowColor = null;
@@ -145,15 +151,190 @@ function toggleButton(x, y, size, colorUP, colorDOWN) {
     toggleButton.addChild(shape);
     toggleButton.addChild(circle);
     toggleButton.onMouseDown = function() {
+        alert.visible = false;
         switchToggleButton();
     }
 
     return [shape, circle, size, colorUP, colorDOWN];
 }
 
+/* Button */
+
+var Button = Base.extend({
+    initialize: function(x, y, color, strokeColor, fontSizeScale, textColor, caption, scale, refreshCallback) {
+
+        this.buttonText = new PointText();
+        this.buttonText.point = new Point(x*scale,y*scale);
+        this.buttonText.fillColor = textColor;
+        this.buttonText.fontFamily = 'sans-serif';
+        this.buttonText.fontWeight = 'normal';
+        this.buttonText.fontSize = fontSizeScale*scale;
+        this.buttonText.content = caption;
+
+        var buttonTextDimension = {
+            x: this.buttonText.bounds.size.width,
+            y: this.buttonText.bounds.size.height
+        }
+        var newTopLeft = new Point(this.buttonText.bounds.topLeft.x - buttonTextDimension.x*.1, this.buttonText.bounds.topLeft.y - buttonTextDimension.y*.1);
+        var newBottomRight = new Point(this.buttonText.bounds.bottomRight.x + buttonTextDimension.x*.1, this.buttonText.bounds.bottomRight.y + buttonTextDimension.y*.1);
+
+        this.button = new Path.Rectangle(new Rectangle(newTopLeft, newBottomRight), new Size(fontSizeScale*scale/9, fontSizeScale*scale/9));                
+        this.button.fillColor = color;
+        this.button.strokeColor = strokeColor;
+        this.button.strokeWidth = scale/15;
+        this.button.sendToBack();
+
+        this.buttonGroup = new Group();
+        this.buttonGroup.addChild(this.button);
+        this.buttonGroup.addChild(this.buttonText);
+        this.buttonGroup.onMouseDown = function() {
+            alert.visible = false;
+            refreshCallback()
+        }
+        
+    }
+});
+
+var helpRefreshCallback = function() {
+    legend.visible = !legend.visible;
+    legendBackground.visible = !legendBackground.visible;
+    catPic.visible = !catPic.visible;
+}
+
+var resetRefreshCallback = function() {
+    resetOperation();
+    stem = 0;
+    cursor.position.x = abacusBottomRight.x*scale;
+    cursor.stem = 1;
+    line = 1;
+    selectedButtonValue = 0;
+    radioButton1.shadowColor = null;
+    radioButton0.shadowColor = new Color(0, 0, 0);
+    radioButton0.shadowBlur = 12;
+    radioButton0.shadowOffset = new Point(5, 5);
+}
+
+var plusRefreshCallback = function() {
+    legend.visible = false;
+    legendBackground.visible = false;
+    catPic.visible = false;
+    if (!stemIsUpdated[stem]) {
+        updateDigitMatrix(line, stem, '+', 1)
+    } else { alert.visible = true; }
+}
+
+var minusRefreshCallback = function() {
+    legend.visible = false;
+    legendBackground.visible = false;
+    catPic.visible = false;
+    if (!stemIsUpdated[stem]) {
+        updateDigitMatrix(line, stem, '-', 1)
+    } else { alert.visible = true; }
+}
+
+// Button's instantiations
+var clearButton = new Button(operationBottomRight.x + 1, operationBottomRight.y + 2, tokenColor[2], tokenStrokeColor[2], .5, '#ffffff', 'Effacer', scale, resetRefreshCallback);
+var helpButton = new Button(operationBottomRight.x + 1.3, operationBottomRight.y + 3, tokenColor[4], tokenStrokeColor[4], .5, '#ffffff', 'Aide', scale, helpRefreshCallback);
+var plusButton = new Button(abacusBottomRight.x - 5.5, abacusBottomRight.y - 2, '#bfbfbf', '#808080', 0.5, '#ffffff' , ' PLUS ', scale, plusRefreshCallback);
+var minusButton = new Button(abacusBottomRight.x - 5.5, abacusBottomRight.y - 1, '#bfbfbf', '#808080', 0.5, '#ffffff', 'MOINS', scale, minusRefreshCallback);
+
+/* Toggle buttons */
+
+// ToggleButton Class
+var ToggleButton = Base.extend({
+
+    initialize: function (x, y, size, colorON, colorOFF, textON, textOFF, scale, refreshCallback, initState) {
+
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.colorON = colorON;
+        this.colorOFF = colorOFF;
+        this.scale = scale;
+        this.isON = initState;
+        this.textON = textON;
+        this.textOFF = textOFF;
+
+        var buttonScale = this.size*this.scale;
+        var rectangle = new Rectangle(new Point(this.x*this.scale, this.y*this.scale), new Size(1.75*buttonScale, 1*buttonScale));
+        var cornerSize = new Size(buttonScale/2, 2*buttonScale/3);
+        this.shape = new Shape.Rectangle(rectangle, cornerSize);
+        this.shape.fillColor = this.colorON;
+        this.shape.strokeWidth = 0;
+
+        this.circle = new Shape.Circle(new Point(this.x*this.scale +0.5*buttonScale, this.y*this.scale +0.5*buttonScale), .45*buttonScale);
+        this.circle.fillColor = "#ffffff";
+        this.circle.strokeWidth = 0;
+
+        this.caption = new PointText();
+        this.caption.point = this.shape.position+ new Point(1.5*buttonScale, .2*buttonScale);
+        if (this.isON) { this.caption.content = this.textON; } else { 
+            this.caption.content = this.textOFF;
+            this.shape.fillColor = this.colorOFF;
+            this.circle.position += new Point(.75*this.size*this.scale, 0);
+        }
+        this.caption.fillColor = '#696969';
+        this.caption.fontFamily = 'sans-serif';
+        this.caption.fontWeight = 'normal';
+        this.caption.fontSize = Math.floor(2*buttonScale/3);
+
+        this.toggleButtonGroup = new Group();
+        this.toggleButtonGroup.addChild(this.shape);
+        this.toggleButtonGroup.addChild(this.circle);
+        this.toggleButtonGroup.addChild(this.caption);
+
+        this.toggleButtonGroup.onMouseDown = function() { if (!animationFired) { refreshCallback(); } }
+
+        return this;
+    },
+    switch: function() {
+
+        if (this.isON) {
+            this.shape.fillColor = this.colorOFF;
+            this.circle.position += new Point(.75*this.size*this.scale, 0);
+            this.caption.content = this.textOFF;
+        } else {
+            this.shape.fillColor = this.colorON;
+            this.circle.position -= new Point(.75*this.size*this.scale, 0);
+            this.caption.content = this.textON;
+        }
+        this.isON = !this.isON;        
+    }
+});
+
+// toggleButton callback functions  - MUST BE DECLARED BEFORE TOGGLEBUTTON INSTANTIATAION
+
+var colorOrMonochromeSwitch = function() {
+
+    isMonochrome = !isMonochrome;
+    toggleButtonColorOrMonochrome.switch();
+    if (isMonochrome) {
+        tokenColor = [ '#008080', '#008080', '#008080', '#008080', '#FFABD5'];
+        tokenStrokeColor = ['#006666', '#006666', '#006666', '#006666', '#FF8FC8'];
+        radioButton0.fillColor = '#008080';
+        radioButton0.strokeColor = '#006666';            
+        radioButton1.fillColor = '#008080';
+        radioButton1.strokeColor = '#006666';
+    } else {
+        tokenColor = [ '#fc5c5e', '#68b147', '#41b1fc', '#fdab78', '#FFABD5'];
+        tokenStrokeColor = ['#fc0d1b', '#389818', '#1a9bfc', '#fc6922', '#FF8FC8'];
+        radioButton0.fillColor = tokenColor[1];
+        radioButton0.strokeColor = tokenStrokeColor[1];            
+        radioButton1.fillColor = tokenColor[2];
+        radioButton1.strokeColor = tokenStrokeColor[2];
+    }
+    updateDigits();
+    updateStacks();
+}
+
+var toggleButtonColorOrMonochrome = new ToggleButton(operationBottomRight.x + 1.3, operationBottomRight.y + 3.5, .5, tokenColor[3], '#C0C0C0',  'Couleurs', 'Monochrome', scale, colorOrMonochromeSwitch, true);
+
 /* Key functions */
 function onKeyDown(event) {
     if (!animationFired) {
+
+        console.log(event.key);
+        alert.visible = false;
 
         if (event.key != 'a') {
             legend.visible = false;
@@ -175,7 +356,6 @@ function onKeyDown(event) {
         if (event.key == 'right') {
             cursor.position.x += scale;
             cursor.stem -= 1
-            console.log('Stem: '+ cursor.stem);
             stem = stem - 1;
             if (stem == -1) {
                 stem = 2;
@@ -188,23 +368,30 @@ function onKeyDown(event) {
         if (event.key == 'up') {
             if (!stemIsUpdated[stem]) {
                 updateDigitMatrix(line, stem, '+', 1)
-            }
-            
+            } else { alert.visible = true; console.log('ici')}
         }
         // removing one token
         if (event.key == 'down') {
             if (!stemIsUpdated[stem]) {
                 updateDigitMatrix(line, stem, '-', 1)
-            }
+            } else { alert.visible = true; }
         }
         // create tokens
         if (shortcuts.indexOf(event.key) >= 0) {
             if (!stemIsUpdated[stem]) {
                 updateDigitMatrix(line, stem, null, parseInt(event.key));
-            }
+                cursor.position.x += scale;
+                cursor.stem -= 1
+                stem = stem - 1;
+                if (stem == -1) {
+                    stem = 0;
+                    cursor.position.x = (abacusBottomRight.x)*scale;
+                    cursor.stem = 1
+                }            
+            } else { alert.visible = true; }
         }
         // change token's color
-        if (event.key == 'space') {
+        if (event.key == 'space' || event.key == '+') {
             
             if (line == 1) { line = 2; } else  { line = 1; };
 
@@ -225,12 +412,11 @@ function onKeyDown(event) {
 
         // removing all the tokens
         if (event.key == 'e') {
-            console.log('resetOperation');
             resetOperation();
             stem = 0;
             cursor.position.x = abacusBottomRight.x*scale;
             cursor.stem = 1;
-            if (line == 1) { line = 2; } else  { line = 1; };
+            line = 1;
             selectedButtonValue = 0;
             radioButton1.shadowColor = null;
             radioButton0.shadowColor = new Color(0, 0, 0);
@@ -264,6 +450,7 @@ function onKeyDown(event) {
         // m : monochrome
         if (event.key == 'm') {
             isMonochrome = !isMonochrome;
+            toggleButtonColorOrMonochrome.switch();
             if (isMonochrome) {
                 tokenColor = [ '#008080', '#008080', '#008080', '#008080'];
                 tokenStrokeColor = ['#006666', '#006666', '#006666', '#006666'];
@@ -323,12 +510,24 @@ legend.onMouseDown = function(event) {
     legend.visible = !legend.visible;
     legendBackground.visible = !legendBackground.visible;
     catPic.visible = !catPic.visible;
+    alert.visible = false;
 };
 
 var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft, legend.bounds.size));
 var legendBackground = new Path.Rectangle(new Rectangle(new Point(legendTopLeft.x*scale, (legendTopLeft.y-2)*scale), new Size(15*scale, 15*scale)));
 legendBackground.fillColor = '#ffffff';
 legend.bringToFront();
+
+// alert
+alert = new PointText({
+    point: [(legendTopLeft.x)*scale, (legendTopLeft.y+9)*scale],
+    content: 'Impossible, échange effectué',
+    fillColor: '#0c6675',
+    fontFamily: 'fantasy',
+    fontWeight: 'bold',
+    fontSize: scale/1.5, 
+    visible: false
+});
 
 // logo
 var catPic = new Raster('logo');

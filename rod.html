@@ -10,10 +10,16 @@
 	<script type="text/paperscript" src="./js/rod.js" canvas="myCanvas"></script>
 </head>
 <script>
-	var randomLogo = function() { return '/img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
+	var randomLogo = function() { return './img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
 </script>
 <body>
 	<canvas id="myCanvas" resize="true"></canvas>
-	<img src="/img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
+	<img src="./img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
+	<img src="./img/rod-menu/grid.png" id="grid" hidden >
+	<img src="./img/rod-menu/cross.png" id="delete" hidden >
+	<img src="./img/rod-menu/menu.png" id="menu" hidden >
+	<img src="./img/rod-menu/question.png" id="help" hidden >
+	<img src="./img/rod-menu/replay.png" id="rotate" hidden >
+	<img src="./img/rod-menu/trash.png" id="trash" hidden >
 </body>
 </html>
