@@ -467,7 +467,7 @@ var sumPointText = new PointText();
 var sum = new Number(0);
 var moneyToMove = [];
 var hitResult;
-var monneySizeList = [.16, .34, .35, .245, .24, .24, .2, .06, .05, .1, .10, .10, .13, .12, .1];
+var monneySizeList = [.16, .34, .35, .245, .24, .24, .2, .13, .13, .13, .13, .13, .13, .12, .1];
 var valueList = [500, 200, 100, 50, 20, 10, 5, 2, 1, 0.50, 0.20, 0.10, 0.05, 0.02, 0.01];
 var decomposition = {};
 var legendTopLeft = {x:7.5 , y:2};
