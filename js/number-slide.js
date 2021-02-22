@@ -3,7 +3,7 @@
 var scale = 45
 var offset = .3
 var opacity = 0.2
-var slideNumberPosition = { x: 13, y: 5 }
+var slideNumberPosition = { x: 13, y: 6 }
 var maxZeroNumberLeft = 6
 var maxZeroNumberRight = 11
 var unityColor = '#68b147'
@@ -13,19 +13,111 @@ var redColor = comaColor
 var blueColor = '#41b1fc'
 var lightGrayColor = '#C0C0C0'
 var legendTopLeft = { x:7, y:1.5 }
+var toggleFactorPosition = 9
+var currentOrder = 0
+var unitsWords = [  'cent-millionièmes',  
+                    'dix-millionièmes',  
+                    'millionièmes',  
+                    'cent-millièmes',  
+                    'dix-millièmes',  
+                    'millièmes', 
+                    'centièmes', 
+                    'dixièmes', 
+                    'unités', 
+                    'dizaines', 
+                    'centaines', 
+                    'milliers', 
+                    'dizaines de milliers', 
+                    'centaines de milliers', 
+                    'millions', 
+                    'dizaines de millions', 
+                    'centaines de millions', 
+                    'milliards', 
+                    'dizaines de milliards', 
+                    'centaines de milliards',]
+
+var unitsWordsSingular = [  'cent-millionième',  
+                    'dix-millionième',  
+                    'millionième',  
+                    'cent-millième',  
+                    'dix-millième',  
+                    'millième', 
+                    'centième', 
+                    'dixième', 
+                    'unité', 
+                    'dizaine', 
+                    'centaine', 
+                    'millier', 
+                    'dizaine de milliers', 
+                    'centaine de milliers', 
+                    'million', 
+                    'dizaine de millions', 
+                    'centaine de millions', 
+                    'milliard', 
+                    'dizaine de milliards', 
+                    'centaine de milliards',]
 
 /* Scenes objects and functions */
 
-// Grid separator
-var separatorGroup = new Group()
+var numberInfo = new PointText((slideNumberPosition.x)*scale, (slideNumberPosition.y + 3)*scale)
+numberInfo.justification = 'center'
+numberInfo.fillColor = 'black'
+numberInfo.fontFamily = 'sans-serif'
+numberInfo.fontSize = scale*.7
+numberInfo.position.x = Math.floor(numberInfo.position.x/scale)*scale + scale/2
+numberInfo.position.y = Math.floor(numberInfo.position.y/scale)*scale + scale/2 - .1*scale
+numberInfo.visible = false
 
+
+var updateNumberInfo = function(order) {
+
+    var copyNumberValue = getCopyNumberValue()
+    var numberOfUnitOrder = Math.floor(copyNumberValue*Math.pow(10, -order))
+    var digitOfUnitOrder = numberOfUnitOrder%10
+    var currentUnitsWordsAccorded = unitsWords[order + 8]
+    if (numberOfUnitOrder == 0 || numberOfUnitOrder == 1) {
+        currentUnitsWordsAccorded = unitsWordsSingular[order + 8]
+    }
+    var msg =   'Il y a ' + numberOfUnitOrder + ' ' + currentUnitsWordsAccorded + ' dans ' + copyNumberValue + '\n\n' +
+                digitOfUnitOrder + ' est le chiffre des '+ currentUnitsWordsAccorded +' de ' + copyNumberValue
+    msg = msg.replaceAll('.', ',')
+                
+    numberInfo.content = msg
+    numberInfo.visible = true
+}
+
+// Grid separator
+var unitText = function(text, x, order) {
+
+    var that = new PointText(new Point(x*scale, (slideNumberPosition.y - 1)*scale))
+    that.justification = 'center'
+    that.fillColor = 'black'
+    that.content = text
+    that.fontFamily = 'sans-serif'
+    that.fontSize = scale*.7
+    that.position.x = Math.floor(that.position.x/scale)*scale + scale/2
+    that.position.y = Math.floor(that.position.y/scale)*scale + scale/2 - .1*scale
+    that.visible = true
+    that.order = order
+
+    that.onMouseEnter = function () {
+        updateNumberInfo(this.order)
+    }
+    that.onMouseLeave = function () {
+        numberInfo.visible = false
+    }
+
+    return that
+}
+
+var separatorGroup = new Group()
 var separator = function() {
 
     for (var i = -11; i<14; i++) {
         var path = new Path();
         path.strokeColor = 'grey';
         path.strokeWidth = 1.5;
-        path.add(new Point((slideNumberPosition.x + i)*scale, (slideNumberPosition.y - 1)*scale));
+        path.add(new Point((slideNumberPosition.x + i)*scale, (slideNumberPosition.y - 2.2)*scale));
         path.add(new Point((slideNumberPosition.x + i)*scale, (slideNumberPosition.y + 1.3)*scale));
         separatorGroup.addChild(path)
         separatorGroup.bringToFront()
@@ -36,6 +128,32 @@ var separator = function() {
     path.add(new Point((slideNumberPosition.x + -11)*scale, (slideNumberPosition.y + .15)*scale));
     path.add(new Point((slideNumberPosition.x + 13)*scale, (slideNumberPosition.y + .15)*scale));
     separatorGroup.addChild(path)
+    separatorGroup.bringToFront()
+
+    var path = new Path();
+    path.strokeColor = 'grey';
+    path.strokeWidth = 1.5;
+    path.add(new Point((slideNumberPosition.x + -11)*scale, (slideNumberPosition.y + .15 - 1.35)*scale));
+    path.add(new Point((slideNumberPosition.x + 13)*scale, (slideNumberPosition.y + .15 - 1.35)*scale));
+
+    var ut04 = unitText('...', 20, -7)
+    var ut03 = unitText('...', 19, -6)
+    var ut02 = unitText('...', 18, -5)
+    var ut01 = unitText('...', 17, -4)
+    var ut1 = unitText('m', 16, -3)
+    var ut2 = unitText('c', 15, -2)
+    var ut3 = unitText('d', 14, -1)
+    var ut4 = unitText('U', 13, 0)
+    ut4.fillColor = unityColor
+    var ut5 = unitText('D', 12, 1)
+    var ut6 = unitText('C', 11, 2)
+    var ut7 = unitText('M', 10, 3)
+    var ut8 = unitText('...', 9, 4)
+    var ut9 = unitText('...', 8, 5)
+    var ut10 = unitText('...', 7, 6)
+    var ut11 = unitText('...', 6, 7)
+
+    separatorGroup.addChildren([path, ut04, ut03, ut02, ut01, ut1, ut2, ut3, ut4, ut5, ut6, ut7, ut8, ut9, ut10, ut11])
     separatorGroup.bringToFront()
 
     return separatorGroup
@@ -80,10 +198,11 @@ coma.fontWeight = 'bold'
 coma.fontSize = 1.5*scale
 coma.content = ","
 coma.visible = false
+comaState = false
 
 
 // Factor
-var factor = new PointText(new Point(10.5*scale, 2*scale))
+var factor = new PointText(new Point((toggleFactorPosition  + 2.5)*scale, 2*scale))
 factor.fillColor = redColor
 factor.fontFamily = 'sans-serif'
 factor.fontWeight = 'bold'
@@ -91,64 +210,66 @@ factor.fontSize = 1.3*scale
 factor.content = ''
 
 // Digits
-var digit = function(value, x, y, isDragable, canBeModified, offset, isUnity) {
+var digit = function(value, x, y, isDragable, canBeModified, offset, isUnity, index) {
 
     var that = new PointText(new Point(x*scale, y*scale))
     that.x = x // original position
     that.justification = 'center'
     that.fillColor = 'black'
-    that.content = value.toString()
-    that.isScalar = true
+    if (!isNaN(value)) { 
+        that.content = value.toString()
+        that.isScalar = true
+    } else {
+        that.content = '_'
+        that.isScalar = false
+        that.fillColor = 'white'
+        if (canBeModified && !isUnity) { that.opacity = opacity }
+    }
     that.fontFamily = 'sans-serif'
     that.fontWeight = 'bold'
     that.fontSize = scale*1.3
-    that.drag = false
     that.position.x = Math.floor(that.position.x/scale)*scale + scale/2
     that.position.y = Math.floor(that.position.y/scale)*scale + scale/2 + offset*scale
 
     if (canBeModified) {
         that.onClick = function(event) {
             separator.sendToBack()
-            if(!this.drag) {    
-                this.opacity = 1
-                var curentValue = parseInt(this.content, 10)
-                var newValue
-                if (isNaN(curentValue)) {
-                    newValue = 0
-                } else {
-                    newValue = (curentValue + 1)%11
-                }
-                if (newValue === 10) {
-                    this.content = '_'
-                    this.isScalar = false
-                    this.copy.isScalar = false
-                    if (!isUnity) { this.opacity = opacity }
-                    this.copy.content = '_'
-                    this.copy.fillColor = 'white'
-                } else {
-                    this.content = newValue.toString();
-                    this.copy.isScalar = true
-                    this.copy.content = newValue.toString();
-                    if (!isUnity) { 
-                        this.copy.fillColor = 'black'
-                    } else {
-                        this.copy.fillColor = unityColor
-                    }
-
-                }
+            this.opacity = 1
+            var curentValue = parseInt(this.content, 10)
+            var newValue
+            if (isNaN(curentValue)) {
+                newValue = 0
             } else {
-                this.drag = false
+                newValue = (curentValue + 1)%11
             }
-            refreshZeroList(this.master)
+            if (newValue === 10) {
+                this.content = '_'
+                this.isScalar = false
+                copyNumber.children[index].isScalar = false
+                if (!isUnity) { this.opacity = opacity }
+                copyNumber.children[index].content = '_'
+                copyNumber.children[index].fillColor = 'white'
+            } else {
+                this.content = newValue.toString();
+                this.isScalar = true
+                copyNumber.children[index].isScalar = true
+                copyNumber.children[index].content = newValue.toString();
+                if (!isUnity) { 
+                    copyNumber.children[index].fillColor = 'black'
+                } else {
+                    copyNumber.children[index].fillColor = unityColor
+                }
+            }
+            refreshZeroList(copyNumber.children[0])
         }
 
         if (!isUnity) {
-            that.onMouseEnter = function (event) {
+            that.onMouseEnter = function () {
                 if (that.content === '_') {
                     that.fillColor = 'black'
                 }
             }
-            that.onMouseLeave = function (event) {
+            that.onMouseLeave = function () {
                 if (that.content === '_') {
                     that.fillColor = 'white'
                 }
@@ -158,34 +279,29 @@ var digit = function(value, x, y, isDragable, canBeModified, offset, isUnity) {
     }
     
     if (isDragable) {
-        that.onMouseEnter = function (event) {
+        that.onMouseEnter = function () {
             document.body.style.cursor = "pointer"
         }
-        that.onMouseLeave = function (event) {
+        that.onMouseLeave = function () {
             document.body.style.cursor = "default"
         }
         that.onMouseDrag = function(event) {
             var order = slideNumberPosition.x - Math.floor(this.position.x/scale)
-            if (-11 < order < 10 && that.content != '_') {
-                this.group.position.x += event.delta.x
-                this.drag = true
+            if (-11 < order && order < 10 && that.content != '_') {
+                copyNumber.position.x += event.delta.x
                 coma.visible = 0 > order
+                comaState = 0 > order
                 coma.bringToFront()
                 refreshZeroList(this)
                 refreshFactor(order)
             }
-            if ( that.content != '_') { this.group.position.y += event.delta.y }
         }
-        that.onMouseUp = function(event) {
-            this.group.position.x = Math.min(Math.floor(this.position.x/scale -2)*scale, (slideNumberPosition.x + 6 + 4)*scale)
-            this.group.position.x = Math.max(Math.floor(this.position.x/scale -2)*scale, (slideNumberPosition.x - 7 - 1)*scale)
-            if (this.group.position.y/scale > slideNumberPosition.y + offset) {
-                this.group.position.y = (slideNumberPosition.y + 0.8 )*scale // + 0.5 + offset ??
-            } else {
-                coma.visible = false
-                this.group.position.x = (slideNumberPosition.x - 2)*scale // 2 ??
-                this.group.position.y = (slideNumberPosition.y - 1/2)*scale
-            }
+        that.onMouseUp = function() {
+            currentOrder = slideNumberPosition.x - Math.floor(this.position.x/scale)
+            currentOrder = Math.min(currentOrder, 6)
+            currentOrder = Math.max(currentOrder, -12 + 5)
+            copyNumber.position.x = Math.min(Math.floor(this.position.x/scale - 2)*scale, (slideNumberPosition.x + 5)*scale)
+            copyNumber.position.x = Math.max(Math.floor(this.position.x/scale - 2)*scale, (slideNumberPosition.x - 8)*scale)
             refreshZeroList(this)
         }
     }
@@ -193,47 +309,28 @@ var digit = function(value, x, y, isDragable, canBeModified, offset, isUnity) {
     return that
 }
 
-// number (main object)
-var number = function(value) {
+var number = function(isDragable) {
 
     var x = slideNumberPosition.x
     var y = slideNumberPosition.y
 
-    // originals digits : can be modified
-    var d0 = digit(value%10, x, y, false, true, 0, true) // not dragable
-    d0.fillColor = unityColor
-    var d1 = digit(Math.floor(value/10)%10, x-1, y, false, true, 0, false) // not dragable
-    var d2 = digit(Math.floor(value/100)%10, x-2, y, false, true, 0, false) // not dragable
-    var d3 = digit(Math.floor(value/1000)%10, x-3, y, false, true, 0, false) // not dragable
-    var d4 = digit(Math.floor(value/10000)%10, x-4, y, false, true, 0, false) // not dragable
-    var d5 = digit(Math.floor(value/100000)%10, x-5, y, false, true, 0, false) // not dragable
+    var yOffset = 0
+    var digitOffset = 0
 
-    // copy digits : can not be modified
+    if (isDragable) {
+        yOffset = 1
+        digitOffset = offset
+    }
+
     var group = new Group()
-    var d0copy = digit(value%10, x, y, true, false, 0, false) // MASTER DIGIT, dragable
-    d0copy.fillColor = unityColor
-    var d1copy = digit(Math.floor(value/10)%10, x-1, y, false, false, 0, false) // not dragable
-    var d2copy = digit(Math.floor(value/100)%10, x-2, y, false, false, 0, false) // not dragable
-    var d3copy = digit(Math.floor(value/1000)%10, x-3, y, false, false, 0, false) // not dragable
-    var d4copy = digit(Math.floor(value/10000)%10, x-4, y, false, false, 0, false) // not dragable
-    var d5copy = digit(Math.floor(value/100000)%10, x-5, y, false, false, 0, false) // not dragable
-    group.addChildren([d0copy, d1copy, d2copy, d3copy, d4copy, d5copy])
-
-    d0.copy = d0copy
-    d1.copy = d1copy
-    d2.copy = d2copy
-    d3.copy = d3copy
-    d4.copy = d4copy
-    d5.copy = d5copy
-
-    d0copy.group = group // pass group to move to MASTER DIGIT
-
-    d0.master = d0copy
-    d1.master = d0copy
-    d2.master = d0copy
-    d3.master = d0copy
-    d4.master = d0copy
-    d5.master = d0copy
+    var d0 = digit(2, x, y + yOffset, isDragable, !isDragable, digitOffset, true, 0)
+    d0.fillColor = unityColor
+    var d1 = digit(4, x-1, y + yOffset, false, !isDragable, digitOffset, false, 1)
+    var d2 = digit('_', x-2, y + yOffset, false, !isDragable, digitOffset, false, 2)
+    var d3 = digit('_', x-3, y + yOffset, false, !isDragable, digitOffset, false, 3)
+    var d4 = digit('_', x-4, y + yOffset, false, !isDragable, digitOffset, false, 4)
+    var d5 = digit('_', x-5, y + yOffset, false, !isDragable, digitOffset, false, 5)
+    group.addChildren([d0, d1, d2, d3, d4, d5])
 
     return group
 }
@@ -250,21 +347,28 @@ var hideZeroList = function() {
 
 var refreshZeroList = function(digit) {
     hideZeroList()
-    var size = sizeNumber(digit.group)
+    var size = sizeNumber(originalNumber)
     var end = slideNumberPosition.x - Math.floor(digit.position.x/scale)
 
-    for (var index = 0; index < -(end + size) + 1; index++) {
-        if(rightZeroList[index]) {
-            rightZeroList[index].sendToBack()
-            rightZeroList[index].visible = true
+    if (size != 0) {
+        for (var index = 0; index < -(end + size) + 1; index++) {
+            if(rightZeroList[index]) {
+                rightZeroList[index].sendToBack()
+                rightZeroList[index].visible = true
+            }
         }
-    }
-
-    for (var index = 0; index < end; index++) {
-        if (leftZeroList[index]) {
-            leftZeroList[index].sendToBack()
-            leftZeroList[index].visible = true
+    
+        for (var index = 0; index < end; index++) {
+            if (leftZeroList[index]) {
+                leftZeroList[index].sendToBack()
+                leftZeroList[index].visible = true
+            }
         }
+    } else {
+        coma.visible = false
+        comaState = false
+        copyNumber.position.x = (slideNumberPosition.x - 2)*scale
+        refreshFactor(0)
     }
 }
 
@@ -296,6 +400,37 @@ var sizeNumber = function(group) {
     }
 }
 
+var getNumber = function(group) {
+    
+    var number = 0
+    for(var index = 0; index < 6; index ++) {
+        if (group.children[index].isScalar) {
+            number += parseInt(group.children[index].content, 10)*Math.pow(10, index)
+        }
+    }
+
+    return number
+}
+
+var getCopyNumberValue = function() {
+    var originalNumberValue = getNumber(originalNumber)
+    var size = sizeNumber(originalNumber)
+    var copyNumberValue  = originalNumberValue.toString()
+    var nbZeroToAddToleft = 1 - currentOrder - size
+    if (nbZeroToAddToleft > 0) {
+        copyNumberValue  = (new Array(nbZeroToAddToleft + 1)).join('0') + copyNumberValue
+        copyNumberValue = copyNumberValue.slice(0,1) + '.' + copyNumberValue.slice(1)
+    } else {
+        if(currentOrder > -1) {
+            copyNumberValue  = copyNumberValue + (new Array(currentOrder + 1)).join('0')
+        } else {
+            copyNumberValue = copyNumberValue.slice(0, size + currentOrder) + '.' + copyNumberValue.slice(size + currentOrder)
+        }
+    }
+    copyNumberValue = parseFloat(copyNumberValue)
+    return copyNumberValue
+}
+
 var factorSwitch = function() {
     toggleFactor.switch();
     factor.visible = !factor.visible
@@ -305,28 +440,11 @@ var separatorSwitch = function() {
     separatorGroup.visible = ! separatorGroup.visible
 }
 
-var modeSwitch = function() {    
-    if(toggleMode.isON) {
-        group.sendToBack()
-    } else {
-        group.bringToFront()
-    }
-    toggleMode.switch();
-}
-
 var factorList = ['10', '100', '1000', '10 000', '100 000', '1 000 000', '10 000 000', '100 000 000', '1 000 000 000', '10 000 000 000', '100 000 000 000', '1 000 000 000 000']
 var refreshFactor = function(order) {
-    if (order > 0) {
-        //var value = Math.min(1000000, Math.pow(10, order))
-        factor.content = 'x ' + factorList[Math.min(5, order - 1)]//value.toString()
-    }
-    if (order < 0) {
-        //var value = Math.min(1000000000000, Math.pow(10, -order))
-        factor.content = ': ' + factorList[Math.min(11, -1 - order )]//value.toString()
-    }
-    if (order === 0) {
-        factor.content = ''
-    }
+    if (order > 0) { factor.content = 'x ' + factorList[Math.min(5, order - 1)] }
+    if (order < 0) { factor.content = ': ' + factorList[Math.min(11, -1 - order )] }
+    if (order === 0) { factor.content = '' }
 }
 
 /* Toggle buttons */
@@ -409,17 +527,14 @@ var IconMenu = Base.extend({
 
 /* main */
 
-var group = number(999991) 
-group.bringToFront()
 var separator = separator()
 separator.sendToBack()
-separatorGroup.visible = false
 
-var toggleFactor = new ToggleButton(8, 1.05, 1, redColor, lightGrayColor, '', '', scale, factorSwitch, true);
-var toggleMode = new ToggleButton(2, 1.05, 1, lightGrayColor, blueColor, 'Déplacer', 'Éditer', scale, modeSwitch, true);
-var separatorButton = new IconMenu(new Point(1, 1.55)*scale, 'grid', .08, separatorSwitch)
+var originalNumber = number(false)
+var copyNumber = number(true)
 
-modeSwitch()
+var toggleFactor = new ToggleButton(toggleFactorPosition, 1.05, 1, redColor, lightGrayColor, '', '', scale, factorSwitch, true);
+var separatorButton = new IconMenu(new Point(5, 1.55)*scale, 'grid', .08, separatorSwitch)
 
 // onKeyDown
 function onKeyDown(event) {
@@ -431,28 +546,57 @@ function onKeyDown(event) {
     }
 
     if (event.key == 'a') { displayHelp() }
-    if (event.key == 'space') { modeSwitch() }
-    if (event.key == 'escape') { factorSwitch() }
+    if (event.key == 'space') { factorSwitch() }
+    if (event.key == 'g') { separatorGroup.visible = !separatorGroup.visible }
+    if (event.key == 'left') {
+        copyNumber.position.x -= scale
+        copyNumber.position.x = Math.max(copyNumber.position.x, (slideNumberPosition.x - 8)*scale)
+        refreshZeroList(copyNumber.children[0])
+        currentOrder = slideNumberPosition.x - Math.floor(copyNumber.children[0].position.x/scale)
+        coma.visible = 0 > currentOrder
+        comaState = 0 > currentOrder
+        refreshFactor(currentOrder)
+    }
+    if (event.key == 'right') {
+        copyNumber.position.x += scale
+        copyNumber.position.x = Math.min(copyNumber.position.x, (slideNumberPosition.x + 5)*scale)
+        refreshZeroList(copyNumber.children[0])
+        currentOrder = slideNumberPosition.x - Math.floor(copyNumber.children[0].position.x/scale)
+        coma.visible = 0 > currentOrder
+        comaState = 0 > currentOrder
+        refreshFactor(currentOrder)
+    }
+
 }
 
+var comaState
 var displayHelp = function() {
     legend.visible = !legend.visible;
     legendBackground.visible = !catPic.visible;
     catPic.visible = !catPic.visible;
+    if(coma.visible && legend.visible) {
+        comaState = true
+        coma.visible = false
+    }
+    if(comaState && !legend.visible) {
+        coma.visible = true
+    }
 }
 
 // Legend
 var legend = new PointText({
     point: [legendTopLeft.x*scale, legendTopLeft.y*scale],
-    content: 
-    'Raccourcis claviers :\n'  +
-    '\n'  +
-    'a : affiche l\'aide\n' +
-    'Espace : passe du mode éditer au mode déplacer\n' +
-    'Escape : avec ou sans le facteur multiplicatif\n\n' +
+    content:
+    '\n\n' +
     'Souris :\n\n' +
-    'permet de déplacer le nombre\n' +
-    'permet de changer les chiffres (clic)\n',
+    '-> change les chiffres du nombre du haut (cliquez)\n' +
+    '-> déplace le nombre du bas (déplacez) \n' +
+    '-> affiche le chiffre et le nombre d\'unités,\n de centaines, de dizaines, ..., de dixièmes, de millièmes, ... (survolez)\n\n' +
+    'Raccourcis claviers :\n\n'  +
+    'a : affiche l\'aide\n' +
+    'g : active/désactive la grille des unités\n' +
+    'Espace : avec ou sans le facteur multiplicatif\n' +
+    'Flèches gauche et droite : déplace le nombre du bas',
     fillColor: '#0c6675',
     fontFamily: 'fantasy',
     fontWeight: 'bold',
@@ -465,9 +609,12 @@ legend.onMouseDown = function(event) {
     catPic.visible = !catPic.visible;
     separatorGroup.visible = true
     separatorButton.visible = true
+    if(comaState) {
+        coma.visible = true
+    }
 };
 
-var legendBackground = new Path.Rectangle(new Rectangle(new Point(0,0), legend.bounds.size + new Size(2*scale, 2*scale)));
+var legendBackground = new Path.Rectangle(new Rectangle(new Point(0,0), legend.bounds.size + new Size(20*scale, 20*scale)));
 legendBackground.fillColor = '#ffffff';
 legend.bringToFront();
 
@@ -476,6 +623,15 @@ var catPic = new Raster('logo');
 catPic.position = legend.bounds.topRight + new Point(-2*scale, .5*scale);
 catPic.scale(0.1);
 catPic.bringToFront();
+
+function onMouseMove(event) {
+	mousePos = event.point;
+    if (Math.floor(mousePos.y/scale) === 4 && separatorGroup.visible) {
+        originalNumber.visible = false
+    } else {
+        originalNumber.visible = true
+    }
+}
 
 /* Other tools */
 
