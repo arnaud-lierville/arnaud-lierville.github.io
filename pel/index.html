@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="problèmes de mathématiques">
+    <title>Problèmes en ligne</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+      .form-range {
+        width: 100%;
+      }
+      th, td {
+        width: 18%;
+      }
+      .frac {
+          display: inline-block;
+          position: relative;
+          vertical-align: middle;
+          letter-spacing: 0.001em;
+          text-align: center;
+      }
+      .frac > span {
+          display: block;
+          padding: 0.1em;
+      }
+      .frac span.bottom {
+          border-top: thin solid black;
+      }
+      .frac span.symbol {
+          display: none;
+      } 
+    </style>
+
+    
+  </head>
+  <body>
+    
+<header>
+  <div class="collapse bg-dark" id="navbarHeader">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-8 col-md-7 py-4">
+          <h4 class="text-white">À propos</h4>
+          <p class="text-muted">Banque de problèmes de mathématiques pour le cycle 2 et 3.</p>
+        </div>
+        <div class="col-sm-4 offset-md-1 py-4">
+          <h4 class="text-white">Miscellaneous</h4>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white">Proposer un problème</a></li>
+            <li><a href="https://arnaud-lierville.github.io/" target="blank" class="text-white">Autres outils Maths en classe !</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navbar navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a href="#" class="navbar-brand d-flex align-items-center">
+        <strong>Problèmes en ligne</strong>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="py-5 container">
+    <div class="row">
+      <div class="col">
+        <div class="text-center">
+          <h1 class="fw-light">Recherche de problèmes</h1>
+          <p class="lead text-muted">Sélectionnez les caractéristiques souhaitées</p>
+        </div>
+        
+        <table class="table">
+          <tbody>
+            <tr class="table-warning">
+              <th>Niveau</th>
+              <td>
+                <input class="form-check-input" type="checkbox" name="level" id="level1" value="option1" checked>
+                <label class="form-check-label" for="level1">CP</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="level" id="level2" value="option1" checked>
+                <label class="form-check-label" for="level2">CE1</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="level" id="level3" value="option1" checked>
+                <label class="form-check-label" for="level3">CE2</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="level" id="level4" value="option1">
+                <label class="form-check-label" for="level4">CM1</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="level" id="level5" value="option1">
+                <label class="form-check-label" for="level5">CM2</label>
+              </td>
+            </tr>
+            <tr class="table-info">
+              <th>Type</th>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="type1" value="option1">
+                <label class="form-check-label" for="type1">Additif (+ et -)</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="type2" value="option1" checked>
+                <label class="form-check-label" for="type2">Multiplicatif</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="type3" value="option1">
+                <label class="form-check-label" for="type3">Division/partage</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="type4" value="option1" checked>
+                <label class="form-check-label" for="type4">Proportionnalité</label>
+              </td>
+              <td></td>
+            </tr>
+            <tr class="table-success">
+              <th>Domaine</th>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="domain1" value="option1">
+                <label class="form-check-label" for="domain1">Entiers</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="domain2" value="option1" checked>
+                <label class="form-check-label" for="domain2">Décimaux</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="domain3" value="option1" checked>
+                <label class="form-check-label" for="domain3">Fractions</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="domain" id="domain3" value="option1">
+                <label class="form-check-label" for="domain3">Autres</label>
+              </td>
+              <td></td>
+            </tr>
+            <tr class="table-danger">
+              <th>Difficulté</td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="type" id="complexity1" value="option1" checked>
+                <label class="form-check-label" for="complexity1">Une étape</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="type" id="complexity2" value="option1">
+                <label class="form-check-label" for="complexity2">Plus d'une étape</label>
+              </td>
+              <td>
+                <input class="form-check-input" type="checkbox" name="type" id="complexity3" value="option1">
+                <label class="form-check-label" for="complexity3">Atypique</label>
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="album py-5 bg-light">
+    <div class="container">
+
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Lucie a 13 billes. <br>
+                  Elle en perd 2 à la récréation. <br><br>
+                  Combien lui en reste-il ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb1.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  <div>
+                    Combien de triangles <br>
+                    y a-t-il dans 
+                    cette figure ? <br><br>
+                  </div>
+                  <img src="./img/fig-triangles.png" width="200px">
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb2.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Pierre a 2 cartes.<br>
+                  Marie en a le triple.<br>
+                  Combien de cartes ont-ils en tout ?<br>
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb3.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Lors d’un voyage, Patricia a expédié 50 cartes postales en 5 mois, soit de janvier à mai.
+                  Chaque mois, elle a expédié une carte de plus que le mois précédent. <br><br>
+                  Combien Patricia a-t-elle expédié de cartes postales pendant le mois de mai ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb4.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Karim a 10 ans. <br>
+                  Il a 3 ans de plus que sa soeur Salia. <br><br>
+                  Quel âge a Salia ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb5.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Je partage mes billes avec mon frère, <br>
+                  j’en garde                   
+                  <div class="frac">
+                    <span>1</span>
+                    <span class="symbol">/</span>
+                    <span class="bottom">4</span>
+                  </div>
+                  et j’en donne le reste. <br>
+                J’ai maintenant 3 billes. <br><br>
+                Combien en avais-je en tout ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb6.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Le porte-avions « Charles de Gaulle » va partir en mission pendant 4 mois.
+                  Lorsqu’il est en mission, chaque heure coûte
+                  30 000€ à l’Etat. <br><br>
+                  Combien l’état dépense-t-il par jour lorsqu’il est en mission ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb7.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  Mes économies s’élèvent à 3 cinquièmes de celles de mon frère. <br>
+                  Mon frère a 24 € de plus que moi. <br><br>
+                  Combien possède mon frère ?
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb8.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-body">
+              <p class="card-text">
+                <div class="text-center">
+                  <div>
+                    Combien d'oeufs peut-on ranger dans ces boites ?
+                  </div>
+                  <img src="./img/egg-box.png" width="200px">
+                </div>
+              </p>
+              <div class="text-center">
+                <div class="btn-group">
+                  <a href="./pb9.html" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">Ouvrir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="text-muted py-5">
+  <div class="container">
+    <p class="float-end mb-1">
+      <a href="#">Revenir en haut de la page</a>
+    </p>
+    <p class="mb-1">Problèmes en ligne, des problèmes pour et dans la classe.</p>
+    <p class="mb-0">À découvrir, les <a href="https://arnaud-lierville.github.io/" target="blank">Outils Maths en classe !</a></p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
+      
+  </body>
+</html>
