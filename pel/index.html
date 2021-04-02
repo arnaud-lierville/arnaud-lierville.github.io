@@ -27,7 +27,7 @@
         width: 100%;
       }
       th, td {
-        width: 18%;
+        width: 16%;
       }
       .frac {
           display: inline-block;
@@ -45,7 +45,15 @@
       }
       .frac span.symbol {
           display: none;
-      } 
+      }
+      /*
+      .py-5 {
+          padding-top: 3rem!important;
+          padding-bottom: 3rem!important;
+      }*/
+      .card-title {
+        color: #198754;
+      }
     </style>
 
     
@@ -61,10 +69,10 @@
           <p class="text-muted">Banque de problèmes de mathématiques pour le cycle 2 et 3.</p>
         </div>
         <div class="col-sm-4 offset-md-1 py-4">
-          <h4 class="text-white">Miscellaneous</h4>
+          <!--h4 class="text-white">Miscellaneous</h4-->
           <ul class="list-unstyled">
             <li><a href="#" class="text-white">Proposer un problème</a></li>
-            <li><a href="https://arnaud-lierville.github.io/" target="blank" class="text-white">Autres outils Maths en classe !</a></li>
+            <li><a href="https://arnaud-lierville.github.io/" target="_blank" class="text-white">Autres outils Maths en classe !</a></li>
           </ul>
         </div>
       </div>
@@ -75,9 +83,15 @@
       <a href="#" class="navbar-brand d-flex align-items-center">
         <strong>Problèmes en ligne</strong>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+
+
+      <div class="navbar-brand d-flex">
+        <input class="form-control me-2" id="pbSearch" type="text" placeholder="numéro du problème" aria-label="Search">
+        <button class="btn btn-outline-info" style="margin-right: 8px;" onclick="gotoPb()">Rechercher</button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
@@ -85,103 +99,207 @@
 <main>
 
   <section class="py-5 container">
+
     <div class="row">
+
+
+
+
       <div class="col">
         <div class="text-center">
           <h1 class="fw-light">Recherche de problèmes</h1>
           <p class="lead text-muted">Sélectionnez les caractéristiques souhaitées</p>
+          <p>
+            <a class="btn btn-outline-success" data-bs-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Caractéristiques</a>
+            <button class="btn btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Typologie</button>
+            <!--button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse" aria-expanded="false" aria-controls="multiCollapseExample1 multiCollapseExample2">Toggle both elements</button-->
+          </p>
         </div>
-        
-        <table class="table">
-          <tbody>
-            <tr class="table-warning">
-              <th>Niveau</th>
-              <td>
-                <input class="form-check-input" type="checkbox" name="level" id="level1" value="option1" checked>
-                <label class="form-check-label" for="level1">CP</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="level" id="level2" value="option1" checked>
-                <label class="form-check-label" for="level2">CE1</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="level" id="level3" value="option1" checked>
-                <label class="form-check-label" for="level3">CE2</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="level" id="level4" value="option1">
-                <label class="form-check-label" for="level4">CM1</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="level" id="level5" value="option1">
-                <label class="form-check-label" for="level5">CM2</label>
-              </td>
-            </tr>
-            <tr class="table-info">
-              <th>Type</th>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="type1" value="option1">
-                <label class="form-check-label" for="type1">Additif (+ et -)</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="type2" value="option1" checked>
-                <label class="form-check-label" for="type2">Multiplicatif</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="type3" value="option1">
-                <label class="form-check-label" for="type3">Division/partage</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="type4" value="option1" checked>
-                <label class="form-check-label" for="type4">Proportionnalité</label>
-              </td>
-              <td></td>
-            </tr>
-            <tr class="table-success">
-              <th>Domaine</th>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="domain1" value="option1">
-                <label class="form-check-label" for="domain1">Entiers</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="domain2" value="option1" checked>
-                <label class="form-check-label" for="domain2">Décimaux</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="domain3" value="option1" checked>
-                <label class="form-check-label" for="domain3">Fractions</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="domain" id="domain3" value="option1">
-                <label class="form-check-label" for="domain3">Autres</label>
-              </td>
-              <td></td>
-            </tr>
-            <tr class="table-danger">
-              <th>Difficulté</td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="type" id="complexity1" value="option1" checked>
-                <label class="form-check-label" for="complexity1">Une étape</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="type" id="complexity2" value="option1">
-                <label class="form-check-label" for="complexity2">Plus d'une étape</label>
-              </td>
-              <td>
-                <input class="form-check-input" type="checkbox" name="type" id="complexity3" value="option1">
-                <label class="form-check-label" for="complexity3">Atypique</label>
-              </td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
+
+        <div class="collapse multi-collapse" id="multiCollapseExample1">
+          <table class="table table-hover">
+            <tbody>
+              <tr class="table-warning">
+                <th>Niveau</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_level" id="level1" value="option1" checked>
+                  <label class="form-check-label" for="level1">CP</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_level" id="level2" value="option1" checked>
+                  <label class="form-check-label" for="level2">CE1</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_level" id="level3" value="option1" checked>
+                  <label class="form-check-label" for="level3">CE2</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_level" id="level4" value="option1" checked>
+                  <label class="form-check-label" for="level4">CM1</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_level" id="level5" value="option1" checked>
+                  <label class="form-check-label" for="level5">CM2</label>
+                </td>
+              </tr>
+              <tr class="table-info">
+                <th>Catégorie</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="type1" value="option1" checked>
+                  <label class="form-check-label" for="type1">Additif (+ et -)</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="type2" value="option1" checked>
+                  <label class="form-check-label" for="type2">Multiplicatif</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="type3" value="option1" checked>
+                  <label class="form-check-label" for="type3">Division/partage</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="type4" value="option1" checked>
+                  <label class="form-check-label" for="type4">Proportionnalité</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="type5" value="option1" checked>
+                  <label class="form-check-label" for="type5">Numération</label>
+                </td>
+              </tr>
+              <tr class="table-success">
+                <th>Domaine</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="domain1" value="option1" checked>
+                  <label class="form-check-label" for="domain1">Entiers</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="domain2" value="option1" checked>
+                  <label class="form-check-label" for="domain2">Décimaux</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="domain3" value="option1" checked>
+                  <label class="form-check-label" for="domain3">Fractions</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="domain4" value="option1" checked>
+                  <label class="form-check-label" for="domain4">Géométrie</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_domain" id="domain5" value="option1" checked>
+                  <label class="form-check-label" for="domain5">Logique</label>
+                </td>
+              </tr>
+              <tr class="table-danger">
+                <th>Complexité</td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_type" id="complexity1" value="option1" checked>
+                  <label class="form-check-label" for="complexity1">Une étape</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_type" id="complexity2" value="option1" checked>
+                  <label class="form-check-label" for="complexity2">Plus d'une étape</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="car_type" id="complexity3" value="option1" checked>
+                  <label class="form-check-label" for="complexity3">Atypique</label>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-center" style="margin-bottom: 15px;">
+            <button type="button" class="btn btn-outline-secondary  btn-sm" onclick="switchCheckbox('car')">Tout sélectionner / désélectionner</button>
+          </div>
+        </div>
+
+        <div class="collapse multi-collapse" id="multiCollapseExample2">
+          <table class="table table-hover">
+            <tbody>
+              <tr>
+                <th>Additif</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_addition" id="add1" value="option1" checked>
+                  <label class="form-check-label" for="add1">Composition</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_addition" id="add2" value="option1" checked>
+                  <label class="form-check-label" for="add2">Transformation</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_addition" id="add3" value="option1" checked>
+                  <label class="form-check-label" for="add3">Comparaison</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_addition" id="add4" value="option1" checked>
+                  <label class="form-check-label" for="add4">Compo. de transfo.</label>
+                </td>
+              </tr>
+              <tr>
+                <th>Multiplicatif</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_multiply" id="mul1" value="option1" checked>
+                  <label class="form-check-label" for="mul1">n fois plus/moins</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_multiply" id="mul2" value="option1" checked>
+                  <label class="form-check-label" for="mul2">Rectangulaire</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_multiply" id="mul3" value="option1" checked>
+                  <label class="form-check-label" for="mul3">Produit cartésien</label>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Division</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_division" id="div1" value="option1" checked>
+                  <label class="form-check-label" for="div1">Partition</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_division" id="div2" value="option1" checked>
+                  <label class="form-check-label" for="div2">Quotition</label>
+                </td>
+                <td></td>
+                <td></td>
+              </tr>
+              <!--tr class="table-danger">
+                <th>Divers</th>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_proportionality" id="divers1" value="option1" checked>
+                  <label class="form-check-label" for="divers1">Proportionnalité</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_proportionality" id="divers2" value="option1" checked>
+                  <label class="form-check-label" for="divers2">Numération</label>
+                </td>
+                <td>
+                  <input class="form-check-input" type="checkbox" name="typ_proportionality" id="divers3" value="option1" checked>
+                  <label class="form-check-label" for="divers3">Logique</label>
+                </td>
+                <td></td>
+              </tr-->
+            </tbody>
+          </table>
+          <div class="text-center">
+            <button type="button" class="btn btn-outline-secondary  btn-sm" onclick="switchCheckbox('typ')">Tout sélectionner / désélectionner</button>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
+  <div class="col">
+    <div class="row text-center">
+      <p class="fs-1">42 énoncés trouvés</p>
+    </div>
+  </div>
+
   <div class="album py-5 bg-light">
     <div class="container">
+
+
 
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
         <div class="col">
@@ -189,6 +307,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#1</h5>
                   Lucie a 13 billes. <br>
                   Elle en perd 2 à la récréation. <br><br>
                   Combien lui en reste-il ?
@@ -208,6 +327,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#2</h5>
                   <div>
                     Combien de triangles <br>
                     y a-t-il dans 
@@ -229,6 +349,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#3</h5>
                   Pierre a 2 cartes.<br>
                   Marie en a le triple.<br>
                   Combien de cartes ont-ils en tout ?<br>
@@ -249,6 +370,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#4</h5>
                   Lors d’un voyage, Patricia a expédié 50 cartes postales en 5 mois, soit de janvier à mai.
                   Chaque mois, elle a expédié une carte de plus que le mois précédent. <br><br>
                   Combien Patricia a-t-elle expédié de cartes postales pendant le mois de mai ?
@@ -268,6 +390,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#5</h5>
                   Karim a 10 ans. <br>
                   Il a 3 ans de plus que sa soeur Salia. <br><br>
                   Quel âge a Salia ?
@@ -287,6 +410,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#6</h5>
                   Je partage mes billes avec mon frère, <br>
                   j’en garde                   
                   <div class="frac">
@@ -314,6 +438,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#7</h5>
                   Le porte-avions « Charles de Gaulle » va partir en mission pendant 4 mois.
                   Lorsqu’il est en mission, chaque heure coûte
                   30 000€ à l’Etat. <br><br>
@@ -334,6 +459,7 @@
             <div class="card-body">
               <p class="card-text">
                 <div class="text-center">
+                  <h5 class="card-title">#8</h5>
                   Mes économies s’élèvent à 3 cinquièmes de celles de mon frère. <br>
                   Mon frère a 24 € de plus que moi. <br><br>
                   Combien possède mon frère ?
@@ -354,6 +480,7 @@
               <p class="card-text">
                 <div class="text-center">
                   <div>
+                    <h5 class="card-title">#9</h5>
                     Combien d'oeufs peut-on ranger dans ces boites ?
                   </div>
                   <img src="./img/egg-box.png" width="200px">
@@ -379,11 +506,46 @@
       <a href="#">Revenir en haut de la page</a>
     </p>
     <p class="mb-1">Problèmes en ligne, des problèmes pour et dans la classe.</p>
-    <p class="mb-0">À découvrir, les <a href="https://arnaud-lierville.github.io/" target="blank">Outils Maths en classe !</a></p>
+    <p class="mb-0">À découvrir, les <a href="https://arnaud-lierville.github.io/" target="_blank">Outils Maths en classe !</a></p>
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 
+<script>
+
+  let flag = {
+    car: true,
+    typ: true
+  }
+
+  function switchCheckbox(pre){
+
+    flag[pre] = !flag[pre]
+    
+    var ele=document.getElementsByTagName('input');
+    for(var i=0; i<ele.length; i++) {
+      if(ele[i].type=='checkbox' && ele[i].name.substr(0,3) === pre) {
+          ele[i].checked = flag[pre]
+        }
+    }
+  }
+
+  let gotoPb = function() {
+    let value = document.getElementById('pbSearch').value
+    console.log(value)
+    window.open(`http://127.0.0.1:5500/pb${value}.html`,'_blank');
+  }
+
+  let searchInput = document.getElementById("pbSearch");
+
+  searchInput.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      gotoPb()
+    }
+  });
+  
+</script>
       
   </body>
 </html>
