@@ -1,0 +1,30 @@
+html,
+body {
+    margin: 0; /* NEW */
+    overflow: hidden; /* NEW */
+    height: 100%;
+}
+
+/* Scale canvas with resize attribute to full size */
+canvas[resize] {
+    width: 100%;
+    height: auto;
+}
+
+.form-switch .form-check-input {
+    width: 4em;
+    height: 2em;
+}
+
+.form-check-input:checked {
+    background-color: #86B8FF;
+    border-color: #86B8FF;
+}
+
+.navbar-custom {
+    height: 70%;
+}
+
+.btn-custom {
+    margin: 3%;
+}
