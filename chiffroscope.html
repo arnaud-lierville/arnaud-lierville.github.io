@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="./css/responsive-paper-chiffroscope.css">
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>	<!--script type="text/javascript" src="./js/paper-full.js"></script-->
+		<script src="https://kit.fontawesome.com/83906c3267.js" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js"></script>
+		<script type="text/paperscript" src="./js/chiffroscope.js" canvas="chiffroscope"></script>
+	</head>
+	<body>
+
+		<div class="modal fade" id="helpModal" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+			<div class="modal-dialog modal-xl">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalToggleLabel">Chiffroscope - mode d'emploi</h5>
+				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col">
+							<h5>Bouttons à gauche</h5>
+							<div style="margin: 5px">
+								<button class="btn btn-outline-info" style="margin-right: 10px">
+									<i class="fa-solid fa-minus"></i> 
+								</button>Moins de colonnes
+							</div>
+							<div style="margin: 5px">
+								<button class="btn btn-outline-success" style="margin-right: 10px">
+									<i class="fa-solid fa-coins"></i> 
+								</button>Générer une carte unité au hasard
+							</div>
+							<div style="margin: 5px">
+								<button class="btn btn-outline-success" style="margin-right: 10px">
+									<i class="fa-solid fa-hand-sparkles"></i> 
+								</button>Générer une carte nombre au hasard
+							</div>
+							<div style="margin: 5px">
+								<button class="btn btn-outline-danger" style="margin-right: 10px">
+									<i class="fa-solid fa-plus"></i> 
+								</button>Plus de colonnes
+							</div>
+							<p></p>
+							<h5>À la souris</h5>
+							<ul>
+								<li>On peut déplacer les cartes.</li>
+								<li>Un <strong>CLICK</strong> sur une carte la retourne.</li>
+								<li>Un <strong>DOUBLE-CLICK</strong> sur une carte la supprime.</li>
+							</ul>
+						</div>
+						<div class="col">
+							<h5>Menus déroulants</h5>
+							<p>Les deux menus déroulants permettent de régler le tirage aléatoire des cartes.</p>
+							<h5>Switchs</h5>
+							<ul>
+								<li class="form-check form-switch">
+									<input id="helpSwitch1" class="form-check-input" type="checkbox" checked>
+									Le premier switch permet de cacher la valeur de la carte à génerer.
+								</li>
+								<li class="form-check form-switch">
+									<input id="helpSwitch2" class="form-check-input" type="checkbox" checked>
+									Le deuxième switch permet d'afficher le nombre codé.
+								</li>
+							</ul>
+							<h5>Bouttons à droite</h5>
+							<div style="margin: 5px">
+								<button class="btn btn-danger" style="margin-right: 10px">
+									<i class="fa-solid fa-trash"></i> 
+								</button>Pour recommencer
+							</div>
+							<div style="margin: 5px">
+								<button class="btn btn-success" style="margin-right: 10px">
+									<i class="fa-solid fa-question"></i> 
+								</button>Accès à cette aide !
+							</div>
+						</div>
+						<div class="col">
+							<h5>Cartes unités possibles</h5>
+							<ul>
+								<li>Millièmes (saisie 'm*')</li>
+								<li>Centièmes (saisie 'c*')</li>
+								<li>Dixièmes (saisie 'd*')</li>
+								<li>Unités (saisie 'u')</li>
+								<li>Dizaines (saisie 'd')</li>
+								<li>Centaines (saisie 'c')</li>
+								<li>Milliers (saisie 'm')</li>
+								<li>Dizaines de milliers (saisie 'dm')</li>
+								<li>Centaines de milliers (saisie 'cm')</li>
+								<li>Millions (saisie 'M')</li>
+							</ul>
+							<p>
+								<a href="https://chiffroscope.blogs.laclasse.com/" target="_blank">Ressource pédagogique sur le site de l'Ifé</a>
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+				  <button class="btn btn-outline-success" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Scénarii de jeux possibles</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+			<div class="modal-dialog modal-xl">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalToggleLabel2">Scénarii de jeux possibles tirés de <a href="https://chiffroscope.blogs.laclasse.com/" target="_blank">https://chiffroscope.blogs.laclasse.com/</a></h5>
+				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+				  <ul>
+					  <li class="li-rules">
+						Le Chiffroscope : le jeu de base consiste à chercher un nombre mystère à partir d’un tirage de cartes unités de numération et de cartes nombre associées. Il se joue à 2 joueurs de manière collaborative. Le but du jeu est d’écrire ensemble le nombre représenté par un tirage de plusieurs cartes Unité de numération et cartes Nombre associées, déposées sur le plateau.
+					  </li>
+					  <li class="li-rules">
+						Le Décal’tout : c'est une variante du Chiffroscope qui se joue à 2 joueurs de manière collaborative. Le but du jeu est d’écrire le nombre représenté par un tirage de plusieurs cartes Unité de numération et cartes Nombre associées, dont certaines ont été décalées d’une colonne sur le plateau.
+					  </li>
+					  <li class="li-rules">
+						Le Coup de vent : c'est une variante du Chiffroscope qui se joue à 2 joueurs de manière collaborative. Une fois le tirage initial réalisé, le Coup de vent consiste à supprimer une carte, ou à la déplacer sur le plateau, à l’échanger avec une autre, selon l’indication de la carte Coup de vent, et à chercher la conséquence sur le nombre final.
+					  </li>
+					  <li class="li-rules">
+						Le Multiplitout : c'est une variante du Chiffroscope qui se joue à 2 joueurs de manière collaborative. Le Multiplitout consiste à multiplier le nombre obtenu initialement puis à trouver comment déplacer certaines cartes Nombre ou Unité de numération, disposées sur le plateau, pour faire correspondre le tableau avec le nouveau nombre réponse.
+					  </li>
+					  <li class="li-rules">
+						Faire apparaître un zéro est une variante du Chiffroscope qui se joue à 2 joueurs de manière collaborative.Inutile d’être magicien ! Le but du jeu est d’inventer une carte nombre supplémentaire et de la placer sur le plateau, sans changer ou déplacer les cartes qui sont déjà posées, de façon à obtenir un zéro dans une unité de numération de l’écriture du nombre.
+					  </li>
+					  <li class="li-rules">
+						Quel est le tirage ? est une variante du Chiffroscope qui se joue à 2 joueurs de manière collaborative. Elle consiste à faire le jeu inverse du Chiffroscope. 
+						Un nombre “cible” est donné, puis les joueurs cherchent à partir d’une sélection de cartes Unité de numération et une sélection de carte Nombre, 
+						lesquelles choisir et comment les positionner sur le plateau de façon à obtenir le nombre tiré initialement. 
+						Le but du jeu est de déterminer le tirage, c’est-à-dire les cartes Unité de numération, les cartes Nombre et leur position, de façon à obtenir un nombre donné.
+					  </li>
+				  </ul>
+				</div>
+			  </div>
+			</div>
+		  </div>
+
+		<div >
+			<canvas id="chiffroscope" resize="true"></canvas>
+		</div>
+	</body>
+</html>
