@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+		<link rel="stylesheet" type="text/css" href="./css/responsive-paper-gridwindow.css">
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>	<!--script type="text/javascript" src="./js/paper-full.js"></script-->
+		<script src="https://kit.fontawesome.com/83906c3267.js" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.11/paper-full.min.js"></script>
+		<script type="text/paperscript" src="./js/gridwindow.js" canvas="gridwindow"></script>
+	</head>
+	<body>
+
+		<div class="modal fade" id="helpModal" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+			<div class="modal-dialog modal-xl">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalToggleLabel">Fenêtre sur grille - mode d'emploi</h5>
+				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+
+						<div class="col">
+							<h5>Menu déroulant</h5>
+							<p>Le menu déroulant permet de choisir le niveau de jeu
+								<ul>
+									<li>Niveau 1 : on part d'une grille 20x20</li>
+									<li>Niveau 2 : la grille est de taille aléatoire n^2 avec n entre 10 et 20</li>
+								</ul>
+							</p>
+							<h5>Switchs</h5>
+							<ul>
+								<li class="form-check form-switch">
+									<input id="helpSwitch1" class="form-check-input" type="checkbox" checked>
+									Le premier switch "couleur" met dans une couleur différente les nombres à la fois multiples des deux entiers recherchés.
+								</li>
+								<li class="form-check form-switch">
+									<input id="helpSwitch1" class="form-check-input" type="checkbox" checked>
+									Le deuxième switch "Peupler" remplit la grille.
+								</li>
+								<li class="form-check form-switch">
+									<input id="helpSwitch2" class="form-check-input" type="checkbox" checked>
+									Le dernier switch "Vérifier le résultat" valide ou non la solution.
+								</li>
+							</ul>
+						</div>
+						<div class="col">
+							<h5>Saisie des réponses</h5>
+							<ul>
+								<div class="nav-item">
+									<input id="numberInput" class="form-control me-2" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
+								</div>
+								<div style="margin-top: 10px"></div>
+								<div class="nav-item">
+									<input id="numberInput2" class="form-control me-2" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
+								</div>
+							</ul>
+							<h5>Bouttons à droite</h5>
+							<div style="margin: 5px">
+								<button class="btn btn-danger" style="margin-right: 10px">
+									<i class="fa-solid fa-rotate-right"></i> 
+								</button>Démarre une nouvelle partie
+							</div>
+							<div style="margin: 5px">
+								<button class="btn btn-success" style="margin-right: 10px">
+									<i class="fa-solid fa-question"></i> 
+								</button>Accès à cette aide !
+							</div>
+							<p>
+								Jeu original sur <a href="http://conifere.be/Jeux2019/Jeux.html" target="_blank">http://conifere.be/Jeux2019/Jeux.html</a>
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+				  <button class="btn btn-outline-success" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Principe du jeu</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		  <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+			<div class="modal-dialog modal-xl">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalToggleLabel2">Jeu tiré de <a href="http://conifere.be/Jeux2019/Jeux.html" target="_blank">http://conifere.be/Jeux2019/Jeux.html</a></h5>
+				  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<p>
+					Une GRILLE carrée (nxn, 10 ≤ n ≤  20) est peuplée des nombres entiers de 1 à n^2.<br>
+
+					Deux nombres naturels différents, a et b sont déterminés aléatoirement avec 3 ≤  a ≤ 10  et 3 ≤  b ≤ 10,<br>
+					toutes les cases occupées par les multiples de a ou de b sont coloriées.<br>
+					
+					Le contour d'une FENÊTRE carrée (10x10) est arbitrairement inscrit dans la grille.<br>
+					
+					Tous les nombres disparaissent de la fenêtre mais les cases occupées par les multiples de a ou de b restent coloriées.<br><br>
+					
+					<strong>But du jeu : en ne disposant que de cette fenêtre, trouver la valeur de a et de b.</strong> 
+					</p>
+				</div>
+			  </div>
+			</div>
+		  </div>
+
+		<div >
+			<canvas id="gridwindow" resize="true"></canvas>
+		</div>
+	</body>
+</html>
