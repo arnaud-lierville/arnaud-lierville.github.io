@@ -11,14 +11,20 @@ canvas[resize] {
     height: 1000px;
 }
 
-#helpSwitch1:checked, #showNumberSwitch:checked {
-    background-color: #91A8D0;
-    border-color: #91A8D0;
+
+#showColorSwitch:checked, #showColorSwitch:checked {
+    background-color: #7A80AB;
+    border-color: #616688;
 }
 
-#helpSwitch2:checked, #showResultSwitch:checked {
+#populateSwitch:checked, #populateSwitch:checked {
+    background-color: #969696;
+    border-color: #787878;
+}
+
+#showResultSwitch:checked, #showResultSwitch:checked {
     background-color: #E30B63;
-    border-color: #E30B63;
+    border-color: #B5084F;
 }
 
 .navbar-light .navbar-text {

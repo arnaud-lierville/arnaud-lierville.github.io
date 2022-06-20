@@ -2,8 +2,6 @@
 // Global variables
 var marginNavbar = 80
 var gridColor = '#91A8D0'
-var pinkStrokeColor = '#D8A9B9'
-var greenStrokeColor = '#88BE69'
 var simpleMultipeColor = '#F64C72'
 var doubleMultipleColor = '#7A80AB'
 var digitColor ='#505050'
@@ -131,11 +129,11 @@ var html =  '<nav class="navbar fixed-bottom navbar-light bg-light">' +
 					'</li>' +
 
                     '<li class="nav-item">' +
-                    '<div class="form-check form-switch custom-switch" data-toggle="tooltip" data-placement="bottom" title="Peupler la grille">' +
-                        '<input id="populateSwitch" class="form-check-input" type="checkbox" role="switch" style="transform: scale(1.8);">' +
-                        '<label class="form-check-label" style="padding-left: 13px;">Peupler</label>' +
-                    '</div>' +
-                '</li>' +
+                        '<div class="form-check form-switch custom-switch" data-toggle="tooltip" data-placement="bottom" title="Peupler la grille">' +
+                            '<input id="populateSwitch" class="form-check-input" type="checkbox" role="switch" style="transform: scale(1.8);">' +
+                            '<label class="form-check-label" style="padding-left: 13px;">Peupler</label>' +
+                        '</div>' +
+                    '</li>' +
 
 					'<li class="nav-item">' +
 						'<select class="form-select" id="level">' +
@@ -156,6 +154,13 @@ var html =  '<nav class="navbar fixed-bottom navbar-light bg-light">' +
                         '<input id="numberInput3" class="form-control me-2" placeholder="En haut à gauche" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" >' +
                     '</li>' +
 
+                    '<li class="nav-item">' +
+                        '<div class="form-check form-switch custom-switch" data-placement="bottom" title="Vérifier le résultat">' +
+                            '<input id="showResultSwitch" class="form-check-input" type="checkbox" role="switch" style="transform: scale(1.8);">' +
+                            '<label class="form-check-label" style="padding-left: 20px;">Vérifier</label>' +
+                        '</div>' +
+                    '</li>' +
+
 					'<li class="nav-item">' +
 						'<div class="btn-group">' +
 							'<button class="btn btn-danger" data-toggle="tooltip" data-placement="bottom" title="Nouvelle partie" id="redoButton">' +
@@ -164,13 +169,6 @@ var html =  '<nav class="navbar fixed-bottom navbar-light bg-light">' +
 							'<button class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="Aide" id="helpButton">' +
 								'<i class="fa-solid fa-question"></i>' +
 							'</button>' +
-						'</div>' +
-					'</li>' +
-
-					'<li class="nav-item">' +
-						'<div class="form-check form-switch custom-switch" data-placement="bottom" title="Vérifier le résultat">' +
-							'<input id="showResultSwitch" class="form-check-input" type="checkbox" role="switch" style="transform: scale(1.8);">' +
-							'<label class="form-check-label" style="padding-left: 20px;">Vérifier</label>' +
 						'</div>' +
 					'</li>' +
 
