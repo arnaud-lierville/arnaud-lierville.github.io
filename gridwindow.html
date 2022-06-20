@@ -41,7 +41,7 @@
 								</li>
 								<li class="form-check form-switch">
 									<input id="helpSwitch2" class="form-check-input" type="checkbox" checked>
-									Le dernier switch "Vérifier le résultat" valide ou non la solution.
+									Le dernier switch "Vérifier" valide ou non la solution.
 								</li>
 							</ul>
 						</div>
@@ -49,11 +49,15 @@
 							<h5>Saisie des réponses</h5>
 							<ul>
 								<div class="nav-item">
-									<input id="numberInput" class="form-control me-2" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
+									<input id="numberInput" class="form-control me-2"  placeholder="Trouver un des deux entiers dont les multiples sont cachés" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
 								</div>
 								<div style="margin-top: 10px"></div>
 								<div class="nav-item">
-									<input id="numberInput2" class="form-control me-2" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
+									<input id="numberInput2" class="form-control me-2"  placeholder="Trouver l'autre entier dont les multiples sont aussi cachés" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
+								</div>
+								<div style="margin-top: 10px"></div>
+								<div class="nav-item">
+									<input id="numberInput2" class="form-control me-2"  placeholder="Trouver un entier possible pour la case en haut à gauche" type="number" data-toggle="tooltip" data-placement="left" title="Entrez un entier" disabled>
 								</div>
 							</ul>
 							<h5>Bouttons à droite</h5>
@@ -67,8 +71,9 @@
 									<i class="fa-solid fa-question"></i> 
 								</button>Accès à cette aide !
 							</div>
+							<div style="margin-top: 30px"></div>
 							<p>
-								Jeu original sur <a href="http://conifere.be/Jeux2019/Jeux.html" target="_blank">http://conifere.be/Jeux2019/Jeux.html</a>
+								Jeu <strong>original</strong> sur <a href="http://conifere.be/Jeux2019/Jeux.html" target="_blank">http://conifere.be/Jeux2019/Jeux.html</a>
 							</p>
 						</div>
 					</div>
@@ -89,15 +94,25 @@
 				<div class="modal-body">
 					<p>
 					Une GRILLE carrée (nxn, 10 ≤ n ≤  20) est peuplée des nombres entiers de 1 à n^2.<br>
+					
+					<img src="/img/g20p.png" alt="Grille 20x20 peuplée" width="500px"><br>
 
 					Deux nombres naturels différents, a et b sont déterminés aléatoirement avec 3 ≤  a ≤ 10  et 3 ≤  b ≤ 10,<br>
 					toutes les cases occupées par les multiples de a ou de b sont coloriées.<br>
-					
-					Le contour d'une FENÊTRE carrée (10x10) est arbitrairement inscrit dans la grille.<br>
-					
-					Tous les nombres disparaissent de la fenêtre mais les cases occupées par les multiples de a ou de b restent coloriées.<br><br>
-					
-					<strong>But du jeu : en ne disposant que de cette fenêtre, trouver la valeur de a et de b.</strong> 
+					Tous les nombres disparaissent de la fenêtre mais les cases occupées par les multiples de a ou de b restent coloriées.<br>
+
+					<img src="/img/g20c1.png" alt="Grille 20x20 colorée" width="500px"><br>
+
+					Le contour d'une FENÊTRE carrée (10x10) est arbitrairement extraite de la grille.<br>
+
+					<img src="/img/g10c1.png" alt="Fenêtre 10x10 colorée" width="250px"><br>
+
+					<br>
+					<strong>But du jeu : 
+						<ul>
+							<li>en ne disposant que de cette fenêtre, trouver la valeur de a et de b.</li>
+							<li>trouver une des valeurs possible pour l'entier qui se trouve dans la case en haut à gauche.</li>
+						</ul>	</strong> 
 					</p>
 				</div>
 			  </div>
