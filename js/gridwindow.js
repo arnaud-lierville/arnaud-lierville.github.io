@@ -231,6 +231,7 @@ redoButton.onclick = function() {
     isMultipleColor = false
     showColorSwitch.checked = false
     isResultHidden = true
+    showResultSwitch.checked = false
     numberInput.value = ''
     numberInput2.value = ''
     numberInput3.value = ''
