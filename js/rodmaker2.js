@@ -65,6 +65,55 @@ function exportModel(paperWidth) {
     imgage.src = url
     bsOffcanvas.hide()
 }
+
+var pgcdFormula = function(aa ,bb) {
+
+    var a = Math.max(aa, bb)
+    var b = Math.min(aa, bb)
+    var tempA = a
+
+    var r = a%b
+    var q = Math.floor(a/b)
+
+    var pcgdFormula = a + '=' + q + '*' + b + '+' + r
+
+    while(r != 0) {
+        a = b, b = r, r = a%b, q = Math.floor(a/b)
+        pcgdFormula += '=' + q + '*' + b + '+' + r
+    }
+
+    pcgdFormula += '=' + Math.floor(tempA/b) + '*' + b
+
+    return pcgdFormula
+}
+
+var pgcd = function(a ,b) {
+    var r = a, q = 1
+    while(r != 0) { a = b, b = r, r = a%b, q = Math.floor(a/b) }
+    return b
+}
+
+var bezout = function(a, b) {
+    var gcd = pgcd(a, b)
+    var u = 1
+    var v = 1
+    var cumA = a
+    var cumB = b
+    while(Math.abs(cumA - cumB) - gcd > 0.01) {
+        if(cumA >= cumB) {
+            v += 1
+            cumB += b
+        } else {
+            u += 1
+            cumA += a
+        }
+    }
+
+    var formula = '?' + u + '*' + a + '=' + '?' + v + '*' + b + '+' + gcd
+    if (cumB > cumA) { formula = '?' + u + '*' + a + '+' + gcd + '=' + '?' + v + '*' + b }
+    return formula
+}
+
 /* shorcut examples */
 formulaList = {
     'a': '42=40+2',
@@ -87,12 +136,14 @@ formulaList = {
     'k': '3?*1/2',
     'l': '1=1/2+1/3+1/6',
     'm': '?5*2=10=3.3+6,7=7+?3=5*2?',
-    'w': '15=3?*5'
+    'w': '15=3?*5',
+    'v': 'pgcd(77,24)',
+    'b': 'bezout(77,24)'
 }
 
 function onKeyDown(event) {
     var shortKey = event.key
-    if ('azertyuiopqsdfghjklmw'.indexOf(shortKey) > -1 && formulaInput != document.activeElement) {
+    if ('azertyuiopqsdfghjklmwvb'.indexOf(shortKey) > -1 && formulaInput != document.activeElement) {
         formulaInput.value = formulaList[shortKey]
         drawApp(paper.view.bounds.width, formulaList[shortKey], true)
         bsOffcanvas.hide()
@@ -200,7 +251,34 @@ function drawApp(paperWidth, formula, withMark) {
 
     project.clear()
 
-    var formulaSplitEqual = formula.split('=')
+    var currentFormula = formula
+
+    /* testing pgcd input */
+    if(currentFormula.substring(0, 4) == 'pgcd') {
+        var getNumericValue = currentFormula.substring(4, currentFormula.length)
+        getNumericValue = getNumericValue.replace(/\(*\)*/g, '')
+        getNumericValue = getNumericValue.split(',')
+        var a = parseInt(getNumericValue[0])
+        var b = parseInt(getNumericValue[1])
+        if(!isNaN(a) && !isNaN(b)) {
+            currentFormula = pgcdFormula(a, b)
+        }
+    }
+
+     /* testing bezout input */
+    if(currentFormula.substring(0, 6) == 'bezout') {
+        var getNumericValue = currentFormula.substring(6, currentFormula.length)
+        getNumericValue = getNumericValue.replace(/\(*\)*/g, '')
+        getNumericValue = getNumericValue.split(',')
+        var a = parseInt(getNumericValue[0])
+        var b = parseInt(getNumericValue[1])
+        if(!isNaN(a) && !isNaN(b)) {
+            currentFormula = bezout(a, b)
+        }
+    }
+
+
+    var formulaSplitEqual = currentFormula.split('=')
     var lines = formulaSplitEqual.map(function(item) { return item.replace(/\,/g, '.').replace(/[a-zA-Z\s\?]*/g, '') }) 
 
     var sumList = []
