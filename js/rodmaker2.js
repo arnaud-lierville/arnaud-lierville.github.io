@@ -114,6 +114,24 @@ var bezout = function(a, b) {
     return formula
 }
 
+var ppcm = function(a, b) {
+    var cumA = a
+    var cumB = b
+    var u = 1
+    var v = 1
+    while(cumA != cumB) {
+        if(cumA > cumB) {
+            v += 1
+            cumB += b
+        } else {
+            u += 1
+            cumA += a
+        }
+    }
+    var formula = '?' + u + '*' + a + '=' + u*a + '=' + '?' + v + '*' + b
+    return formula
+}
+
 /* shorcut examples */
 formulaList = {
     'a': '42=40+2',
@@ -138,12 +156,13 @@ formulaList = {
     'm': '?5*2=10=3.3+6,7=7+?3=5*2?',
     'w': '15=3?*5',
     'v': 'pgcd(77,24)',
-    'b': 'bezout(77,24)'
+    'b': 'bezout(77,24)',
+    'n': 'ppcm(6,10)'
 }
 
 function onKeyDown(event) {
     var shortKey = event.key
-    if ('azertyuiopqsdfghjklmwvb'.indexOf(shortKey) > -1 && formulaInput != document.activeElement) {
+    if ('azertyuiopqsdfghjklmwvbn'.indexOf(shortKey) > -1 && formulaInput != document.activeElement) {
         formulaInput.value = formulaList[shortKey]
         drawApp(paper.view.bounds.width, formulaList[shortKey], true)
         bsOffcanvas.hide()
@@ -217,7 +236,9 @@ var emptyDownload = document.getElementById('empty-download')
 var myOffcanvas = document.getElementById('offcanvasNavbar')
 var bsOffcanvas = new bootstrap.Offcanvas(myOffcanvas)
 
-formulaInput.value = formulaList['i']
+var cmd = window.location.search
+cmd = cmd.substring(1, cmd.length)
+if(cmd) { formulaInput.value = cmd } else { formulaInput.value = formulaList['i'] }
 
 formulaInput.addEventListener('keyup', function(event) {
     if(event.key != 'Shift') { drawApp(paper.view.bounds.width, formulaInput.value, true) }
@@ -266,7 +287,7 @@ function drawApp(paperWidth, formula, withMark) {
     }
 
      /* testing bezout input */
-    if(currentFormula.substring(0, 6) == 'bezout') {
+     if(currentFormula.substring(0, 6) == 'bezout') {
         var getNumericValue = currentFormula.substring(6, currentFormula.length)
         getNumericValue = getNumericValue.replace(/\(*\)*/g, '')
         getNumericValue = getNumericValue.split(',')
@@ -276,7 +297,18 @@ function drawApp(paperWidth, formula, withMark) {
             currentFormula = bezout(a, b)
         }
     }
-
+       
+    /* testing bezout input */
+     if(currentFormula.substring(0, 4) == 'ppcm') {
+        var getNumericValue = currentFormula.substring(4, currentFormula.length)
+        getNumericValue = getNumericValue.replace(/\(*\)*/g, '')
+        getNumericValue = getNumericValue.split(',')
+        var a = parseInt(getNumericValue[0])
+        var b = parseInt(getNumericValue[1])
+        if(!isNaN(a) && !isNaN(b)) {
+            currentFormula = ppcm(a, b)
+        }
+    }
 
     var formulaSplitEqual = currentFormula.split('=')
     var lines = formulaSplitEqual.map(function(item) { return item.replace(/\,/g, '.').replace(/[a-zA-Z\s\?]*/g, '') }) 
