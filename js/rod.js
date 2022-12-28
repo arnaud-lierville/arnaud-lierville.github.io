@@ -17,6 +17,8 @@ var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
 var activeRod = null;
 var isGridVisible = false;
+var keySequence = ''
+var sequenceFlag = false
 
 disableScroll();
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
@@ -165,7 +167,8 @@ function createRod(l) {
     var y = 0;
     var rodRectangle = new Rectangle(new Point((x+1)*gridScale, (y+3)*gridScale), new Size(gridScale, l*gridScale));
     var rod = new Path.Rectangle(rodRectangle);
-    rod.fillColor = colorRod[l-1];
+    rod.fillColor = '#A3A3A3'
+    if(l<11) { rod.fillColor = colorRod[l-1]; }
     rod.strokeColor = rodStrokeColor;
     rod.strokeWidth = rodStrokeWidth;
     rod.shadowColor = new Color(0, 0, 0);
@@ -189,13 +192,21 @@ function createRod(l) {
         };
     };
     rod.flip();
-    if (l > 5) {rod.position.y -= 5*gridScale }
+    if (l > 5) { rod.position.y -= 5*gridScale }
+    if (l > 10) { rod.position.y -= 7*gridScale }
     return rod;
 };
 
+//resetKeySequence
+function resetKeySequence() {
+    sequenceFlag = false
+    keySequence = ''
+    newBar.visible = false
+}
+
 //onMouseDown
 function onMouseDown(event) {
-    
+    resetKeySequence()
     var hitResult = project.hitTest(event.point, hitOptions);
     if (!hitResult) { 
         if (activeRod) {
@@ -225,6 +236,7 @@ function onMouseDown(event) {
 
 // onMouseDrag
 function onMouseDrag(event) {
+    resetKeySequence()
 	if (activeRod) {
 	    activeRod.position += event.delta;
 	};
@@ -232,6 +244,7 @@ function onMouseDrag(event) {
 
 // onMouseUp
 function onMouseUp(event) {
+    resetKeySequence()
     if (activeRod) {
         // no moving detect
         if (event.delta.x == 0 && event.delta.y == 0) {
@@ -261,117 +274,128 @@ function onMouseUp(event) {
 
 // onKeyDown
 function onKeyDown(event) {
+    if(event.key == 'l' || (sequenceFlag && event.key == 'enter') || sequenceFlag) {
+        sequenceFlag = true
+        if(event.key in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] && event.key != 'shift') { keySequence += event.key }
+        newBar.content = 'l = ' + keySequence
+        newBar.visible = true && menuGroup.visible
+        if(event.key == 'enter') {
+            var l = parseInt(keySequence)
+            if(!isNaN(l) && l<23) { activeRod = createRod(keySequence) }
+            resetKeySequence()
+        }
+    } else {
 
-    if (legend.visible && event.key != 'h') {
-        legend.visible = !legend.visible;
-        legendBackground.visible = !legendBackground.visible;
-        catPic.visible = !catPic.visible;
-    }
+        console.log('key: ' + event.key);
 
-    console.log('key: ' + event.key);
+        if (legend.visible && event.key != 'h') {
+            legend.visible = !legend.visible;
+            legendBackground.visible = !legendBackground.visible;
+            catPic.visible = !catPic.visible;
+        }
 
-    if (event.key == 'up') {
-        if (activeRod) {
-            activeRod.position.y -= gridScale;
+        if (event.key == 'up') {
+            if (activeRod) {
+                activeRod.position.y -= gridScale;
+            };
         };
-    };
-
-    if (event.key == 'down') {
-        if (activeRod) {
-            activeRod.position.y += gridScale;
-        };
-    };
-
-    if (event.key == 'left') {
-        if (activeRod) {
-            activeRod.position.x -= gridScale;
-        };
-    };
-
-    if (event.key == 'right') {
-        if (activeRod) {
-            activeRod.position.x += gridScale;
-        };
-    };
-
-    // Flip a rod
-    if (event.key == 'space') {
-        if (activeRod) { activeRod.flip(); };
-    };
     
-    // Delete a rod
-    if (event.key == 'backspace') {
-        if (activeRod) { 
-            activeRod.remove(); 
-            activeRod = null;
+        if (event.key == 'down') {
+            if (activeRod) {
+                activeRod.position.y += gridScale;
+            };
         };
-    };
     
-    // Reset the scene
-    if (event.key == 'c') {
-        rodGroup.removeChildren();
-    };
+        if (event.key == 'left') {
+            if (activeRod) {
+                activeRod.position.x -= gridScale;
+            };
+        };
     
-    // Grid : on/off
-    if (event.key == 'g') {
-        if (isGridVisible) {
-            isGridVisible = false;
-            gridGroup.removeChildren();
-        } else {
-            isGridVisible = true;
-            gridSetup(gridScale, gridFillColor);
+        if (event.key == 'right') {
+            if (activeRod) {
+                activeRod.position.x += gridScale;
+            };
         };
-    };
-
-    // enter : unactive rod
-    if (event.key == 'enter') {
-        if (activeRod) { 
-            activeRod.shadowColor = null;
-            activeRod = null;
+    
+        // Flip a rod
+        if (event.key == 'space') {
+            if (activeRod) { activeRod.flip(); };
         };
+        
+        // Delete a rod
+        if (event.key == 'backspace') {
+            if (activeRod) { 
+                activeRod.remove(); 
+                activeRod = null;
+            };
+        };
+        
+        // Reset the scene
+        if (event.key == 'c') {
+            rodGroup.removeChildren();
+        };
+        
+        // Grid : on/off
+        if (event.key == 'g') {
+            if (isGridVisible) {
+                isGridVisible = false;
+                gridGroup.removeChildren();
+            } else {
+                isGridVisible = true;
+                gridSetup(gridScale, gridFillColor);
+            };
+        };
+    
+        // enter : unactive rod
+        if (event.key == 'enter') {
+            if (activeRod) { 
+                activeRod.shadowColor = null;
+                activeRod = null;
+            };
+        };
+    
+        // h : legend
+        if (event.key == 'h') {
+            legend.visible = !legend.visible;
+            legendBackground.visible = !legendBackground.visible;
+            catPic.visible = !catPic.visible;
+        };
+    
+        // m : menu
+        if (event.key == 'm') {
+            newBar.visible = !menuGroup.visible
+            menuGroup.visible = !menuGroup.visible;
+        };
+    
+        // create stair
+        if (event.key == 's') {
+            stairs();
+        };
+    
+        if (event.key == '1') { activeRod = createRod(1); };
+        if (event.key == '2') { activeRod = createRod(2); };
+        if (event.key == '3') { activeRod = createRod(3); };
+        if (event.key == '4') { activeRod = createRod(4); };
+        if (event.key == '5') { activeRod = createRod(5); };
+        if (event.key == '6') { activeRod = createRod(6); };
+        if (event.key == '7') { activeRod = createRod(7); };
+        if (event.key == '8') { activeRod = createRod(8); };
+        if (event.key == '9') { activeRod = createRod(9); };
+        if (event.key == '0') { activeRod = createRod(10); };
+    
+        if (event.key == 'a') { carpet(1); };
+        if (event.key == 'z') { carpet(2); };
+        if (event.key == 'e') { carpet(3); };
+        if (event.key == 'r') { carpet(4); };
+        if (event.key == 't') { carpet(5); };
+        if (event.key == 'y') { carpet(6); };
+        if (event.key == 'u') { carpet(7); };
+        if (event.key == 'i') { carpet(8); };
+        if (event.key == 'o') { carpet(9); };
+        if (event.key == 'p') { carpet(10); };
     };
-
-    // h : legend
-    if (event.key == 'h') {
-        legend.visible = !legend.visible;
-        legendBackground.visible = !legendBackground.visible;
-        catPic.visible = !catPic.visible;
-    };
-
-    // m : menu
-    if (event.key == 'm') {
-        menuGroup.visible = !menuGroup.visible;
-    };
-
-    // create stair
-    if (event.key == 's') {
-        stairs();
-    };
-
-
-    if (event.key == '1') { activeRod = createRod(1); };
-    if (event.key == '2') { activeRod = createRod(2); };
-    if (event.key == '3') { activeRod = createRod(3); };
-    if (event.key == '4') { activeRod = createRod(4); };
-    if (event.key == '5') { activeRod = createRod(5); };
-    if (event.key == '6') { activeRod = createRod(6); };
-    if (event.key == '7') { activeRod = createRod(7); };
-    if (event.key == '8') { activeRod = createRod(8); };
-    if (event.key == '9') { activeRod = createRod(9); };
-    if (event.key == '0') { activeRod = createRod(10); };
-
-    if (event.key == 'a') { carpet(1); };
-    if (event.key == 'z') { carpet(2); };
-    if (event.key == 'e') { carpet(3); };
-    if (event.key == 'r') { carpet(4); };
-    if (event.key == 't') { carpet(5); };
-    if (event.key == 'y') { carpet(6); };
-    if (event.key == 'u') { carpet(7); };
-    if (event.key == 'i') { carpet(8); };
-    if (event.key == 'o') { carpet(9); };
-    if (event.key == 'p') { carpet(10); };
-
-};
+}
 
 
 var menuRefreshCallback = function() {
@@ -437,8 +461,13 @@ new IconMenu(new Point(17, 1.5)*gridScale, 'trash', .08, trashRefreshCallback)
 new IconMenu(new Point(18, 1.5)*gridScale, 'help', .08, helpRefreshCallback)
 
 
-
-
+//new bar
+var newBar = new PointText({
+    point: [20*gridScale, 1.9*gridScale],
+    fillColor: '#666666',
+    fontSize: 50,
+    visible: false
+});
 
 // Legend
 var legend = new PointText({
@@ -455,6 +484,7 @@ var legend = new PointText({
     'Supprimer : supprime la réglette\n' +
     '1, 2, 3, ... : crée la réglette 1, 2, 3, ...\n' +
     'a, z, e, r, t, y, ... : crée le tapis 1, 2, 3, ...\n' +
+    'l + x + touche entrée : crée une barre de x jusqu\' 22\n' +
     's : crée l\'escalier\n'  +
     'c : efface tout\n',
     fillColor: '#0c6675',
