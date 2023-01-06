@@ -24,6 +24,8 @@ var keySequence = ''
 var sequenceFlag = false
 var allRodsRevelead = false
 var isMagic = false
+var clickDownTime = undefined
+var clickUpTime = undefined
 
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 /* SETUP FUNCTIONS */
@@ -63,6 +65,7 @@ var legend = new PointText({
     'Espace ou double-click : pivote la réglette\n' +
     'Click : active la réglette\n' +
     'Entrer : désactive la réglette\n' +
+    'Click long : retourne la réglette\n' +
     'Supprimer : supprime la réglette\n' +
     '1, 2, 3, ... : crée la réglette 1, 2, 3, ...\n' +
     'a, z, e, r, t, y, ... : crée le tapis 1, 2, 3, ...\n' +
@@ -73,7 +76,7 @@ var legend = new PointText({
     fillColor: '#0c6675',
     fontFamily: 'fantasy',
     fontWeight: 'bold',
-    fontSize: 25,
+    fontSize: 22,
     onMouseDown: function(event) { 
         if (activeRod) { activeRod.levitate(false) };
         switchLegend()
@@ -292,6 +295,7 @@ function onMouseDown(event) {
                 if (activeRod) { activeRod.levitate(false) };
                 activeRod = thisItem;
                 activeRod.levitate(true)
+                clickDownTime = Date.now()
             };
         };
     };
@@ -323,8 +327,16 @@ function onMouseUp(event) {
                 activeRod.position.x = (Math.floor(x/gridScale) + activeRod.parity*0.5)*gridScale;
                 activeRod.position.y = (Math.max((Math.floor(y/gridScale)), 3) + 0.5)*gridScale;
             };
-        };
-        activeRod.show(allRodsRevelead)
+            clickDownTime = undefined
+            clickUpTime = undefined
+            activeRod.show(allRodsRevelead)
+        } else {
+            activeRod.show(allRodsRevelead)
+            clickUpTime = Date.now()
+            if(clickDownTime && clickUpTime && clickUpTime - clickDownTime > 550) { activeRod.show(!allRodsRevelead) }
+            clickDownTime = undefined
+            clickUpTime = undefined
+        }
     };
 };
 
@@ -395,6 +407,8 @@ function onKeyDown(event) {
         if (event.key == 's') { stairs(); };
         // swtich colors/numbers (magix)
         if (event.key == 'x') {  magicCallback(); };
+        // sitch rodValue on active rod
+        if (event.key == 'b') {  if(activeRod) { activeRod.show(!allRodsRevelead)} };
         // create rod by key
         if(['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) { activeRod = createRod(parseInt(event.key)); }
         if (event.key == '0') { activeRod = createRod(10); };
