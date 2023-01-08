@@ -74,7 +74,7 @@ function drawApp(gridScale) {
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
     // longRodInput
-    var longRodInput = new PointText({ point: [20*gridScale, 1.9*gridScale], fillColor: '#666666', fontSize: 50, visible: false });
+    var longRodInput = new PointText({ point: [20*gridScale, 1.9*gridScale], fillColor: '#666666', fontSize: 50*gridScale/45, visible: false });
 
     // Legend
     var legend = new PointText({
@@ -100,7 +100,7 @@ function drawApp(gridScale) {
         fillColor: '#0c6675',
         fontFamily: 'fantasy',
         fontWeight: 'bold',
-        fontSize: 22,
+        fontSize: 22*gridScale/45,
         onMouseDown: function(event) { 
             if (activeRod) { activeRod.levitate(false) };
             switchLegend()
@@ -148,7 +148,7 @@ function drawApp(gridScale) {
                 rod.currentColor = longRodColor;
                 if(l<11) { rod.currentColor = colorRod[l-1]; }
                 rod.fillColor = rod.currentColor;
-                rod.rodValue = new PointText({ fillColor: rod.currentColor, content: parseInt(l), fontSize: 40, visible: false });
+                rod.rodValue = new PointText({ fillColor: rod.currentColor, content: parseInt(l), fontSize: 40*gridScale/45, visible: false });
                 rod.strokeColor = rodStrokeColor;
                 rod.strokeWidth = rodStrokeWidth;
                 rod.selected = false;
@@ -162,11 +162,11 @@ function drawApp(gridScale) {
                         if (this.isUP) {
                             this.rotate(90, this.bounds.bottomLeft);
                             this.isUP = false;
-                            this.rodValue.fontSize = 40
+                            this.rodValue.fontSize = 40*gridScale/45
                         } else {
                             this.rotate(-90, this.bounds.topLeft);
                             this.isUP = true;
-                            if(this.rodLength > 9) { this.rodValue.fontSize = 33 }
+                            if(this.rodLength > 9) { this.rodValue.fontSize = 33*gridScale/45 }
                         };
                     };
                     this.show(allRodsRevelead)
