@@ -60,7 +60,7 @@ function setupRodMenu() {
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
 // longRodInput
-var longRodInput = new PointText({ point: [20*gridScale, 1.9*gridScale], fillColor: '#666666', fontSize: 50, visible: false });
+var longRodInput = new PointText({ point: [12.5*gridScale, 3.3*gridScale], fillColor: '#666666', fontSize: 50, visible: false });
 
 // Legend
 var legend = new PointText({
@@ -81,6 +81,7 @@ var legend = new PointText({
     'a, z, e, r, t, y, ... : crée le tapis 1, 2, 3, ...\n' +
     'l + x + touche entrée : crée une barre de x jusqu\' 25\n' +
     'x : magix ! => montre/cache les valeurs des réglettes\n'  +
+    'w : secret ! => pour créer des réglettes mystères\n'  +
     's : crée l\'escalier\n'  +
     'c : efface tout\n',
     fillColor: '#0c6675',
@@ -531,9 +532,11 @@ function onKeyDown(event) {
         if (event.key == 'm') { menuCallback() };
         // create stair
         if (event.key == 's') { stairs(); };
-        // swtich colors/numbers (magix)
-        if (event.key == 'x') {  magicCallback(); };
-        // sitch rodValue on active rod
+        // switch colors/numbers (magix)
+        if (event.key == 'x') { magicCallback(); };
+        // switch secret
+        if (event.key == 'w') { incognitoCallback(); };
+        // switch rodValue on active rod
         if (event.key == 'b') {  if(activeRod) { activeRod.show(!allRodsRevelead)} };
         // create rod by key
         if(['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) { activeRod = createRod(parseInt(event.key)); }
@@ -626,15 +629,15 @@ setupRodMenu(xTopLegend, yTopLegend, gridScale);
 var iconMenuData = {
     menu: [14, 'menu', .06, menuCallback],
     grid: [15, 'grid', .08, gridCallback],
-    rotate: [17, 'rotate', .08, rotateCallback],
-    delete: [18, 'delete', .08, deleteCallback],
-    trash: [19, 'trash', .08, trashCallback],
-    help: [20, 'help', .08, helpCallback],
+    rotate: [17.1, 'rotate', .08, rotateCallback],
+    delete: [18.1, 'delete', .08, deleteCallback],
+    trash: [19.1, 'trash', .08, trashCallback],
+    help: [20.1, 'help', .08, helpCallback],
 }
 
 for (var menu in iconMenuData) { 
     var icon = new IconMenu(new Point(iconMenuData[menu][0], 1.5)*gridScale, iconMenuData[menu][1], iconMenuData[menu][2], iconMenuData[menu][3])
-    iconMenuGroup.addChild(icon)
+    if(menu != 'delete' && menu != 'trash') { iconMenuGroup.addChild(icon); }
 }
 var iconMagic = new IconMenu(new Point(16.1, 1.5)*gridScale, 'magic', .1, magicCallback)
 var iconMagicColor = new IconMenu(new Point(16.1, 1.5)*gridScale, 'magicolor', .1, magicCallback)

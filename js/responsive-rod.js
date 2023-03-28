@@ -7,6 +7,7 @@ HOW TO to convert rod.js to responsive-rod.js :
 - refactor mouse and key events : view.onMouseDown = function(event) {}
 - disable help
 - raster with scale : picture.scale(scale*gridScale/45)
+- PointText in Rod and RodSecret Class => *gridScale/45
 - and take a look to the html launcher
 
 SEARCH IN CODE => / CONVERT TAG /
@@ -34,12 +35,16 @@ function drawApp(gridScale) {
     var yTopLegend = gridScale;
     var rodStrokeWidth = gridScale/15;
     var rodStrokeColor = '#D3D3D3';
+    var rodStrokeColorLight = '#F6F6F6'
+    var secretColor = '#7E7E7E';
     var colorRod = ['#f2e1c9', '#e71f43', '#9fc94d', '#f487ab', '#fff035', '#118550', '#100f17', '#9d3b37','#1a7cba', '#f17331'];
     var longRodColor = '#A3A3A3'
 
     var rodGroup = new Group();
     var gridGroup = new Group();
     var menuGroup = new Group();
+    var menuGroupSecret = new Group();
+    var iconMenuGroup = new Group();
     var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
 
     var activeRod = null;
@@ -48,6 +53,7 @@ function drawApp(gridScale) {
     var sequenceFlag = false
     var allRodsRevelead = false
     var isMagic = false
+    var isIncognito = false
     var clickDownTime = undefined
     var clickUpTime = undefined
 
@@ -67,14 +73,20 @@ function drawApp(gridScale) {
     };
 
     // setupRodMenu
-    function setupRodMenu() { for(var l = 1; l<11; l++) { menuGroup.addChild(new MenuRod(l)); } };
+    function setupRodMenu() {
+        for(var l = 1; l<11; l++) {
+            menuGroupSecret.addChild(new MenuRodSecret(l));
+            menuGroupSecret.visible = false
+            menuGroup.addChild(new MenuRod(l));
+        }
+    };
 
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
     /* SCENE ELEMENTS */
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
     // longRodInput
-    var longRodInput = new PointText({ point: [20*gridScale, 1.9*gridScale], fillColor: '#666666', fontSize: 50*gridScale/45, visible: false });
+    var longRodInput = new PointText({ point: [12.5*gridScale, 3.3*gridScale], fillColor: '#666666', fontSize: 50, visible: false });
 
     // Legend
     var legend = new PointText({
@@ -208,6 +220,85 @@ function drawApp(gridScale) {
         }
     })
 
+    // RodSecret Class
+    var RodSecret = Base.extend({
+        initialize: function(x, y, l) {
+            rod = null
+            if(l>0) {
+                var rodRectangle = new Rectangle(new Point((x+1)*gridScale, (y+3)*gridScale), new Size(l*gridScale, gridScale));
+                var rod = new Path.Rectangle(rodRectangle);
+                rod.currentColor = longRodColor;
+                if(l<11) { rod.currentColor = colorRod[l-1]; }
+                rod.fillColor = rod.currentColor;
+                rod.rodValue = new PointText({ fillColor: rod.currentColor, content: parseInt(l), fontSize: 40*gridScale/45, visible: false });
+                rod.secret = new PointText({ fillColor: secretColor, content: '?', fontSize: 40*gridScale/45, visible: false });
+                rod.strokeColor = rodStrokeColor;
+                rod.strokeWidth = rodStrokeWidth;
+                rod.selected = false;
+                rod.isSelectable = true;
+                rod.isUP = false;
+                rod.isSecret = true
+                rod.rodLength = l;
+                rod.parity = l%2;
+                rod.flip = function() {
+                    this.show(false)
+                    if (this.rodLength !=1) {
+                        if (this.isUP) {
+                            this.rotate(90, this.bounds.bottomLeft);
+                            this.isUP = false;
+                            this.rodValue.fontSize = 40
+                        } else {
+                            this.rotate(-90, this.bounds.topLeft);
+                            this.isUP = true;
+                            if(this.rodLength > 9) { this.rodValue.fontSize = 33 }
+                        };
+                    };
+                    this.show(allRodsRevelead)
+                };
+                rod.onDoubleClick = function(event) {  if (event.point.y > 2*gridScale) { this.flip(); } }
+                rod.levitate = function(bool) {
+                    if(bool) {
+                        rod.shadowColor = new Color(0, 0, 0);
+                        rod.shadowBlur = 12;
+                        rod.shadowOffset = new Point(5, 5);
+                        rod.bringToFront();
+                    } else {
+                        rod.shadowColor = null;
+                        activeRod = null;
+                    }
+                }
+                rod.levitate(true)
+                rod.show = function(isON) {
+                    if(!isON) {
+                        this.fillColor = '#FFFFFF'
+                        rod.secret.position.x = this.position.x
+                        var epsilon = 0
+                        if(!this.isUP || this.rodLength == 1) { epsilon = .05*gridScale }
+                        rod.secret.position.y = this.position.y + epsilon
+                        rod.secret.visible = true
+                        rod.rodValue.visible = false
+                    } else {
+                        this.fillColor = '#FFFFFF'
+                        rod.rodValue.position.x = this.position.x
+                        var epsilon = 0
+                        if(!this.isUP || this.rodLength == 1) { epsilon = .05*gridScale }
+                        rod.rodValue.position.y = this.position.y + epsilon
+                        rod.rodValue.visible = true
+                        rod.secret.visible = false
+                    }
+                }
+                rod.show(allRodsRevelead)
+                rod.delete = function() {
+                    this.rodValue.remove()
+                    this.secret.remove()
+                    this.remove()
+                }
+            rodGroup.addChild(rod);
+            }
+            return rod;
+        }
+    })
+
     // IconMenu Class
     var IconMenu = Base.extend({
         initialize: function(point, name, scale, callback) {
@@ -237,6 +328,20 @@ function drawApp(gridScale) {
         }
     })
 
+    // MenuRodSecret Class
+    var MenuRodSecret = Base.extend({
+        initialize: function(l) {
+            var menuRod = new Path.Rectangle(new Rectangle(new Point(xTopLegend + (l-1)*gridScale, yTopLegend), new Size(gridScale, gridScale)));
+            menuRod.fillColor = '#FFFFFF';
+            menuRod.strokeColor = rodStrokeColorLight;
+            menuRod.strokeWidth = rodStrokeWidth;
+            menuRod.selected = false;
+            menuRod.isSelectable = false;
+            menuRod.onMouseDown = function(event) { activeRod = createRod(l); };
+            return menuRod
+        }
+    })
+
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
     /* MAIN FUNCTIONS */
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
@@ -247,7 +352,12 @@ function drawApp(gridScale) {
         if (activeRod) { activeRod.levitate(false) };
         var x = Math.floor(Math.random() * 10);
         var y = Math.floor(Math.random() * 10)%12;
-        var rod = new Rod(x, y, l)
+        var rod
+        if(isIncognito) {
+            rod = new RodSecret(x, y, l)
+        } else {
+            rod = new Rod(x, y, l)
+        }
         return rod;
     };
 
@@ -287,10 +397,20 @@ function drawApp(gridScale) {
         var letterToNumber = { a: 1,  z: 2, e: 3, r:4, t:5, y:6, u:7, i:8, o:9, p:10 }
         var n = letterToNumber[letter]
         for (i = 0; i < n+1; i++) {
-            activeRod = Rod(1,1+i - 1,i) // left rod
+            // left rod
+            if(isIncognito) {
+                activeRod = RodSecret(1,1+i - 1,i) 
+            } else {
+                activeRod = Rod(1,1+i - 1,i) 
+            }
             rodGroup.addChild(activeRod);
             if (activeRod) { activeRod.levitate(false) }
-            activeRod = Rod(i + 1,1+i - 1,n-i) // right rod
+            // right rod
+            if(isIncognito) {
+                activeRod = RodSecret(i + 1,1+i - 1,n-i)
+            } else {
+                activeRod = Rod(i + 1,1+i - 1,n-i) 
+            }
             rodGroup.addChild(activeRod);
             if (activeRod) { activeRod.levitate(false) }
         }
@@ -299,12 +419,20 @@ function drawApp(gridScale) {
     // stairs
     function stairs() {
         if (activeRod) { activeRod.levitate(false) }
-        var rod = new Rod(1,9,1)
+        if(isIncognito) {
+            var rod = new RodSecret(1,9,1)
+        } else {
+            var rod = new Rod(1,9,1)
+        }
         rodGroup.addChild(activeRod);
         rod.flip()
         rod.levitate(false)
         for (i = 2; i < 11; i++) {
-            var rod = new Rod(i,10,i)
+            if(isIncognito) {
+                var rod = new RodSecret(i,10,i)
+            } else {
+                var rod = new Rod(i,10,i)
+            }
             rod.flip()
             rod.levitate(false)
         }
@@ -444,9 +572,11 @@ function drawApp(gridScale) {
             if (event.key == 'm') { menuCallback() };
             // create stair
             if (event.key == 's') { stairs(); };
-            // swtich colors/numbers (magix)
-            if (event.key == 'x') {  magicCallback(); };
-            // sitch rodValue on active rod
+            // switch colors/numbers (magix)
+            if (event.key == 'x') { magicCallback(); };
+            // switch secret
+            if (event.key == 'w') { incognitoCallback(); };
+            // switch rodValue on active rod
             if (event.key == 'b') {  if(activeRod) { activeRod.show(!allRodsRevelead)} };
             // create rod by key
             if(['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) { activeRod = createRod(parseInt(event.key)); }
@@ -487,6 +617,17 @@ function drawApp(gridScale) {
         for(var index in rodGroup.children) { rodGroup.children[index].show(allRodsRevelead) }
     }
 
+    var incognitoCallback = function() {
+        console.log('incognitoCallback');
+        isIncognito = !isIncognito
+        iconIncognito.visible = !isIncognito
+        iconIncognitoColor.visible = isIncognito
+        iconMenuGroup.visible = !isIncognito
+        menuGroup.visible = !isIncognito
+        menuGroupSecret.visible = isIncognito
+        if (activeRod) { activeRod.levitate(false) };
+    }    
+
     var rotateCallback = function() {
         console.log('rotateCallback');
         if (activeRod) { activeRod.flip(); };
@@ -503,8 +644,10 @@ function drawApp(gridScale) {
     var trashCallback = function() {
         console.log('trashCallback');
         var tempRodValueGroup = new Group()
-        for(var index in rodGroup.children) { tempRodValueGroup.addChild(rodGroup.children[index].rodValue) }
-        tempRodValueGroup.remove()
+        for(var index in rodGroup.children) { 
+            tempRodValueGroup.addChild(rodGroup.children[index].rodValue)
+            tempRodValueGroup.addChild(rodGroup.children[index].secret)
+         }        tempRodValueGroup.remove()
         rodGroup.removeChildren()
     }
 
@@ -523,19 +666,27 @@ function drawApp(gridScale) {
     /* Icon menu */
 
     var iconMenuData = {
-        menu: [13, 'menu', .06, menuCallback],
-        grid: [14, 'grid', .08, gridCallback],
-        rotate: [16, 'rotate', .08, rotateCallback],
-        delete: [17, 'delete', .08, deleteCallback],
-        trash: [18, 'trash', .08, trashCallback],
+        menu: [14, 'menu', .06, menuCallback],
+        grid: [15, 'grid', .08, gridCallback],
+        rotate: [17.1, 'rotate', .08, rotateCallback],
+        delete: [18.1, 'delete', .08, deleteCallback],
+        trash: [19.1, 'trash', .08, trashCallback],
         /* CONVERT TAG */
         //help: [19, 'help', .08, helpCallback],
     }
-
-    for (var menu in iconMenuData) { new IconMenu(new Point(iconMenuData[menu][0], 1.5)*gridScale, iconMenuData[menu][1], iconMenuData[menu][2], iconMenuData[menu][3]) }
-    var iconMagic = new IconMenu(new Point(15.1, 1.5)*gridScale, 'magic', .1, magicCallback)
-    var iconMagicColor = new IconMenu(new Point(15.1, 1.5)*gridScale, 'magicolor', .1, magicCallback)
+    
+    for (var menu in iconMenuData) { 
+        var icon = new IconMenu(new Point(iconMenuData[menu][0], 1.5)*gridScale, iconMenuData[menu][1], iconMenuData[menu][2], iconMenuData[menu][3])
+        if(menu != 'delete' && menu != 'trash') { iconMenuGroup.addChild(icon); }
+    }
+    var iconMagic = new IconMenu(new Point(16.1, 1.5)*gridScale, 'magic', .1, magicCallback)
+    var iconMagicColor = new IconMenu(new Point(16.1, 1.5)*gridScale, 'magicolor', .1, magicCallback)
+    var iconIncognito = new IconMenu(new Point(12.7, 1.5)*gridScale, 'incognito', .08, incognitoCallback)
+    var iconIncognitoColor = new IconMenu(new Point(12.7, 1.5)*gridScale, 'incognitocolor', .08, incognitoCallback)
+    iconMenuGroup.addChild(iconMagic)
+    iconMenuGroup.addChild(iconMagicColor)
     iconMagicColor.visible = false
+    iconIncognitoColor.visible = false
 
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
     /* OTHERS TOOLS */
