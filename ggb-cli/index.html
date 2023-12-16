@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+    <meta charset="utf-8">
+    <!--meta http-equiv="Content-Type" content="text/html; charset=utf-8" /-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GGB CLI</title>
+
+    <link rel="stylesheet" href="ggb-cli.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.0/ace.js" integrity="sha512-/j4QF7NJ4YyRe7gkXW9LNmMzebNKXUZagblPCkluUVcvG9iI5PtRdw3Zc7Hcvretcjwrrz8q+NpGWoQu/ElYDg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+    <script type="text/javascript" src="https://cdn.geogebra.org/apps/deployggb.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">&nbsp;&nbsp;&nbsp;
+                    <?xml version="1.0"?>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="me-2"
+                        viewBox="0 0 30 30">
+                        <path fill="none" stroke="#666" stroke-width="2.2" d="m15.3,4.7a11.4,9.1-26 1,0 1,0z" />
+                        <g stroke-linecap="round">
+                            <path stroke="#000" stroke-width="6"
+                                d="m13.2,4.9h0M3.8,11.8h0M7.2,22.9h0M20.1,21.2h0M24.4,10.1h0" />
+                            <path stroke="#99F" stroke-width="4.3"
+                                d="m13.2,4.9h0M3.8,11.8h0M7.2,22.9h0M20.1,21.2h0M24.4,10.1h0" />
+                        </g>
+                    </svg>
+                    <strong>GeoGebra CLI</strong>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <button class="btn btn-success me-2" type="button" onclick="evalCode()">Compiler</button>
+                        </li>
+                        <!--li class="nav-item">
+                            <a class="nav-link" href="#">Link</a>
+                        </li-->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                Fichier
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="resetGGB()">Nouveau</a></li>
+                                <li><a class="dropdown-item" onclick="openUpload()">Ouvrir</a></li>
+                                <li><a class="dropdown-item" onclick="saveFile()">Enregistrer</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-primary" onclick="exampleModal.show()">Exemples</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item text-success" onclick="saveGgbFile()">Télécharger en ggb</a>
+                                </li>
+                                <li><a class="dropdown-item text-success" onclick="exportSVG()">Télécharger en svg</a></li>
+                                <li><a class="dropdown-item text-success" onclick="exportPDF()">Télécharger en pdf</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <div class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Sans titre" aria-label="Search"
+                            id="filename">
+                        <button class="btn btn-info" type="submit" onclick="openAbout()">À&nbsp;propos</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Modals -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Exemples</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" onclick="loadExample('limacon')">Limaçon</li>
+                            <li class="list-group-item" onclick="loadExample('crible')">Crible de Matiyasevich</li>
+                            <li class="list-group-item" onclick="loadExample('square')">Un carré qui tourne</li>
+                            <li class="list-group-item" onclick="loadExample('func')">Dérivées</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="errorModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content modal-dialog-centered">
+                <div class="modal-body">
+                  <h1 class="text-danger">Nom de fichier incorrect</h1>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <div class="modal" id="aboutModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title text-success">À propos</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h1>Geogebra CLI</h1>
+                  <p class="text-info-emphasis fst-italic">CLI : command line interface</p>
+                  <p>Cette interface permet de générer des fichiers ggb en ligne de commande à la manière d'un document LaTeX, PSTricks, MetaPost ou TikZ.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <div class="modal" id="uploadModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-body">
+                    <input class="form-control" type="file" accept="text/plain" id="fileInput" onchange="uploadFile()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- End modals -->
+        
+        <section>
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="split">
+                        <div id="editor"></div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="split">
+                        <div id="ggbApplet"></div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="Base64" id="Base64"/>
+        </section>
+    </main>
+
+</body>
+
+<script type="module">
+    import { openAbout, evalCode, ggbOnInit, exampleModal, loadExample, resetGGB, saveGgbFile, exportSVG, exportPDF, saveFile, openUpload, uploadFile } from './main.js'
+    Object.assign(window, { openAbout, evalCode, ggbOnInit, exampleModal, loadExample, resetGGB, saveGgbFile, exportSVG, exportPDF, saveFile, openUpload, uploadFile });
+    console.log('GeoGebra CLI loading...')
+</script>
+
+</html>
