@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Load the paper.css stylesheet-->
+	<link rel="stylesheet" type="text/css" href="./css/paper.css">
+	<!-- Load the Paper.js library -->
+	<!--script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.2/paper-full.js"></!--script!-->
+	<script type="text/javascript" src="./js/paper-full.js"></script>
+	<!-- Load external PaperScript and associate it with myCanvas -->
+	<script type="text/paperscript" src="./js/rod-plus.js" canvas="myCanvas"></script>
+
+	<title>Réglettes en classe !</title>
+
+</head>
+<script>
+	var randomLogo = function() { return './img/logo-' + 'ABCDEF'.substr(Math.floor(Math.random()*6), 1) + '.png'; }
+</script>
+<body>
+	<canvas id="myCanvas" resize="true"></canvas>
+	<img src="./img/logo-A.png" onload="this.onload = null; this.src = randomLogo();" id="logo" hidden>
+	<img src="./img/rod-menu/grid.png" id="grid" hidden >
+	<img src="./img/rod-menu/cross.png" id="delete" hidden >
+	<img src="./img/rod-menu/menu.png" id="menu" hidden >
+	<img src="./img/rod-menu/question.png" id="help" hidden >
+	<img src="./img/rod-menu/replay.png" id="rotate" hidden >
+	<img src="./img/rod-menu/magic.png" id="magic" hidden >
+	<img src="./img/rod-menu/magic-color.png" id="magicolor" hidden >
+	<img src="./img/rod-menu/trash.png" id="trash" hidden >
+	<img src="./img/rod-menu/incognito.png" id="incognito" hidden >
+	<img src="./img/rod-menu/incognito-color.png" id="incognitocolor" hidden >
+	<img src="./img/rod-menu/thumbtack-solid.png" id="unity" hidden >
+</body>
+</html>
