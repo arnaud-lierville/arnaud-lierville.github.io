@@ -123,7 +123,6 @@ var switchLegend = function() {
 var RodLabel = Base.extend({
     initialize: function(fillColor, l, fontSize) {
         var rodLabel = new Group()
-        console.log(l,unity+1,l%(unity+1))
         if((l%(unity+1) == 0)) {
             var textLabel = new PointText({ fillColor: fillColor, content: parseInt(l/(unity+1)), fontSize: fontSize, visible: true });
             rodLabel.addChild(textLabel)
@@ -154,29 +153,59 @@ var Rod = Base.extend({
             if(l<11) { rod.currentColor = colorRod[l-1]; }
             rod.fillColor = rod.currentColor;
             rod.rodValue = new RodLabel(rod.currentColor, l, 40)
+            rod.rodValue.onClick = function() { 
+                if (activeRod) { activeRod.levitate(false) };
+                activeRod = rod;
+                activeRod.levitate(true)
+            }
             rod.strokeColor = rodStrokeColor;
             rod.strokeWidth = rodStrokeWidth;
             rod.selected = false;
             rod.isSelectable = true;
             rod.isUP = false;
+            rod.isSecret = false;
             rod.rodLength = l;
             rod.parity = l%2;
+            rod.updateLabel = function() {
+                rod.rodValue.remove()
+                var newLabelFontSize = 40
+                if(this.rodLength > 9 && this.isUP) { 
+                    newLabelFontSize = 33
+                 }
+                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize)
+                rod.rodValue.onClick = function() { 
+                    if (activeRod) { activeRod.levitate(false) };
+                    activeRod = rod;
+                    activeRod.levitate(true)
+                }
+                rod.show(allRodsRevelead)
+            }
             rod.flip = function() {
-                this.show(false)
-                if (this.rodLength !=1) {
-                    if (this.isUP) {
-                        this.rotate(90, this.bounds.bottomLeft);
-                        this.isUP = false;
-                        this.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40)
+                rod.show(false);
+                if (rod.rodLength !=1) {
+                    if (rod.isUP) {
+                        rod.rotate(90, rod.bounds.bottomLeft);
+                        rod.isUP = false;
+                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40)
+                        rod.rodValue.onClick = function() { 
+                            if (activeRod) { activeRod.levitate(false) };
+                            activeRod = rod;
+                            activeRod.levitate(true)
+                        }
                     } else {
-                        this.rotate(-90, this.bounds.topLeft);
-                        this.isUP = true;
-                        if(this.rodLength > 9) { 
-                            this.rodValue = new RodLabel(this.currentColor, this.rodLength, 33)
+                        rod.rotate(-90, rod.bounds.topLeft);
+                        rod.isUP = true;
+                        if(rod.rodLength > 9) { 
+                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33)
+                            rod.rodValue.onClick = function() { 
+                                if (activeRod) { activeRod.levitate(false) };
+                                activeRod = rod;
+                                activeRod.levitate(true)
+                            }
                          }
                     };
                 };
-                this.show(allRodsRevelead)
+                rod.show(allRodsRevelead)
             };
             rod.onDoubleClick = function(event) {  if (event.point.y > 2*gridScale) { this.flip(); } }
             rod.levitate = function(bool) {
@@ -192,14 +221,14 @@ var Rod = Base.extend({
             }
             rod.levitate(true)
             rod.show = function(isON) {
-                if(isON) {
+                if(isON) {  // TURN VALUE VISIBLE
                     this.fillColor = '#FFFFFF'
                     rod.rodValue.position.x = this.position.x
                     var epsilon = 0
                     if(!this.isUP || this.rodLength == 1) { epsilon = .05*gridScale }
                     rod.rodValue.position.y = this.position.y + epsilon
                     rod.rodValue.visible = true
-                } else {
+                } else {  // TURN COLOR VISIBLE
                     this.fillColor = this.currentColor
                     rod.rodValue.visible = false
                 }
@@ -226,31 +255,65 @@ var RodSecret = Base.extend({
             if(l<11) { rod.currentColor = colorRod[l-1]; }
             rod.fillColor = rod.currentColor;
             rod.rodValue = new RodLabel(rod.currentColor, l, 40)
+            rod.rodValue.onClick = function() { 
+                if (activeRod) { activeRod.levitate(false) };
+                activeRod = rod;
+                activeRod.levitate(true)
+            }
             rod.secret = new PointText({ fillColor: secretColor, content: '?', fontSize: 40, visible: false });
+            rod.secret.onClick = function() { 
+                if (activeRod) { activeRod.levitate(false) };
+                activeRod = rod;
+                activeRod.levitate(true)
+            }
             rod.strokeColor = rodStrokeColor;
             rod.strokeWidth = rodStrokeWidth;
             rod.selected = false;
             rod.isSelectable = true;
             rod.isUP = false;
-            rod.isSecret = true
+            rod.isSecret = true;
             rod.rodLength = l;
             rod.parity = l%2;
+            rod.updateLabel = function() {
+                rod.rodValue.remove()
+                var newLabelFontSize = 40
+                if(this.rodLength > 9 && this.isUP) { 
+                    newLabelFontSize = 33
+                 }
+                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize)
+                rod.rodValue.onClick = function() { 
+                    if (activeRod) { activeRod.levitate(false) };
+                    activeRod = rod;
+                    activeRod.levitate(true)
+                }
+                rod.show(allRodsRevelead)
+            }
             rod.flip = function() {
-                this.show(false)
-                if (this.rodLength !=1) {
-                    if (this.isUP) {
-                        this.rotate(90, this.bounds.bottomLeft);
-                        this.isUP = false;
-                        this.rodValue = new RodLabel(this.currentColor, this.rodLength, 40)
+                rod.show(false);
+                if (rod.rodLength !=1) {
+                    if (rod.isUP) {
+                        rod.rotate(90, rod.bounds.bottomLeft);
+                        rod.isUP = false;
+                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40)
+                        rod.rodValue.onClick = function() { 
+                            if (activeRod) { activeRod.levitate(false) };
+                            activeRod = rod;
+                            activeRod.levitate(true)
+                        }
                     } else {
-                        this.rotate(-90, this.bounds.topLeft);
-                        this.isUP = true;
-                        if(this.rodLength > 9) { 
-                            this.rodValue = new RodLabel(this.currentColor, this.rodLength, 33)
+                        rod.rotate(-90, rod.bounds.topLeft);
+                        rod.isUP = true;
+                        if(rod.rodLength > 9) { 
+                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33)
+                            rod.rodValue.onClick = function() { 
+                                if (activeRod) { activeRod.levitate(false) };
+                                activeRod = rod;
+                                activeRod.levitate(true)
+                            }
                          }
                     };
                 };
-                this.show(allRodsRevelead)
+                rod.show(allRodsRevelead)
             };
             rod.onDoubleClick = function(event) {  if (event.point.y > 2*gridScale) { this.flip(); } }
             rod.levitate = function(bool) {
@@ -266,15 +329,7 @@ var RodSecret = Base.extend({
             }
             rod.levitate(true)
             rod.show = function(isON) {
-                if(!isON) {
-                    this.fillColor = '#FFFFFF'
-                    rod.secret.position.x = this.position.x
-                    var epsilon = 0
-                    if(!this.isUP || this.rodLength == 1) { epsilon = .05*gridScale }
-                    rod.secret.position.y = this.position.y + epsilon
-                    rod.secret.visible = true
-                    rod.rodValue.visible = false
-                } else {
+                if(isON) {  // TURN VALUE VISIBLE
                     this.fillColor = '#FFFFFF'
                     rod.rodValue.position.x = this.position.x
                     var epsilon = 0
@@ -282,6 +337,14 @@ var RodSecret = Base.extend({
                     rod.rodValue.position.y = this.position.y + epsilon
                     rod.rodValue.visible = true
                     rod.secret.visible = false
+                } else {    // TURN SECRET VISIBLE
+                    this.fillColor = '#FFFFFF'
+                    rod.secret.position.x = this.position.x
+                    var epsilon = 0
+                    if(!this.isUP || this.rodLength == 1) { epsilon = .05*gridScale }
+                    rod.secret.position.y = this.position.y + epsilon
+                    rod.secret.visible = true
+                    rod.rodValue.visible = false
                 }
             }
             rod.show(allRodsRevelead)
@@ -595,6 +658,7 @@ var magicCallback = function() {
     console.log('magicCallback');
     isMagic = !isMagic
     iconMagic.visible = !isMagic
+    iconIncognito.visible = !isMagic
     iconMagicColor.visible = isMagic
     if (activeRod) { activeRod.levitate(false) };
     allRodsRevelead = !allRodsRevelead
@@ -607,19 +671,20 @@ var incognitoCallback = function() {
     iconIncognito.visible = !isIncognito
     iconIncognitoColor.visible = isIncognito
     iconMenuGroup.visible = !isIncognito
+    iconUnity.visible = !isIncognito
     menuGroup.visible = !isIncognito
     menuGroupSecret.visible = isIncognito
     if (activeRod) { activeRod.levitate(false) };
 }
 
 var changeUnityCallback = function() {
-    trashCallback()
     console.log('changeUnityCallback');
     menuGroup.children[unity].label.visible = false
     unity = (unity + 1)%10
     if(unity != 0) {
         menuGroup.children[unity].label.visible = true
     }
+    updateRodGroupValue()
 }
 
 var rotateCallback = function() {
@@ -644,6 +709,10 @@ var trashCallback = function() {
      }
     tempRodValueGroup.remove()
     rodGroup.removeChildren()
+}
+
+var updateRodGroupValue = function() {
+    for(var index in rodGroup.children) { rodGroup.children[index].updateLabel() }
 }
 
 var helpCallback = function() {
