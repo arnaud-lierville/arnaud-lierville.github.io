@@ -31,6 +31,7 @@ var sequenceFlag = false
 var allRodsRevelead = false
 var isMagic = false
 var isIncognito = false
+var isSymplify = false
 var clickDownTime = undefined
 var clickUpTime = undefined
 
@@ -86,12 +87,13 @@ var legend = new PointText({
     'x : magix ! => montre/cache les valeurs des réglettes\n'  +
     'w : secret ! => pour créer des réglettes mystères\n'  +
     'n : unité => change de barre pour l\'unité\n'  +
+    'f : simplifie => change de mode fractions simplifiées ou non\n'  +
     's : crée l\'escalier\n'  +
-    'c : efface tout\n',
+    'c : efface tout',
     fillColor: '#0c6675',
     fontFamily: 'fantasy',
     fontWeight: 'bold',
-    fontSize: 22,
+    fontSize: 20,
     onMouseDown: function(event) { 
         if (activeRod) { activeRod.levitate(false) };
         switchLegend()
@@ -121,17 +123,33 @@ var switchLegend = function() {
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
 var RodLabel = Base.extend({
-    initialize: function(fillColor, l, fontSize) {
+    initialize: function(fillColor, l, fontSize, toSimplify) {
         var rodLabel = new Group()
+
+        function gcd(a, b) {
+            if (!b) {
+                return a;
+            }
+            return gcd(b, a % b);
+        }
+
         if((l%(unity+1) == 0)) {
             var textLabel = new PointText({ fillColor: fillColor, content: parseInt(l/(unity+1)), fontSize: fontSize, visible: true });
             rodLabel.addChild(textLabel)
         } else {
+            var p = parseInt(l)
+            var q = unity+1
+            if(toSimplify) {
+                var gcd = gcd(p,q)
+                p = p/gcd
+                q = q/gcd
+            }
+
             var bar = new PointText({ fillColor: fillColor, content: "—", fontSize: fontSize*30/40, visible: true });
-            var numerator = new PointText({ fillColor: fillColor, content: parseInt(l), fontSize: fontSize*23/40, visible: true });
+            var numerator = new PointText({ fillColor: fillColor, content: p, fontSize: fontSize*23/40, visible: true });
             numerator.position.x = bar.position.x
             numerator.position.y = bar.position.y - 9*fontSize/40
-            var denominator = new PointText({ fillColor: fillColor, content: unity+1, fontSize: fontSize*23/40, visible: true });
+            var denominator = new PointText({ fillColor: fillColor, content: q, fontSize: fontSize*23/40, visible: true });
             denominator.position.x = bar.position.x
             denominator.position.y = bar.position.y + 13*fontSize/40
             rodLabel.addChild(numerator)
@@ -152,7 +170,8 @@ var Rod = Base.extend({
             rod.currentColor = longRodColor;
             if(l<11) { rod.currentColor = colorRod[l-1]; }
             rod.fillColor = rod.currentColor;
-            rod.rodValue = new RodLabel(rod.currentColor, l, 40)
+            rod.isSymplify = isSymplify
+            rod.rodValue = new RodLabel(rod.currentColor, l, 40, rod.isSymplify)
             rod.rodValue.onClick = function() { 
                 if (activeRod) { activeRod.levitate(false) };
                 activeRod = rod;
@@ -172,7 +191,7 @@ var Rod = Base.extend({
                 if(this.rodLength > 9 && this.isUP) { 
                     newLabelFontSize = 33
                  }
-                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize)
+                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize, rod.isSymplify)
                 rod.rodValue.onClick = function() { 
                     if (activeRod) { activeRod.levitate(false) };
                     activeRod = rod;
@@ -186,7 +205,7 @@ var Rod = Base.extend({
                     if (rod.isUP) {
                         rod.rotate(90, rod.bounds.bottomLeft);
                         rod.isUP = false;
-                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40)
+                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40, rod.isSymplify)
                         rod.rodValue.onClick = function() { 
                             if (activeRod) { activeRod.levitate(false) };
                             activeRod = rod;
@@ -196,7 +215,7 @@ var Rod = Base.extend({
                         rod.rotate(-90, rod.bounds.topLeft);
                         rod.isUP = true;
                         if(rod.rodLength > 9) { 
-                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33)
+                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33, rod.isSymplify)
                             rod.rodValue.onClick = function() { 
                                 if (activeRod) { activeRod.levitate(false) };
                                 activeRod = rod;
@@ -254,7 +273,8 @@ var RodSecret = Base.extend({
             rod.currentColor = longRodColor;
             if(l<11) { rod.currentColor = colorRod[l-1]; }
             rod.fillColor = rod.currentColor;
-            rod.rodValue = new RodLabel(rod.currentColor, l, 40)
+            rod.isSymplify = isSymplify
+            rod.rodValue = new RodLabel(rod.currentColor, l, 40, rod.isSymplify)
             rod.rodValue.onClick = function() { 
                 if (activeRod) { activeRod.levitate(false) };
                 activeRod = rod;
@@ -280,7 +300,7 @@ var RodSecret = Base.extend({
                 if(this.rodLength > 9 && this.isUP) { 
                     newLabelFontSize = 33
                  }
-                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize)
+                rod.rodValue = new RodLabel(rod.currentColor, l, newLabelFontSize, rod.isSymplify)
                 rod.rodValue.onClick = function() { 
                     if (activeRod) { activeRod.levitate(false) };
                     activeRod = rod;
@@ -294,7 +314,7 @@ var RodSecret = Base.extend({
                     if (rod.isUP) {
                         rod.rotate(90, rod.bounds.bottomLeft);
                         rod.isUP = false;
-                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40)
+                        rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 40, rod.isSymplify)
                         rod.rodValue.onClick = function() { 
                             if (activeRod) { activeRod.levitate(false) };
                             activeRod = rod;
@@ -304,7 +324,7 @@ var RodSecret = Base.extend({
                         rod.rotate(-90, rod.bounds.topLeft);
                         rod.isUP = true;
                         if(rod.rodLength > 9) { 
-                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33)
+                            rod.rodValue = new RodLabel(rod.currentColor, rod.rodLength, 33, rod.isSymplify)
                             rod.rodValue.onClick = function() { 
                                 if (activeRod) { activeRod.levitate(false) };
                                 activeRod = rod;
@@ -623,6 +643,8 @@ function onKeyDown(event) {
         if (event.key == 'w') { incognitoCallback(); };
         // up unity
         if (event.key == 'n') { changeUnityCallback(); };
+        // up unity
+        if (event.key == 'f') { simplifyCallback(); };
         // switch rodValue on active rod
         if (event.key == 'b') {  if(activeRod) { activeRod.show(!allRodsRevelead)} };
         // create rod by key
@@ -687,6 +709,14 @@ var changeUnityCallback = function() {
     updateRodGroupValue()
 }
 
+var simplifyCallback = function() {
+    console.log('simplifyCallback');
+    isSymplify = !isSymplify
+    iconSimplify.visible = !isSymplify
+    iconSimplifyColor.visible = isSymplify
+    if (activeRod) { activeRod.levitate(false) };
+}
+
 var rotateCallback = function() {
     console.log('rotateCallback');
     if (activeRod) { activeRod.flip(); };
@@ -732,10 +762,10 @@ setupRodMenu(xTopLegend, yTopLegend, gridScale);
 var iconMenuData = {
     menu: [14, 'menu', .06, menuCallback],
     grid: [15, 'grid', .08, gridCallback],
-    rotate: [18.1, 'rotate', .08, rotateCallback],
-    delete: [19.1, 'delete', .08, deleteCallback],
-    trash: [20.1, 'trash', .08, trashCallback],
-    help: [21.1, 'help', .08, helpCallback],
+    rotate: [19.1, 'rotate', .08, rotateCallback],
+    delete: [20.1, 'delete', .08, deleteCallback],
+    trash: [21.1, 'trash', .08, trashCallback],
+    help: [22.1, 'help', .08, helpCallback],
 }
 
 for (var menu in iconMenuData) { 
@@ -747,6 +777,8 @@ var iconMagicColor = new IconMenu(new Point(16.1, 1.5)*gridScale, 'magicolor', .
 var iconIncognito = new IconMenu(new Point(13, 1.5)*gridScale, 'incognito', .08, incognitoCallback)
 var iconIncognitoColor = new IconMenu(new Point(13, 1.5)*gridScale, 'incognitocolor', .08, incognitoCallback)
 var iconUnity = new IconMenu(new Point(17.1, 1.5)*gridScale, 'unity', .07, changeUnityCallback)
+var iconSimplifyColor = new IconMenu(new Point(18.1, 1.5)*gridScale, 'simplifycolor', .07, simplifyCallback)
+var iconSimplify = new IconMenu(new Point(18.1, 1.5)*gridScale, 'simplify', .07, simplifyCallback)
 iconMenuGroup.addChild(iconMagic)
 iconMenuGroup.addChild(iconMagicColor)
 iconMagicColor.visible = false
