@@ -10,7 +10,9 @@ function drawApp(gridScale) {
     var planWidth = Math.floor(paper.view.bounds.width / tileWidth) + 1;
     var planHeight = Math.floor(paper.view.bounds.height / tileWidth) + 2;
     var gridGroup = new Group();
-    var numiconColors = ['#3560D5', '#E05927', '#88A1CE', '#EAC547', '#8ED284', '#D7443F', '#58B9B3', '#E56D72', '#3B8125', '#602E72'];
+    var isGridVisible = false;
+    gridGroup.visible = isGridVisible;
+    var numiconColors = ['#3560D5', '#E98A67', '#88A1CE', '#EAC547', '#8ED284', '#D7443F', '#58B9B3', '#E56D72', '#3B8125', '#602E72'];
     gridFillColor = "#74abb5";
 
     function gridSetup(color) {
@@ -65,19 +67,30 @@ function drawApp(gridScale) {
                 this.number = 10;
             }
 
-            var numicon = new Group();
-            var val = 0;
-            var j = 0;
+            var numicon = new Tile(pos_x, pos_y, this.color);
+            var lastNumicon = numicon;
+            var tileToRemove = [], numiconToRemove = [numicon]
+            var val = 0, j = 0;
             while (val < this.number) {
                 for (var i = 0; i < 2; i++) {
                     if (val < this.number) {
                         var tile = new Tile(pos_x + i * tileWidth, pos_y + j * tileWidth, this.color);
-                        numicon.addChild(tile);
+                        numicon = numicon.unite(tile);
+                        tileToRemove.push(tile)
+                        numiconToRemove.push(numicon)
+                        lastNumicon = numicon;
                     }
                     val++;
                 }
                 j++;
             }
+
+            for (var i = 0; i < numiconToRemove.length - 1; i++) { 
+                tileToRemove[i].remove()
+                numiconToRemove[i].remove()
+            }
+            tileToRemove[tileToRemove.length - 1].remove()
+            numicon = lastNumicon;
 
             numicon.number = this.number;
 
@@ -89,7 +102,6 @@ function drawApp(gridScale) {
                     numicon.bringToFront();
                 } else {
                     numicon.shadowColor = null;
-                    activenumicon = null;
                 }
             }
             numicon.levitate(false)
@@ -137,8 +149,10 @@ function drawApp(gridScale) {
         if(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(event.key)) { 
             new Numicon(parseInt(event.key)); 
         }
-    
+        if(event.key == 'g') {
+            isGridVisible = !isGridVisible;
+            gridGroup.visible = isGridVisible;
+        }
     }
-
 }
 
