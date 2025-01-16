@@ -16,13 +16,15 @@ function drawApp(gridScale) {
     var isMonochrome = false;
     gridGroup.visible = isGridVisible;
     var numiconColors = ['#3560D5', '#E98A67', '#88A1CE', '#EAC547', '#8ED284', '#D7443F', '#58B9B3', '#E56D72', '#3B8125', '#602E72'];
-    var numiconGrayColors = ['#4B4B4B', '#7A7A7A', '#9E9E9E', '#B3B3B3', '#8C8C8C', '#666666', '#AAAAAA', '#8F8F8F', '#5C5C5C', '#3F3F3F'];
+    // var numiconGrayColors = ['#4B4B4B', '#7A7A7A', '#9E9E9E', '#B3B3B3', '#8C8C8C', '#666666', '#AAAAAA', '#8F8F8F', '#5C5C5C', '#3F3F3F'];
+    var numiconUniqueGrayColors = '#B3B3B3'
     var numiconStokeColors = ['#002080', '#A04000', '#004080', '#A08000', '#008040', '#800000', '#006060', '#800040', '#004000', '#400040'];
     var gridFillColor = "#74abb5";
     var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
     var activeNumicon = null;
-    var clickDownTime = undefined
-    var clickUpTime = undefined
+    // TODO: appui long => symmetry
+    // var clickDownTime = undefined
+    // var clickUpTime = undefined
     var numiconGroup = new Group();
 
     function gridSetup(color) {
@@ -81,7 +83,7 @@ function drawApp(gridScale) {
             var pos_y = Math.floor(Math.random() * 3 + 3) * tileWidth;
             this.number = keynumber;
             this.color = numiconColors[this.number];
-            this.grayColor = numiconGrayColors[this.number]
+            this.grayColor = numiconUniqueGrayColors;// numiconGrayColors[this.number]
             this.strokeColor = numiconStokeColors[this.number];
             if (this.number == 0) {
                 this.number = 10;
@@ -118,6 +120,8 @@ function drawApp(gridScale) {
             numicon.strokeWidth = 2;
 
             numicon.number = this.number;
+            numicon.nbLines = Math.floor((numicon.number + 1) / 2)
+            numicon.nbColomns = numicon.number === 1 ? 1 : 2
             numicon.isSelectable = true;
 
             numicon.levitate = function (bool) {
@@ -154,7 +158,6 @@ function drawApp(gridScale) {
             }
 
             numicon.onMouseDrag = function (event) {
-                console.log('onMouseDrag')
                 if(activeNumicon) { 
                     activeNumicon.levitate(false);
                     activeNumicon = null;
@@ -165,16 +168,49 @@ function drawApp(gridScale) {
             }
 
             numicon.onMouseUp = function (event) {
-                var detla_x = numicon.number > 1 ? tileWidth/2 : 0; // si ça fait plus de 1 de large !ROTATION
-                var detla_y = numicon.number == 3 || numicon.number == 4 || numicon.number == 7 || numicon.number == 8 ? tileWidth/2 : 0; //!ROTATION
-                numicon.position.x = numicon.position.x - numicon.position.x % tileWidth + detla_x;
-                numicon.position.y = numicon.position.y - numicon.position.y % tileWidth + detla_y;
+                // var delta_x = numicon.number > 1 ? tileWidth/2 : 0; // si ça fait plus de 1 de large !ROTATION
+                // var delta_y = numicon.number == 3 || numicon.number == 4 || numicon.number == 7 || numicon.number == 8 ? tileWidth/2 : 0; //!ROTATION
+                var delta_x = computeDelta(numicon.nbLines, numicon.nbColomns, tileWidth)[0];
+                var delta_y = computeDelta(numicon.nbLines, numicon.nbColomns, tileWidth)[1];
+                numicon.position.x = numicon.position.x - numicon.position.x % tileWidth + delta_x;
+                numicon.position.y = numicon.position.y - numicon.position.y % tileWidth+ delta_y;
+            }
+
+            numicon.isRotated = 0
+            numicon.doRotate = function () {
+
+                numicon.rotate(-90)
+                numicon.isRotated = (numicon.isRotated + 1)%4
+
+                var temp = numicon.nbLines
+                numicon.nbLines = numicon.nbColomns
+                numicon.nbColomns = temp
+
+                var delta_x = computeDelta(numicon.nbLines, numicon.nbColomns, tileWidth)[0];
+                var delta_y = computeDelta(numicon.nbLines, numicon.nbColomns, tileWidth)[1];
+                numicon.position.x = numicon.position.x - numicon.position.x % tileWidth + delta_x;
+                numicon.position.y = numicon.position.y - numicon.position.y % tileWidth + delta_y
             }
 
             numiconGroup.addChild(numicon)
             return numicon;
         }
     });
+
+    var computeDelta = function(a,b, tileWidth) {
+        if (a==1 && b== 1) {
+            return [0,0]
+        }
+        if (a==2 && b==2) {
+            return [1*tileWidth/2,1*tileWidth/2]
+        }
+        if (b==2) {
+            return [1*tileWidth/2,((a+1)%2)*tileWidth/2]
+        }
+        if (a==2) {
+            return [((b+1)%2)*tileWidth/2,1*tileWidth/2]
+        }
+    }
 
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
     /* MOUSE */
@@ -184,7 +220,6 @@ function drawApp(gridScale) {
     //TODO: traiter le cas où on clique sur grid (Path)
     view.onMouseDown = function(event) {
         //resetKeySequence()
-        console.log('onMouseDown')
         var hitResult = project.hitTest(event.point, hitOptions);
         if (!hitResult) { 
             if (activeNumicon) { 
@@ -194,26 +229,21 @@ function drawApp(gridScale) {
             //if (legend.visible) { switchLegend() }
             return; 
         } else {
-
             if (hitResult.type == 'fill') {
-                console.log('fill')
                 thisItem = hitResult.item;
-                console.log(thisItem)
                 if (thisItem.isSelectable) {
                     if(thisItem == activeNumicon) { 
                         activeNumicon.levitate(false);
                         activeNumicon = null;
                     } else {
-                        console.log('isSelectable')
-                        console.log(thisItem)
                         if (activeNumicon) { 
                             activeNumicon.levitate(false);
                             activeNumicon = thisItem;
                          };
                         activeNumicon = thisItem;
                         activeNumicon.levitate(true)
-                        clickDownTime = Date.now()
-                }
+                        //clickDownTime = Date.now()
+                    }
                 };
             };
         };
@@ -240,13 +270,8 @@ function drawApp(gridScale) {
     var rotateCallback = function () {
         console.log('rotateCallback');
         if(activeNumicon) { 
-            activeNumicon.rotate(-90);
-            var detla_x = activeNumicon.number > 1 ? tileWidth/2 : 0; // si ça fait plus de 1 de large !ROTATION
-            var detla_y = activeNumicon.number == 3 || activeNumicon.number == 4 || activeNumicon.number == 7 || activeNumicon.number == 8 ? tileWidth/2 : 0; //!ROTATION
-            activeNumicon.position.x = activeNumicon.position.x - activeNumicon.position.x % tileWidth + detla_x;
-            activeNumicon.position.y = activeNumicon.position.y - activeNumicon.position.y % tileWidth + detla_y;
+            activeNumicon.doRotate();
         }
-        paper.view.detach('frame', this.onFrame);
     }
 
     var symmetryCallback = function () {
@@ -299,7 +324,7 @@ function drawApp(gridScale) {
     var iconMonochromeON = new IconMenu(new Point(20.2, 1.15) * gridScale, 'toggle-off', .07*gridScale/36, toogleCallback)
     iconMonochromeON.visible = false
     new IconMenu(new Point(21.3, 1.1) * gridScale, 'trash', .08*gridScale/36, trashCallback)
-    //new IconMenu(new Point(22.5, 1.1) * gridScale, 'help', .08*gridScale/36, helpCallback)
+    new IconMenu(new Point(22.5, 1.1) * gridScale, 'help', .08*gridScale/36, helpCallback)
 
     // Numicon Menu
     for (var i = 1; i < 11; i++) {
@@ -308,7 +333,6 @@ function drawApp(gridScale) {
 
     // Keyboard events
     paper.view.onKeyDown = function (event) {
-        console.log(event.key)
         if(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(event.key)) { 
             if(activeNumicon) { 
                 activeNumicon.levitate(false);
@@ -317,10 +341,45 @@ function drawApp(gridScale) {
             activeNumicon = new Numicon(parseInt(event.key)); 
             activeNumicon.levitate(true);
         }
-        if(event.key == 'g') {
-            isGridVisible = !isGridVisible;
-            gridGroup.visible = isGridVisible;
-        }
+        if (event.key == 'up') {
+            if (activeNumicon) {
+                activeNumicon.position.y -= tileWidth;
+            };
+        };
+        if (event.key == 'down') {
+            if (activeNumicon) {
+                activeNumicon.position.y += tileWidth;
+            };
+        };
+        if (event.key == 'left') {
+            if (activeNumicon) {
+                activeNumicon.position.x -= tileWidth;
+            };
+        };
+        if (event.key == 'right') {
+            if (activeNumicon) {
+                activeNumicon.position.x += tileWidth;
+            };
+        };
+        // enter : unactive rod
+        if (event.key == 'enter' && activeNumicon) { 
+            activeNumicon.levitate(false);
+            activeNumicon = null;
+         };
+        // Rotate a numicon
+        if (event.key == 'space') { rotateCallback() };
+        // Sym a numicon
+        if (event.key == 's') { symmetryCallback() };
+        // Delete a numicon
+        if (event.key == 'backspace') { deleteCallback() };
+        // Reset the scene
+        if (event.key == 'c') { trashCallback() };
+        // Grid : on/off
+        if (event.key == 'g') { gridCallback() };
+        // h : legend
+        if (event.key == 'h') { helpCallback() };
+        // m : toogle colors
+        if (event.key == 'm') { toogleCallback() };
     }
 }
 
@@ -335,3 +394,9 @@ function disableScroll() {
     // if any scroll is attempted, set this to the previous value 
     window.onscroll = function() {  window.scrollTo(scrollLeft, scrollTop); }; 
 }
+
+/* TODO */
+
+// help
+// appui long => sym
+// push
