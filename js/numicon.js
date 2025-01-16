@@ -39,6 +39,68 @@ function drawApp(gridScale) {
 
     gridSetup(gridFillColor);
 
+    /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
+    /* SCENE ELEMENTS */
+    /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
+
+    // longRodInput
+
+    // Legend
+    var legend = new PointText({
+        point: [3.5 * gridScale, 3.5 * gridScale],
+        content:
+            'Souris et raccourcis claviers :\n' +
+            '\n' +
+            'h : affiche l\'aide\n' +
+            'g : active/désactive la grille\n' +
+            'm : monochrome/couleur\n' +
+            'Flèches : déplace le numicom\n' +
+            'Espace  : pivote le numicom\n' +//ou double-click
+            's  : fait le symétrique du numicom\n' +
+            'Click : active le numicom\n' +
+            'Entrer : désactive le numicom\n' +
+            //'Click long : retourne le numicom\n' +
+            'Supprimer : supprime le numicom\n' +
+            '1, 2, 3, ... : crée le numicom\n' +
+            'c : efface tout',
+        fillColor: '#0c6675',
+        fontFamily: 'fantasy',
+        fontWeight: 'bold',
+        fontSize: 25,
+        onMouseDown: function (event) {
+            if (activeNumicon) { 
+                activeNumicon.levitate(false);
+                activeNumicon = null;
+             };
+            switchLegend()
+        }
+    });
+
+    // legendBackground
+    var legendBackground = new Path.Rectangle(new Rectangle(legend.bounds.topLeft * 0.8, legend.bounds.size * 1.2));
+    legendBackground.fillColor = '#ffefd6';
+    legend.bringToFront();
+
+    // logo
+    var catPic = new Raster('logo');
+    catPic.position = legend.bounds.topRight + new Point(0, 40);
+    catPic.scale(0.05);
+    catPic.bringToFront();
+
+    //switchLegend and legendBackground anc catPic function
+    var switchLegend = function () {
+        legend.visible = !legend.visible;
+        legendBackground.visible = !legendBackground.visible;
+        catPic.visible = !catPic.visible;
+    }
+
+    // turnOFFLegend
+    function turnOFFLegend() {
+        legend.visible = false;
+        legendBackground.visible = false;
+        catPic.visible = false;
+    }
+
     var Tile = Base.extend({
         initialize: function (x, y, color) {
             this.x = x;
@@ -64,6 +126,7 @@ function drawApp(gridScale) {
             numiconMenu.strokeColor = strokeColor;
             numiconMenu.strokeWidth = 2;
             numiconMenu.onMouseDown = function (event) {
+                turnOFFLegend();
                 if(activeNumicon) { 
                     activeNumicon.levitate(false);
                     activeNumicon = null;
@@ -226,7 +289,7 @@ function drawApp(gridScale) {
                 activeNumicon.levitate(false);
                 activeNumicon = null;
             }
-            //if (legend.visible) { switchLegend() }
+            if (legend.visible) { switchLegend() }
             return; 
         } else {
             if (hitResult.type == 'fill') {
@@ -258,7 +321,7 @@ function drawApp(gridScale) {
             picture.position = point;
             picture.scale(scale)
             picture.onMouseDown = function () {
-                //turnOFFLegend();
+                turnOFFLegend();
                 callback();
             }
             picture.isSelectable = false;
@@ -296,6 +359,7 @@ function drawApp(gridScale) {
 
     var helpCallback = function () {
         console.log('helpCallback');
+        switchLegend();
     }
 
     var gridCallback = function () {
@@ -333,6 +397,7 @@ function drawApp(gridScale) {
 
     // Keyboard events
     paper.view.onKeyDown = function (event) {
+        if (legend.visible && event.key != 'h') { switchLegend() }
         if(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].includes(event.key)) { 
             if(activeNumicon) { 
                 activeNumicon.levitate(false);
@@ -397,6 +462,6 @@ function disableScroll() {
 
 /* TODO */
 
-// help
 // appui long => sym
+//  'Espace  : pivote le numicom\n' +//ou double-click
 // push
