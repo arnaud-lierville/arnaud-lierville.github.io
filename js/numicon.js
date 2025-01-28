@@ -22,9 +22,8 @@ function drawApp(gridScale) {
     var gridFillColor = "#74abb5";
     var hitOptions = { segments: true, stroke: true, fill: true, tolerance: 5 };
     var activeNumicon = null;
-    // TODO: appui long => symmetry
-    // var clickDownTime = undefined
-    // var clickUpTime = undefined
+    var clickDownTime = undefined
+    var clickUpTime = undefined
     var numiconGroup = new Group();
 
     function gridSetup(color) {
@@ -43,25 +42,23 @@ function drawApp(gridScale) {
     /* SCENE ELEMENTS */
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
-    // longRodInput
-
     // Legend
     var legend = new PointText({
         point: [3.5 * gridScale, 3.5 * gridScale],
         content:
             'Souris et raccourcis claviers :\n' +
             '\n' +
-            'h : affiche l\'aide\n' +
-            'g : active/désactive la grille\n' +
-            'm : monochrome/couleur\n' +
             'Flèches : déplace le numicom\n' +
-            'Espace  : pivote le numicom\n' +//ou double-click
-            's  : fait le symétrique du numicom\n' +
+            'Espace ou double-click : pivote le numicom\n' +
+            's  : symétrique du numicom\n' +
+            'Click long : retourne le numicom\n' +
             'Click : active le numicom\n' +
             'Entrer : désactive le numicom\n' +
-            //'Click long : retourne le numicom\n' +
             'Supprimer : supprime le numicom\n' +
             '1, 2, 3, ... : crée le numicom\n' +
+            'g : active/désactive la grille\n' +
+            'm : monochrome/couleur\n' +
+            'h : affiche l\'aide\n' +
             'c : efface tout',
         fillColor: '#0c6675',
         fontFamily: 'fantasy',
@@ -101,6 +98,7 @@ function drawApp(gridScale) {
         catPic.visible = false;
     }
 
+    // Tile Class
     var Tile = Base.extend({
         initialize: function (x, y, color) {
             this.x = x;
@@ -117,7 +115,7 @@ function drawApp(gridScale) {
         }
     });
 
-    //TODO: refactor to use Tile => plain tile with a number
+    // NumiconMenu Class
     var NumiconMenu = Base.extend({
         initialize: function (number) {
             var color = numiconColors[number%10];
@@ -139,6 +137,7 @@ function drawApp(gridScale) {
         }
     });
 
+    // Numicon Class
     var Numicon = Base.extend({
         initialize: function (keynumber) {
 
@@ -239,6 +238,12 @@ function drawApp(gridScale) {
                 numicon.position.y = numicon.position.y - numicon.position.y % tileWidth+ delta_y;
             }
 
+            numicon.onDoubleClick = function(event) { 
+                if (event.point.y > 2*gridScale) { 
+                    this.doRotate();
+                }
+            }
+
             numicon.isRotated = 0
             numicon.doRotate = function () {
 
@@ -279,7 +284,7 @@ function drawApp(gridScale) {
     /* MOUSE */
     /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
-    //onMouseDown
+    // view onMouseDown
     //TODO: traiter le cas où on clique sur grid (Path)
     view.onMouseDown = function(event) {
         //resetKeySequence()
@@ -305,10 +310,26 @@ function drawApp(gridScale) {
                          };
                         activeNumicon = thisItem;
                         activeNumicon.levitate(true)
-                        //clickDownTime = Date.now()
+                        clickDownTime = Date.now()
                     }
                 };
             };
+        };
+    };
+
+    // view onMouseUp
+    view.onMouseUp = function(event) {
+        if (activeNumicon) {
+            // moving detect
+            if (event.delta.x != 0 || event.delta.y != 0) {
+                clickDownTime = undefined
+                clickUpTime = undefined
+            } else {
+                clickUpTime = Date.now()
+                if(clickDownTime && clickUpTime && clickUpTime - clickDownTime > 550) { activeNumicon.scale(-1, 1) }
+                clickDownTime = undefined
+                clickUpTime = undefined
+            }
         };
     };
 
@@ -378,6 +399,7 @@ function drawApp(gridScale) {
          }   
     }
 
+    // IconMenu tools
     new IconMenu(new Point(14.4, 1.1) * gridScale, 'rotate', .08*gridScale/36, rotateCallback)
     new IconMenu(new Point(15.55, 1.15) * gridScale, 'symmetry', .065*gridScale/36, symmetryCallback)
     new IconMenu(new Point(16.8, 1.15) * gridScale, 'delete', .075*gridScale/36, deleteCallback)
@@ -390,7 +412,7 @@ function drawApp(gridScale) {
     new IconMenu(new Point(21.3, 1.1) * gridScale, 'trash', .08*gridScale/36, trashCallback)
     new IconMenu(new Point(22.5, 1.1) * gridScale, 'help', .08*gridScale/36, helpCallback)
 
-    // Numicon Menu
+    // Numicon Menu palet
     for (var i = 1; i < 11; i++) {
         new NumiconMenu(i);
     }
@@ -462,6 +484,6 @@ function disableScroll() {
 
 /* TODO */
 
-// appui long => sym
-//  'Espace  : pivote le numicom\n' +//ou double-click
+// COMMENT
+// traiter le cas où on clique sur grid (Path)
 // push
