@@ -18,7 +18,7 @@
         },
         {
         "id": "deux-carres",
-        "title": "Deux carré",
+        "title": "Deux carrés",
         "description": "Restauration de figure avec deux carré",
         "path": "/pdfs/Deux carres.pdf",
         "level": ["CM1", "CM2"],
@@ -293,7 +293,7 @@
         "title": "Fiche 7 - Terrain de sport",
         "description": "Ressemble à un terrain de sport",
         "path": "/pdfs/fiche 7 CP.pdf",
-        "level": ["CP"],
+        "level": ["CE1"],
         "vision": ["Surface", "Ligne", "Point"],
         "instruments": ["Règle non informable", "Règle informable", "Bande de papier"],
         "withCost": true,
