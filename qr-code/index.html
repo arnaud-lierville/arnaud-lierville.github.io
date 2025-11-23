@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de QR Code</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        .container.extra {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .add-container-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-container-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .add-container-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls-top {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: #4a90e2;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        #qrcode {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .qrcode {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .qrcode:hover {
+            transform: scale(1.05);
+        }
+
+        .qrcode canvas {
+            display: block;
+        }
+
+        /* Modal pour afficher le QR code en grand */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .modal-qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-qrcode canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .main-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .container {
+                padding: 30px 20px;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .controls-top {
+                margin-bottom: 10px;
+            }
+
+            .add-container-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls-top">
+        <button class="add-container-btn" id="add-container-btn">
+            <span>+</span> Ajouter un générateur
+        </button>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="container" id="container-0">
+            <button class="delete-btn" data-container="0" title="Supprimer">×</button>
+            <h1>QR Code #1</h1>
+            
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    class="qr-input" 
+                    data-container="0"
+                    placeholder="Entrez un texte ou une URL..."
+                    autocomplete="off"
+                >
+                <button class="generate-btn" data-container="0">Générer le QR Code</button>
+                <div class="error" data-container="0"></div>
+            </div>
+
+            <div class="qr-container">
+                <div class="qrcode" data-container="0"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour afficher le QR code en grand -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div class="modal-qrcode" id="modal-qrcode"></div>
+        </div>
+    </div>
+
+    <script>
+        const mainWrapper = document.querySelector('.main-wrapper');
+        const addContainerBtn = document.getElementById('add-container-btn');
+        const modal = document.getElementById('modal');
+        const modalQrCode = document.getElementById('modal-qrcode');
+        const closeBtn = document.querySelector('.close-btn');
+        let containerCount = 1; // On commence à 1 car le premier container existe déjà
+        const maxContainers = 4;
+
+        // Stocker les textes de chaque container
+        const containerTexts = {};
+
+        function generateQRCode(containerId) {
+            const input = document.querySelector(`.qr-input[data-container="${containerId}"]`);
+            const qrContainer = document.querySelector(`.qrcode[data-container="${containerId}"]`);
+            const errorMessage = document.querySelector(`.error[data-container="${containerId}"]`);
+            const text = input.value.trim();
+            
+            containerTexts[containerId] = text;
+            
+            // Vider le message d'erreur
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
+            
+            // Vérifier que le champ n'est pas vide
+            if (!text) {
+                errorMessage.textContent = 'Veuillez entrer un texte ou une URL';
+                errorMessage.classList.add('show');
+                qrContainer.innerHTML = '';
+                return;
+            }
+
+            // Vider le conteneur QR code précédent
+            qrContainer.innerHTML = '';
+
+            try {
+                // Générer le QR code
+                new QRCode(qrContainer, {
+                    text: text,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                errorMessage.textContent = 'Erreur lors de la génération du QR code';
+                errorMessage.classList.add('show');
+            }
+        }
+
+        function openModal(containerId) {
+            const text = containerTexts[containerId];
+            if (!text) return;
+            
+            // Vider le conteneur modal précédent
+            modalQrCode.innerHTML = '';
+            
+            // Générer un QR code plus grand pour la modal
+            new QRCode(modalQrCode, {
+                text: text,
+                width: 512,
+                height: 512,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // Afficher la modal
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+        }
+
+        function getMaxContainerNumber() {
+            const containers = mainWrapper.querySelectorAll('.container');
+            let maxNumber = 0;
+            containers.forEach(container => {
+                const h1 = container.querySelector('h1');
+                if (h1) {
+                    const match = h1.textContent.match(/#(\d+)/);
+                    if (match) {
+                        const number = parseInt(match[1]);
+                        if (number > maxNumber) {
+                            maxNumber = number;
+                        }
+                    }
+                }
+            });
+            return maxNumber;
+        }
+
+        function addContainer() {
+            if (containerCount >= maxContainers) {
+                addContainerBtn.disabled = true;
+                return;
+            }
+
+            const containerId = containerCount;
+            containerCount++;
+            const nextNumber = getMaxContainerNumber() + 1;
+
+            const newContainer = document.createElement('div');
+            newContainer.className = 'container extra';
+            newContainer.id = `container-${containerId}`;
+            newContainer.innerHTML = `
+                <button class="delete-btn" data-container="${containerId}" title="Supprimer">×</button>
+                <h1>QR Code #${nextNumber}</h1>
+                
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        class="qr-input" 
+                        data-container="${containerId}"
+                        placeholder="Entrez un texte ou une URL..."
+                        autocomplete="off"
+                    >
+                    <button class="generate-btn" data-container="${containerId}">Générer le QR Code</button>
+                    <div class="error" data-container="${containerId}"></div>
+                </div>
+
+                <div class="qr-container">
+                    <div class="qrcode" data-container="${containerId}"></div>
+                </div>
+            `;
+
+            mainWrapper.appendChild(newContainer);
+
+            // Ajouter les event listeners pour ce nouveau container
+            setupContainerEvents(containerId);
+
+            // Désactiver le bouton si on a atteint le maximum
+            if (containerCount >= maxContainers) {
+                addContainerBtn.disabled = true;
+            }
+
+            // Mettre à jour la visibilité des boutons de suppression
+            updateDeleteButtonsVisibility();
+        }
+
+        function updateDeleteButtonsVisibility() {
+            const containers = mainWrapper.querySelectorAll('.container');
+            const deleteButtons = mainWrapper.querySelectorAll('.delete-btn');
+            
+            if (containers.length <= 1) {
+                // Masquer tous les boutons de suppression s'il n'y a qu'un seul container
+                deleteButtons.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            } else {
+                // Afficher tous les boutons de suppression s'il y a plusieurs containers
+                deleteButtons.forEach(btn => {
+                    btn.style.display = 'flex';
+                });
+            }
+        }
+
+        function removeContainer(containerId) {
+            const container = document.getElementById(`container-${containerId}`);
+            if (container) {
+                container.remove();
+                containerCount--;
+                delete containerTexts[containerId];
+                
+                // Réactiver le bouton d'ajout
+                addContainerBtn.disabled = false;
+                
+                // Mettre à jour la visibilité des boutons de suppression
+                updateDeleteButtonsVisibility();
+            }
+        }
+
+        function setupContainerEvents(containerId) {
+            const input = document.querySelector(`.qr-input[data-container="${containerId}"]`);
+            const generateBtn = document.querySelector(`.generate-btn[data-container="${containerId}"]`);
+            const qrContainer = document.querySelector(`.qrcode[data-container="${containerId}"]`);
+
+            // Générer au clic sur le bouton
+            generateBtn.addEventListener('click', () => generateQRCode(containerId));
+
+            // Générer en appuyant sur Entrée dans l'input
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    generateQRCode(containerId);
+                }
+            });
+
+            // Ouvrir la modal au clic sur le QR code
+            qrContainer.addEventListener('click', function(e) {
+                if (qrContainer.querySelector('canvas')) {
+                    openModal(containerId);
+                }
+            });
+        }
+
+        // Setup pour le container initial
+        setupContainerEvents(0);
+
+        // Initialiser la visibilité des boutons de suppression
+        updateDeleteButtonsVisibility();
+
+        // Bouton pour ajouter un container
+        addContainerBtn.addEventListener('click', addContainer);
+
+        // Gestion de la suppression des containers
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-btn')) {
+                const containerId = e.target.getAttribute('data-container');
+                const containers = mainWrapper.querySelectorAll('.container');
+                // Permettre la suppression seulement s'il reste au moins un container
+                if (containers.length > 1) {
+                    removeContainer(containerId);
+                }
+            }
+        });
+
+        // Fermer la modal au clic sur le bouton de fermeture
+        closeBtn.addEventListener('click', closeModal);
+
+        // Fermer la modal au clic sur l'overlay (fond sombre)
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Fermer la modal avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
+
