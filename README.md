@@ -109,3 +109,10 @@
 * Déplacer la monnaie à la souris 
 * Cliquez sur un billet pour le retourner 
 * Déplacez de la monnaie depuis la droite pour la supprimer
+
+## Licence
+
+Le code source de ce dépôt est distribué sous **GNU GPL v3.0** (voir `LICENSE`).
+
+- Texte (FR) : [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.fr.html#license-text)
+- Dépendances / ressources tierces : `THIRD_PARTY_NOTICES.md`
