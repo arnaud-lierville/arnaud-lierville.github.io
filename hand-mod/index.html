@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modèle en mains</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav id="menu-principal">
+    <button id="btn-ajouter" class="btn-icone" title="Ajouter une main [H]">
+      <img src="img/hand.png" class="icone-main" alt="Main">
+    </button>
+
+    <button id="btn-rotation-scene" class="btn-icone" title="Pivoter la scène −90° [Q]">
+      <img src="img/rotate-frame.png" class="icone" alt="Pivoter la scène">
+    </button>
+
+    <button id="btn-effacer" class="btn-icone" title="Tout effacer [Suppr]">
+      <img src="img/trash.png" class="icone" alt="Effacer">
+    </button>
+
+    <button id="btn-aide" class="btn-icone" title="Aide [?]">
+      <img src="img/help.png" class="icone" alt="Aide">
+    </button>
+
+    <div id="menu-secondaire" class="hidden">
+      <div class="separateur"></div>
+
+      <button id="btn-rotation-ccw" class="btn-icone" title="Rotation −30° sens trigo [R]">
+        <img src="img/rotate.png" class="icone" alt="Rotation sens trigo">
+      </button>
+
+      <button id="btn-rotation-cw" class="btn-icone" title="Rotation +30° sens horaire [Maj+R]">
+        <img src="img/rotate.png" class="icone icone-miroir" alt="Rotation sens horaire">
+      </button>
+
+      <button id="btn-retournement" class="btn-icone" title="Retournement [F]">
+        <img src="img/symmetry.png" class="icone" alt="Retournement">
+      </button>
+
+      <button id="btn-supprimer" class="btn-icone" title="Supprimer [X]">
+        <img src="img/delete.png" class="icone" alt="Supprimer">
+      </button>
+    </div>
+  </nav>
+
+  <div id="scene"></div>
+
+  <div id="modal-aide" class="hidden">
+    <div class="modal-fond" id="modal-fond"></div>
+    <div class="modal-contenu">
+      <button class="btn-fermer" id="btn-fermer-modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="aide-entete">
+        <img src="img/logo-D.png" class="aide-logo" alt="Logo">
+        <h2>Modèle en mains</h2>
+      </div>
+
+      <h3>Souris</h3>
+      <dl class="aide-dl">
+        <dt>Clic sur une main</dt>       <dd>Lever / poser</dd>
+        <dt>Glisser une main levée</dt>  <dd>Déplacer</dd>
+        <dt>Glisser une main posée</dt>  <dd>Déplacer sans lever</dd>
+        <dt>Clic sur le fond</dt>        <dd>Poser toutes les mains</dd>
+        <dt>Glisser le fond</dt>         <dd>Déplacer toute la scène</dd>
+      </dl>
+
+      <h3>Raccourcis clavier</h3>
+      <dl class="aide-dl">
+        <dt><kbd>H</kbd></dt>                                            <dd>Ajouter une main</dd>
+        <dt><kbd>Q</kbd></dt>                                            <dd>Pivoter la scène −90°</dd>
+        <dt><kbd>Suppr</kbd> / <kbd>⌫</kbd></dt>                        <dd>Tout effacer</dd>
+        <dt><kbd>Échap</kbd></dt>                                        <dd>Poser toutes les mains</dd>
+        <dt><kbd>?</kbd></dt>                                            <dd>Ouvrir / fermer l'aide</dd>
+        <dt><kbd>R</kbd></dt>                                            <dd>Rotation −30° (sens trigo)</dd>
+        <dt><kbd>Maj</kbd> + <kbd>R</kbd></dt>                           <dd>Rotation +30° (sens horaire)</dd>
+        <dt><kbd>F</kbd></dt>                                            <dd>Retournement</dd>
+        <dt><kbd>X</kbd></dt>                                            <dd>Supprimer la main sélectionnée</dd>
+        <dt><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></dt>   <dd>Déplacer (10 px)</dd>
+        <dt><kbd>Maj</kbd> + flèches</dt>                                <dd>Déplacer (50 px)</dd>
+      </dl>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
