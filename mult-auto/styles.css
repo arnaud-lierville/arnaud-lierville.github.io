@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+body { font-family: 'Nunito', sans-serif; }
+
+.slide-enter { animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+
+.table-btn.selected { background: #6366f1; color: white; border-color: #6366f1; }
+.level-btn.selected { background: #10b981; color: white; border-color: #10b981; }
+
+.calcul-card { break-inside: avoid; }
+
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

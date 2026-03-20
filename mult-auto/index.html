@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiplications - Automatismes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="dist/tailwind.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-green-50 min-h-screen">
+
+<!-- ===================== PAGE PARAMETRAGE ===================== -->
+<div id="page-params" class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-4 sm:p-8">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-3">✖️</div>
+      <h1 class="text-2xl font-black text-indigo-700 leading-tight">Multiplications - Automatismes</h1>
+    </div>
+
+    <!-- Sélection tables -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-3">
+        <label class="font-black text-gray-700">📊 Tables à travailler</label>
+        <button onclick="toggleAll()" id="btn-all" class="text-xs font-bold text-indigo-500 hover:underline">Tout sélectionner</button>
+      </div>
+      <div id="tables-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+    </div>
+
+    <!-- Nombre de calculs -->
+    <div class="mb-6">
+      <label class="block font-black text-gray-700 mb-2">🔢 Nombre de calculs</label>
+      <input id="nb-calculs" type="number" min="1" max="51" value="10"
+        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg font-bold text-center focus:outline-none focus:border-indigo-400">
+    </div>
+
+    <!-- Niveaux -->
+    <div class="mb-8">
+      <label class="block font-black text-gray-700 mb-3">🎯 Niveau de difficulté</label>
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="toggleLevel(1)" id="level-1" class="level-btn border-2 border-gray-200 rounded-2xl p-4 text-center transition hover:border-green-400">
+          <div class="text-2xl font-black text-gray-800">L1</div>
+          <div class="text-xs text-gray-500 mt-1">9 × 2 = <span class="font-bold text-indigo-600">?</span></div>
+        </button>
+        <button onclick="toggleLevel(2)" id="level-2" class="level-btn border-2 border-gray-200 rounded-2xl p-4 text-center transition hover:border-green-400">
+          <div class="text-2xl font-black text-gray-800">L2</div>
+          <div class="text-xs text-gray-500 mt-1">9 × <span class="font-bold text-indigo-600">?</span> = 18</div>
+        </button>
+        <button onclick="toggleLevel(3)" id="level-3" class="level-btn border-2 border-gray-200 rounded-2xl p-4 text-center transition hover:border-green-400">
+          <div class="text-2xl font-black text-gray-800">L3</div>
+          <div class="text-xs text-gray-500 mt-1"><span class="font-bold text-indigo-600">?</span> × <span class="font-bold text-indigo-600">?</span> = 18</div>
+        </button>
+      </div>
+    </div>
+
+    <button onclick="startSession()" class="w-full bg-gradient-to-r from-indigo-500 to-green-500 hover:from-indigo-600 hover:to-green-600 text-white font-black text-xl py-4 rounded-2xl shadow-lg transition transform hover:scale-105 active:scale-95">
+      C'est parti ! 🚀
+    </button>
+    <p id="params-error" class="text-red-500 text-sm text-center mt-2 hidden"></p>
+
+    <!-- Import code (en bas) -->
+    <div class="mt-8 border-t border-gray-100 pt-6">
+      <label class="block text-sm font-bold text-gray-500 mb-2">📥 Charger une série existante</label>
+      <div class="flex gap-2">
+        <input id="import-code" type="text" inputmode="numeric" maxlength="4" placeholder="Code à 4 chiffres"
+          class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-400 font-mono tracking-widest text-center text-lg">
+        <button onclick="importCode()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-4 py-2 rounded-xl transition">Charger</button>
+      </div>
+      <p id="import-error" class="text-red-500 text-xs mt-1 hidden"></p>
+      <p class="text-xs text-gray-400 mt-2">⚠️ Les codes à 4 chiffres ne sont utilisables que sur l'appareil où la série a été créée.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE DASHBOARD ===================== -->
+<div id="page-dashboard" class="hidden min-h-screen p-4 pt-16 pb-24">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <button onclick="goBack()" class="flex items-center gap-2 text-indigo-600 font-bold hover:underline">← Retour</button>
+      <h2 class="text-xl font-black text-indigo-700">Tableau de bord</h2>
+      <div class="w-20"></div>
+    </div>
+
+    <!-- Boutons modes -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <button onclick="startProjection()" class="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
+        <div class="text-3xl mb-2">🖥️</div>
+        <div class="font-black text-sm">Mode Projection</div>
+      </button>
+      <button onclick="generatePDF()" class="bg-gradient-to-br from-green-500 to-teal-600 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
+        <div class="text-3xl mb-2">📄</div>
+        <div class="font-black text-sm">Mode PDF</div>
+      </button>
+      <button onclick="showCorrection()" class="bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
+        <div class="text-3xl mb-2">✅</div>
+        <div class="font-black text-sm">Correction</div>
+      </button>
+    </div>
+
+    <!-- Info -->
+    <div class="grid grid-cols-3 gap-3 mb-6 text-center">
+      <div class="bg-blue-100 rounded-2xl p-3">
+        <div id="info-tables" class="font-black text-blue-700 text-base leading-tight break-words"></div>
+        <div class="text-xs text-blue-500 font-semibold">Tables</div>
+      </div>
+      <div class="bg-green-100 rounded-2xl p-3">
+        <div id="info-nb" class="font-black text-green-700 text-lg"></div>
+        <div class="text-xs text-green-500 font-semibold">Calculs</div>
+      </div>
+      <div class="bg-purple-100 rounded-2xl p-3">
+        <div id="info-level" class="font-black text-purple-700 text-lg"></div>
+        <div class="text-xs text-purple-500 font-semibold">Niveau</div>
+      </div>
+    </div>
+
+    <!-- Aperçu -->
+    <div class="bg-white rounded-2xl shadow-md mb-6 overflow-hidden">
+      <button onclick="toggleCard('apercu')" class="w-full flex items-center justify-between px-4 py-3">
+        <h3 class="font-black text-gray-700">📋 Aperçu de la série</h3>
+        <span id="toggle-apercu" class="text-gray-400 text-lg leading-none">▼</span>
+      </button>
+      <div id="card-apercu" class="hidden px-4 pb-8 pt-1">
+        <div id="apercu-list" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      </div>
+    </div>
+
+    <!-- Code série -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+      <button onclick="toggleCard('code')" class="w-full flex items-center justify-between px-4 py-3">
+        <h3 class="font-black text-gray-700">🔑 Code de la série</h3>
+        <span id="toggle-code" class="text-gray-400 text-lg leading-none">▼</span>
+      </button>
+      <div id="card-code" class="hidden px-4 pb-8 pt-1 text-center">
+        <div id="serie-code" class="font-black text-indigo-600 tracking-widest select-all cursor-pointer" style="font-size:clamp(2rem,10vw,3.5rem);line-height:1;" onclick="copyCode()"></div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <button onclick="copyCode()" id="btn-copy" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-3 py-1 rounded-lg transition">Copier</button>
+          <span class="text-xs text-gray-400">Valide uniquement sur cet appareil</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAGE CORRECTION ===================== -->
+<div id="page-correction" class="hidden min-h-screen p-4 py-8">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <button onclick="showDashboard()" class="flex items-center gap-2 text-indigo-600 font-bold hover:underline">← Retour</button>
+      <h2 class="text-xl font-black text-rose-600">✅ CORRECTION</h2>
+      <div class="w-20"></div>
+    </div>
+    <div id="correction-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+  </div>
+</div>
+
+<!-- ===================== MODE PROJECTION ===================== -->
+<div id="projection-mode" class="fixed inset-0 bg-white flex-col items-center justify-center z-50" style="display:none;">
+  <div class="slide-enter text-center px-8 max-w-2xl w-full">
+    <div id="slide-number" class="text-indigo-300 text-lg font-bold mb-6"></div>
+    <div id="slide-calcul" class="text-indigo-900 font-black leading-none mb-8" style="font-size:clamp(2rem,7vw,6rem);"></div>
+    <div id="slide-hint" class="text-indigo-300 text-2xl font-semibold"></div>
+  </div>
+  <div class="absolute bottom-8 flex items-center gap-6">
+    <button onclick="prevSlide()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-6 py-3 rounded-xl transition text-lg">← Préc</button>
+    <span id="slide-counter" class="text-indigo-300 font-semibold text-sm"></span>
+    <button onclick="nextSlide()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold px-6 py-3 rounded-xl transition text-lg">Suiv →</button>
+  </div>
+  <button onclick="exitProjection()" class="absolute top-6 right-6 text-indigo-300 hover:text-indigo-600 text-3xl font-bold leading-none">✕</button>
+</div>
+
+<!-- ===================== PAGE PDF (hidden, for rendering) ===================== -->
+<div id="pdf-container" class="hidden" style="font-family:'Nunito',sans-serif;background:#fff;width:794px;padding:0;">
+  <!-- Identité -->
+  <div style="display:flex;align-items:flex-end;gap:32px;padding:16px 24px 12px;">
+    <div style="display:flex;flex-direction:column;flex:1;">
+      <span style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Série</span>
+      <span id="pdf-code-header" style="font-size:13px;font-weight:900;color:#999;font-family:monospace;letter-spacing:2px;line-height:1.6;"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;flex:2;">
+      <span style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Nom</span>
+      <div style="border-bottom:1.5px solid #aaa;height:22px;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;flex:2;">
+      <span style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Prénom</span>
+      <div style="border-bottom:1.5px solid #aaa;height:22px;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;flex:2;">
+      <span style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Date</span>
+      <div style="border-bottom:1.5px solid #aaa;height:22px;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;flex:3;">
+      <span style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Mon score</span>
+      <span id="pdf-score-label" style="height:22px;font-size:17px;font-weight:800;color:#999;line-height:1.8;"></span>
+    </div>
+  </div>
+  <!-- Grille de calculs -->
+  <div id="pdf-grid" style="display:grid;grid-template-columns:repeat(3,1fr);padding:16px 24px;gap:4px 16px;"></div>
+  </div>
+
+<script src="scripts.js"></script>
+</body>
+</html>
