@@ -267,11 +267,16 @@ function formatCalcul(c, showAnswer) {
   return `? × ? = ${c.result}`;
 }
 
+const SLOT_W = '1.5em';
+const slotQ    = `<span style="display:inline-block;min-width:${SLOT_W};text-align:center;">?</span>`;
+const slotDots = `<span style="display:inline-block;min-width:${SLOT_W};text-align:center;position:relative;top:0.18em;">.....</span>`;
+
 function formatCalculSlide(c) {
-  if (c.hidden === 'result') return `${c.a} × ${c.b} = ?`;
-  if (c.hidden === 'a') return `? × ${c.b} = ${c.result}`;
-  if (c.hidden === 'b') return `${c.a} × ? = ${c.result}`;
-  return `? × ? = ${c.result}`;
+  const q = slotQ;
+  if (c.hidden === 'result') return `${c.a} × ${c.b} = ${q}`;
+  if (c.hidden === 'a') return `${q} × ${c.b} = ${c.result}`;
+  if (c.hidden === 'b') return `${c.a} × ${q} = ${c.result}`;
+  return `${q} × ${q} = ${c.result}`;
 }
 
 function getAnswer(c) {
@@ -287,6 +292,14 @@ function formatCalculDots(c) {
   if (c.hidden === 'a') return `..... × ${c.b} = ${c.result}`;
   if (c.hidden === 'b') return `${c.a} × ..... = ${c.result}`;
   return `..... × ..... = ${c.result}`;
+}
+
+function formatCalculDotsHTML(c) {
+  const d = slotDots;
+  if (c.hidden === 'result') return `${c.a} × ${c.b} = ${d}`;
+  if (c.hidden === 'a') return `${d} × ${c.b} = ${c.result}`;
+  if (c.hidden === 'b') return `${c.a} × ${d} = ${c.result}`;
+  return `${d} × ${d} = ${c.result}`;
 }
 
 // Remplace les "?" par la réponse en rouge (HTML) pour la correction
@@ -331,11 +344,11 @@ function renderSlide() {
   el.classList.remove('slide-enter');
   void el.offsetWidth;
   el.classList.add('slide-enter');
-  el.textContent = formatCalculSlide(c);
+  el.innerHTML = formatCalculSlide(c);
   document.getElementById('slide-number').textContent = '';
   document.getElementById('slide-counter').textContent = `${currentSlide + 1} / ${calculs.length}`;
   slideTimer = setTimeout(() => {
-    el.textContent = formatCalculDots(c);
+    el.innerHTML = formatCalculDotsHTML(c);
     slideTimer = null;
   }, 2000);
 }
@@ -355,16 +368,59 @@ function exitProjection() {
 // ============================================================
 // CORRECTION
 // ============================================================
+
+// Retourne toutes les décompositions non triviales de n (a × b, a ≤ b, a ≥ 2)
+function getDecompositions(n) {
+  const pairs = [];
+  for (let a = 2; a <= Math.sqrt(n); a++) {
+    if (n % a === 0) pairs.push([a, n / a]);
+  }
+  return pairs;
+}
+
+function toggleDecomp(uid) {
+  const panel = document.getElementById(uid);
+  const btn = document.getElementById('btn-' + uid);
+  const isHidden = panel.classList.toggle('hidden');
+  btn.textContent = isHidden ? '▼' : '▲';
+}
+
 function showCorrection() {
   document.getElementById('page-dashboard').classList.add('hidden');
   document.getElementById('page-correction').classList.remove('hidden');
 
   const list = document.getElementById('correction-list');
   list.innerHTML = '';
-  calculs.forEach((c, i) => {
+  calculs.forEach((c) => {
     const el = document.createElement('div');
     el.className = 'calcul-card bg-white rounded-2xl p-6 shadow text-center';
-    el.innerHTML = `<div class="font-black text-gray-700 text-2xl">${formatCalculCorrectionHTML(c)}</div>`;
+
+    if (c.hidden === 'both') {
+      const decomps = getDecompositions(c.result);
+      if (decomps.length <= 1) {
+        // Une seule solution : carte simple
+        const ra = `<span style="color:#ef4444;font-weight:900;">${c.a}</span>`;
+        const rb = `<span style="color:#ef4444;font-weight:900;">${c.b}</span>`;
+        el.innerHTML = `<div class="font-black text-gray-700 text-2xl">${ra} × ${rb} = ${c.result}</div>`;
+      } else {
+        // Plusieurs solutions : première + badge ▼ pour étendre
+        const [first, ...rest] = decomps;
+        const restLignes = rest.map(([a, b]) =>
+          `<div class="text-xl font-black" style="color:#ef4444;">${a} × ${b} = ${c.result}</div>`
+        ).join('');
+        const uid = 'decomp-' + Math.random().toString(36).slice(2);
+        el.innerHTML = `
+          <div class="flex items-center justify-center gap-3">
+            <div class="font-black text-2xl" style="color:#ef4444;">${first[0]} × ${first[1]} = ${c.result}</div>
+            <button onclick="toggleDecomp('${uid}')" class="text-green-500 hover:text-green-700 transition text-sm leading-none" id="btn-${uid}">▼</button>
+          </div>
+          <div id="${uid}" class="hidden border-t border-gray-100 mt-3 pt-3 flex flex-col gap-1">${restLignes}</div>
+        `;
+      }
+    } else {
+      el.innerHTML = `<div class="font-black text-gray-700 text-2xl">${formatCalculCorrectionHTML(c)}</div>`;
+    }
+
     list.appendChild(el);
   });
 }
@@ -381,7 +437,9 @@ function generatePDF() {
     cell.style.cssText = 'padding:10px 6px;';
     const q = document.createElement('span');
     q.style.cssText = 'font-size:20px;font-weight:800;';
-    q.textContent = formatCalculDots(c);
+    const pdfDots = `<span style="position:relative;top:0.18em;">.....</span>`;
+    const pdfDotsHTML = (txt) => txt.replace(/\.\.\.\.\./g, pdfDots);
+    q.innerHTML = pdfDotsHTML(formatCalculDots(c));
     cell.appendChild(q);
     grid.appendChild(cell);
   });

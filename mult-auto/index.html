@@ -85,11 +85,11 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <button onclick="startProjection()" class="bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
         <div class="text-3xl mb-2">🖥️</div>
-        <div class="font-black text-sm">Mode Projection</div>
+        <div class="font-black text-sm">Au tableau</div>
       </button>
       <button onclick="generatePDF()" class="bg-gradient-to-br from-green-500 to-teal-600 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
         <div class="text-3xl mb-2">📄</div>
-        <div class="font-black text-sm">Mode PDF</div>
+        <div class="font-black text-sm">Fiche</div>
       </button>
       <button onclick="showCorrection()" class="bg-gradient-to-br from-rose-500 to-pink-600 text-white rounded-2xl p-5 shadow-md hover:shadow-lg transition transform hover:scale-105">
         <div class="text-3xl mb-2">✅</div>
@@ -98,16 +98,16 @@
     </div>
 
     <!-- Info -->
-    <div class="grid grid-cols-3 gap-3 mb-6 text-center">
-      <div class="bg-blue-100 rounded-2xl p-3">
-        <div id="info-tables" class="font-black text-blue-700 text-base leading-tight break-words"></div>
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <div class="bg-blue-100 rounded-2xl p-3 flex flex-col items-center justify-center text-center">
+        <div id="info-tables" class="font-black text-blue-700 text-lg break-words"></div>
         <div class="text-xs text-blue-500 font-semibold">Tables</div>
       </div>
-      <div class="bg-green-100 rounded-2xl p-3">
+      <div class="bg-green-100 rounded-2xl p-3 flex flex-col items-center justify-center text-center">
         <div id="info-nb" class="font-black text-green-700 text-lg"></div>
         <div class="text-xs text-green-500 font-semibold">Calculs</div>
       </div>
-      <div class="bg-purple-100 rounded-2xl p-3">
+      <div class="bg-purple-100 rounded-2xl p-3 flex flex-col items-center justify-center text-center">
         <div id="info-level" class="font-black text-purple-700 text-lg"></div>
         <div class="text-xs text-purple-500 font-semibold">Niveau</div>
       </div>
@@ -149,7 +149,7 @@
       <h2 class="text-xl font-black text-rose-600">✅ CORRECTION</h2>
       <div class="w-20"></div>
     </div>
-    <div id="correction-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    <div id="correction-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start"></div>
   </div>
 </div>
 
@@ -157,7 +157,7 @@
 <div id="projection-mode" class="fixed inset-0 bg-white flex-col items-center justify-center z-50" style="display:none;">
   <div class="slide-enter text-center px-8 max-w-2xl w-full">
     <div id="slide-number" class="text-indigo-300 text-lg font-bold mb-6"></div>
-    <div id="slide-calcul" class="text-indigo-900 font-black leading-none mb-8" style="font-size:clamp(2rem,7vw,6rem);"></div>
+    <div id="slide-calcul" class="text-indigo-900 font-black leading-none mb-8" style="font-size:clamp(1.5rem,5vw,5rem);white-space:nowrap;"></div>
     <div id="slide-hint" class="text-indigo-300 text-2xl font-semibold"></div>
   </div>
   <div class="absolute bottom-8 flex items-center gap-6">
