@@ -405,13 +405,15 @@ function showCorrection() {
       } else {
         // Plusieurs solutions : première + badge ▼ pour étendre
         const [first, ...rest] = decomps;
-        const restLignes = rest.map(([a, b]) =>
-          `<div class="text-xl font-black" style="color:#ef4444;">${a} × ${b} = ${c.result}</div>`
+        const fmtDecomp = ([a, b]) =>
+          `<span style="color:#ef4444;">${a}</span> <span class="text-gray-700">× <span style="color:#ef4444;">${b}</span> = ${c.result}</span>`;
+        const restLignes = rest.map(p =>
+          `<div class="text-xl font-black">${fmtDecomp(p)}</div>`
         ).join('');
         const uid = 'decomp-' + Math.random().toString(36).slice(2);
         el.innerHTML = `
           <div class="flex items-center justify-center gap-3">
-            <div class="font-black text-2xl" style="color:#ef4444;">${first[0]} × ${first[1]} = ${c.result}</div>
+            <div class="font-black text-2xl">${fmtDecomp(first)}</div>
             <button onclick="toggleDecomp('${uid}')" class="text-green-500 hover:text-green-700 transition text-sm leading-none" id="btn-${uid}">▼</button>
           </div>
           <div id="${uid}" class="hidden border-t border-gray-100 mt-3 pt-3 flex flex-col gap-1">${restLignes}</div>
