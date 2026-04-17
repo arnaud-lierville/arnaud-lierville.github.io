@@ -15,6 +15,12 @@ var secretColor = '#7E7E7E';
 var colorRod = ['#f2e1c9', '#e71f43', '#9fc94d', '#f487ab', '#fff035', '#118550', '#100f17', '#9d3b37','#1a7cba', '#f17331'];
 var longRodColor = '#A3A3A3'
 
+var palette1 = ['#f2e1c9','#e71f43','#9fc94d','#f487ab','#fff035','#118550','#100f17','#9d3b37','#1a7cba','#f17331'];
+var palette2 = ['#f2e1c9','#e71f43','#9fc94d','#7B2FBE','#fff035','#118550','#100f17','#9d3b37','#1a7cba','#f17331'];
+var palette_gray = ['#cecece','#bababa','#a6a6a6','#929292','#7e7e7e','#6a6a6a','#565656','#424242','#2e2e2e','#1a1a1a'];
+var paletteCustom = palette_gray.slice();
+var currentPaletteIndex = 0;
+
 var unity = 0 // 0 for UN
 
 var rodGroup = new Group();
@@ -89,6 +95,7 @@ var legend = new PointText({
     'n : unité => change de barre pour l\'unité\n'  +
     'f : simplifie => change de mode fractions simplifiées ou non\n'  +
     's : crée l\'escalier\n'  +
+    'k : choix de palette\n'  +
     'c : efface tout',
     fillColor: '#0c6675',
     fontFamily: 'fantasy',
@@ -404,6 +411,7 @@ var MenuRod = Base.extend({
         menuRod.strokeWidth = rodStrokeWidth;
         menuRod.selected = false;
         menuRod.isSelectable = false;
+        menuRod.rodLength = l;
         menuRod.onMouseDown = function(event) { activeRod = createRod(l); };
         menuRod.label.onMouseDown = function(event) { activeRod = createRod(l); };
         return menuRod
@@ -629,7 +637,9 @@ function onKeyDown(event) {
         if (event.key == 'backspace') { deleteCallback() };
         // Reset the scene
         if (event.key == 'c') { trashCallback() };
-        // Grid : on/off
+        // Clear the scene
+        if (event.key == 'k') { paletteCallback() };
+        // Display palette choices
         if (event.key == 'g') { gridCallback() };
         // h : legend
         if (event.key == 'h') { helpCallback() };
@@ -750,10 +760,257 @@ var helpCallback = function() {
     switchLegend()
 }
 
+function loadPaletteFromStorage() {
+    var hash = window.location.hash;
+    if (hash.length > 9 && hash.slice(0, 9) === '#palette=') {
+        var hexList = hash.slice(9).split(',');
+        if (hexList.length === 10) {
+            paletteCustom = hexList.map(function(h) { return '#' + h; });
+            currentPaletteIndex = 2;
+            for (var i = 0; i < 10; i++) { colorRod[i] = paletteCustom[i]; }
+            return;
+        }
+    }
+    try {
+        var stored = localStorage.getItem('rodPalette');
+        if (stored) {
+            var data = JSON.parse(stored);
+            if (data.custom && data.custom.length === 10) { paletteCustom = data.custom; }
+            currentPaletteIndex = data.index || 0;
+            var activePal = currentPaletteIndex === 0 ? palette1 : (currentPaletteIndex === 1 ? palette2 : paletteCustom);
+            for (var i = 0; i < 10; i++) { colorRod[i] = activePal[i]; }
+            if (currentPaletteIndex === 2) {
+                var hex = paletteCustom.map(function(c) { return c.replace('#', ''); }).join(',');
+                window.location.hash = 'palette=' + hex;
+            }
+        }
+    } catch(e) {}
+}
+
+function applyPalette(colors) {
+    for (var i = 0; i < 10; i++) { colorRod[i] = colors[i]; }
+    for (var i = 0; i < menuGroup.children.length; i++) {
+        var item = menuGroup.children[i];
+        if (item.rodLength) { item.fillColor = colorRod[item.rodLength - 1]; }
+    }
+    for (var i = 0; i < rodGroup.children.length; i++) {
+        var item = rodGroup.children[i];
+        if (item.rodLength && item.rodLength < 11) {
+            item.currentColor = colorRod[item.rodLength - 1];
+            item.updateLabel();
+        }
+    }
+    try {
+        localStorage.setItem('rodPalette', JSON.stringify({
+            index: currentPaletteIndex,
+            custom: paletteCustom
+        }));
+    } catch(e) {}
+}
+
+function updateSwatches() {
+    var allPalettes = [palette1, palette2, paletteCustom];
+    for (var pi = 0; pi < 3; pi++) {
+        var container = document.getElementById('swatches' + pi);
+        if (!container) continue;
+        container.innerHTML = '';
+        for (var ci = 0; ci < 10; ci++) {
+            var s = document.createElement('div');
+            s.style.cssText = 'width:22px; height:22px; background:' + allPalettes[pi][ci] + '; border:1px solid #aaa; border-radius:2px;';
+            container.appendChild(s);
+        }
+    }
+}
+
+function updateActiveRow() {
+    for (var i = 0; i < 3; i++) {
+        var row = document.getElementById('palRow' + i);
+        if (row) {
+            row.style.borderColor = (i === currentPaletteIndex) ? '#555' : 'transparent';
+            row.style.background = (i === currentPaletteIndex) ? '#f0f0f0' : 'white';
+        }
+    }
+}
+
+var paletteCallback = function() {
+    console.log('paletteCallback');
+    var panel = document.getElementById('palettePanel');
+    if (panel.style.display === 'none' || panel.style.display === '') {
+        for (var i = 0; i < 10; i++) {
+            var inp = document.getElementById('palColorInput' + i);
+            var wrp = document.getElementById('palColorWrapper' + i);
+            if (inp) { inp.value = paletteCustom[i]; }
+            if (wrp) { wrp.style.background = paletteCustom[i]; }
+        }
+        updateSwatches();
+        updateActiveRow();
+        panel.style.display = 'block';
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function initPalettePanel() {
+    var panel = document.getElementById('palettePanel');
+    panel.style.cssText = [
+        'position:fixed',
+        'top:120px',
+        'left:50%',
+        'transform:translateX(-50%)',
+        'background:white',
+        'border:1px solid #bbb',
+        'border-radius:8px',
+        'padding:16px',
+        'z-index:1000',
+        'box-shadow:0 4px 16px rgba(0,0,0,0.25)',
+        'font-family:sans-serif',
+        'font-size:13px',
+        'color:#333',
+        'display:none',
+        'min-width:780px'
+    ].join(';');
+
+    var title = document.createElement('h3');
+    title.textContent = 'Palette de couleurs';
+    title.style.cssText = 'margin:0 0 12px 0; font-size:14px; font-weight:bold; color:#333;';
+    panel.appendChild(title);
+
+    var paletteNames = ['Palette 1 (défaut)', 'Palette 2 (violette)', 'Palette personnalisée'];
+
+    for (var pi = 0; pi < 3; pi++) {
+        (function(paletteIndex) {
+            var row = document.createElement('div');
+            row.id = 'palRow' + paletteIndex;
+            row.style.cssText = 'display:flex; align-items:center; margin-bottom:6px; padding:6px 8px; border-radius:5px; border:2px solid transparent; cursor:pointer;';
+
+            var lbl = document.createElement('span');
+            lbl.textContent = paletteNames[paletteIndex];
+            lbl.style.cssText = 'display:inline-block; width:155px; flex-shrink:0;';
+            row.appendChild(lbl);
+
+            var swatches = document.createElement('div');
+            swatches.id = 'swatches' + paletteIndex;
+            swatches.style.cssText = 'display:flex; gap:2px;';
+            row.appendChild(swatches);
+
+            row.addEventListener('click', function() {
+                currentPaletteIndex = paletteIndex;
+                var pal = paletteIndex === 0 ? palette1 : (paletteIndex === 1 ? palette2 : paletteCustom);
+                applyPalette(pal);
+                if (paletteIndex < 2) {
+                    window.location.hash = '';
+                } else {
+                    var hex = paletteCustom.map(function(c) { return c.replace('#', ''); }).join(',');
+                    window.location.hash = 'palette=' + hex;
+                }
+                updateSwatches();
+                updateActiveRow();
+            });
+
+            panel.appendChild(row);
+
+            if (paletteIndex === 2) {
+                var inputRow = document.createElement('div');
+                inputRow.style.cssText = 'display:flex; align-items:center; padding:4px 8px 8px; border:2px solid transparent;';
+                var emptyLabel = document.createElement('span');
+                emptyLabel.textContent = 'Modifier ici les couleurs :';
+                emptyLabel.style.cssText = 'display:inline-block; width:155px; flex-shrink:0; font-size:12px; font-style:italic; color:#888;';
+                inputRow.appendChild(emptyLabel);
+
+                var pickerContainer = document.createElement('div');
+                pickerContainer.style.cssText = 'display:flex; gap:2px;';
+
+                for (var ci = 0; ci < 10; ci++) {
+                    (function(colorIndex) {
+                        var wrapper = document.createElement('div');
+                        wrapper.id = 'palColorWrapper' + colorIndex;
+                        wrapper.style.cssText = 'width:22px; height:22px; border-radius:2px; border:1px solid #aaa; flex-shrink:0; position:relative; cursor:pointer;';
+                        wrapper.style.background = paletteCustom[colorIndex];
+                        var inp = document.createElement('input');
+                        inp.type = 'color';
+                        inp.id = 'palColorInput' + colorIndex;
+                        inp.value = paletteCustom[colorIndex];
+                        inp.title = 'Réglette ' + (colorIndex + 1);
+                        inp.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;';
+                        inp.addEventListener('input', function() {
+                            wrapper.style.background = this.value;
+                        });
+                        wrapper.appendChild(inp);
+                        pickerContainer.appendChild(wrapper);
+                    })(ci);
+                }
+                inputRow.appendChild(pickerContainer);
+
+                var grayBtn = document.createElement('button');
+                grayBtn.textContent = 'Niveaux de gris';
+                grayBtn.style.cssText = 'margin-left:8px; padding:3px 10px; cursor:pointer; border:1px solid #aaa; border-radius:4px; font-size:12px; flex-shrink:0;';
+                grayBtn.addEventListener('click', function() {
+                    for (var i = 0; i < 10; i++) {
+                        var inp = document.getElementById('palColorInput' + i);
+                        var wrp = document.getElementById('palColorWrapper' + i);
+                        if (inp) { inp.value = palette_gray[i]; }
+                        if (wrp) { wrp.style.background = palette_gray[i]; }
+                    }
+                });
+                inputRow.appendChild(grayBtn);
+
+                var applyBtn = document.createElement('button');
+                applyBtn.textContent = 'Appliquer';
+                applyBtn.style.cssText = 'margin-left:8px; padding:3px 10px; cursor:pointer; border:1px solid #aaa; border-radius:4px; font-size:12px; flex-shrink:0;';
+                applyBtn.addEventListener('click', function() {
+                    for (var i = 0; i < 10; i++) {
+                        var inp = document.getElementById('palColorInput' + i);
+                        if (inp) { paletteCustom[i] = inp.value; }
+                    }
+                    currentPaletteIndex = 2;
+                    applyPalette(paletteCustom);
+                    var hex = paletteCustom.map(function(c) { return c.replace('#', ''); }).join(',');
+                    window.location.hash = 'palette=' + hex;
+                    updateSwatches();
+                    updateActiveRow();
+                });
+                inputRow.appendChild(applyBtn);
+
+                var copyBtn = document.createElement('button');
+                copyBtn.id = 'palCopyBtn';
+                copyBtn.textContent = 'Copier le lien';
+                copyBtn.style.cssText = 'margin-left:4px; padding:3px 10px; cursor:pointer; border:1px solid #aaa; border-radius:4px; font-size:12px; min-width:110px; flex-shrink:0;';
+                copyBtn.addEventListener('click', function() {
+                    var btn = document.getElementById('palCopyBtn');
+                    try {
+                        navigator.clipboard.writeText(window.location.href).then(function() {
+                            btn.textContent = '✓ Copié !';
+                            setTimeout(function() { btn.textContent = 'Copier le lien'; }, 2000);
+                        });
+                    } catch(e) {
+                        btn.textContent = '✓ Copié !';
+                        setTimeout(function() { btn.textContent = 'Copier le lien'; }, 2000);
+                    }
+                });
+                inputRow.appendChild(copyBtn);
+                panel.appendChild(inputRow);
+            }
+        })(pi);
+    }
+
+    var footer = document.createElement('div');
+    footer.style.cssText = 'text-align:right; margin-top:10px; padding-top:8px; border-top:1px solid #eee;';
+    var closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Fermer';
+    closeBtn.style.cssText = 'padding:4px 14px; cursor:pointer; border:1px solid #aaa; border-radius:4px; font-size:12px;';
+    closeBtn.addEventListener('click', function() { panel.style.display = 'none'; });
+    footer.appendChild(closeBtn);
+    panel.appendChild(footer);
+
+    updateSwatches();
+    updateActiveRow();
+}
+
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 /* MAKE THE SCENE */
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 
+loadPaletteFromStorage();
 disableScroll();
 setupRodMenu(xTopLegend, yTopLegend, gridScale);
 
@@ -763,9 +1020,9 @@ var iconMenuData = {
     menu: [14, 'menu', .06, menuCallback],
     grid: [15, 'grid', .08, gridCallback],
     rotate: [19.1, 'rotate', .08, rotateCallback],
-    delete: [20.1, 'delete', .08, deleteCallback],
-    trash: [21.1, 'trash', .08, trashCallback],
-    help: [22.1, 'help', .08, helpCallback],
+    delete: [21.1, 'delete', .08, deleteCallback],
+    trash: [22.1, 'trash', .08, trashCallback],
+    help: [23.1, 'help', .08, helpCallback],
 }
 
 for (var menu in iconMenuData) { 
@@ -783,6 +1040,11 @@ iconMenuGroup.addChild(iconMagic)
 iconMenuGroup.addChild(iconMagicColor)
 iconMagicColor.visible = false
 iconIncognitoColor.visible = false
+
+var iconPalette = new IconMenu(new Point(20.1, 1.5)*gridScale, 'color-palette', .035, paletteCallback)
+iconMenuGroup.addChild(iconPalette)
+
+initPalettePanel();
 
 /* ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— */
 /* OTHERS TOOLS */
