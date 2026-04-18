@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpirAlea</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <h1>SpirAlea</h1>
+
+    <div class="controls">
+      <div class="slider-group">
+        <label><strong id="n2-val">0</strong> carré(s)</label>
+        <input type="range" id="slider-n" min="0" max="20" step="1" value="0">
+      </div>
+      <div class="slider-group">
+        <label><strong id="c-val">5</strong> couleur(s)</label>
+        <input type="range" id="slider-c" min="1" max="10" step="1" value="5">
+      </div>
+      <div class="toggles">
+        <label class="toggle-btn">
+          <input type="checkbox" id="toggle-sorted"> Trié
+        </label>
+        <label class="toggle-btn">
+          <input type="checkbox" id="toggle-bars"> Histogramme
+        </label>
+        <button id="btn-relancer" class="relancer-btn" disabled>Relancer</button>
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="col" id="col1">
+        <div class="col-title">Aléatoire</div>
+        <div class="grid" id="grid1"></div>
+      </div>
+      <div class="col hidden" id="col2">
+        <div class="col-title">Trié</div>
+        <div class="grid" id="grid2"></div>
+      </div>
+      <div class="col hidden" id="col3">
+        <div class="col-title">Histogramme</div>
+        <div class="bars" id="bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

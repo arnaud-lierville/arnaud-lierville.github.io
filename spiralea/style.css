@@ -1,0 +1,171 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #222;
+}
+
+h1 {
+  margin: 0 0 28px;
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 36px;
+  align-items: center;
+  margin-bottom: 36px;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.slider-group label {
+  font-size: 0.95rem;
+}
+
+.slider-group input[type="range"] {
+  width: 100%;
+  accent-color: #7B2FFF;
+  cursor: pointer;
+}
+
+.toggles {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.toggle-btn:has(input:checked) {
+  border-color: #7B2FFF;
+  background: #f3edff;
+}
+
+.toggle-btn input {
+  accent-color: #7B2FFF;
+}
+
+.relancer-btn {
+  padding: 6px 18px;
+  border: 2px solid #7B2FFF;
+  border-radius: 20px;
+  background: #7B2FFF;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.relancer-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.columns {
+  display: flex;
+  gap: 36px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.col.hidden {
+  display: none;
+}
+
+.col-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.grid {
+  display: grid;
+  gap: 1px;
+  background: #eee;
+  border: 1px solid #eee;
+}
+
+.grid:empty {
+  background: transparent;
+  border-color: transparent;
+}
+
+.square {
+  display: block;
+}
+
+.empty-msg {
+  color: #ccc;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 12px 0;
+}
+
+/* Barres */
+
+.bars {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bar-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
+}
+
+.bar-square {
+  display: block;
+  flex-shrink: 0;
+}
+
+.bar-label {
+  margin-top: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #666;
+}
