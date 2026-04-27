@@ -171,7 +171,7 @@ function buildGrid2() {
   });
 }
 
-// ── Colonne 3 : histogramme de barres ────────────────────────────────────────
+// ── Colonne 3 : diagramme en barres ────────────────────────────────────────
 
 function buildBars() {
   barsEl.innerHTML = '';
