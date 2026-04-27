@@ -26,6 +26,19 @@ const col3El = $('col3');
 const btnRelancer = $('btn-relancer');
 
 let debounceTimer;
+let resizeTimer;
+
+function applyMaxN() {
+  const max = Math.min(460, window.innerWidth * 0.38);
+  const maxN = Math.min(20, Math.floor(max / 8));
+  sliderN.max = maxN;
+  if (state.n > maxN) {
+    state.n = maxN;
+    sliderN.value = maxN;
+    n2Val.textContent = maxN ** 2;
+    btnRelancer.disabled = maxN === 0;
+  }
+}
 
 function cellSize(n) {
   if (n === 0) return 20;
@@ -295,7 +308,16 @@ toggleBars.addEventListener('change', () => {
 
 btnRelancer.addEventListener('click', render);
 
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    applyMaxN();
+    if (state.n > 0) render();
+  }, 150);
+});
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 
+applyMaxN();
 n2Val.textContent = '0';
 cVal.textContent = state.c;
