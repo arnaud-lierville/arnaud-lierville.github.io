@@ -131,26 +131,29 @@ function buildGrid2() {
     grid2.appendChild(sq);
   }
 
-  requestAnimationFrame(() => {
-    const sq1 = [...grid1.querySelectorAll('.square')];
-    const sq2 = [...grid2.querySelectorAll('.square')];
-    const r1 = sq1.map((el) => el.getBoundingClientRect());
-    const r2 = sq2.map((el) => el.getBoundingClientRect());
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      const sq1 = [...grid1.querySelectorAll('.square')];
+      const sq2 = [...grid2.querySelectorAll('.square')];
+      const r1 = sq1.map((el) => el.getBoundingClientRect());
+      const r2 = sq2.map((el) => el.getBoundingClientRect());
 
-    anime({
-      targets: sq2,
-      translateX: (el, i) => {
-        const orig = parseInt(el.dataset.origIdx);
-        return [r1[orig].left - r2[i].left, 0];
-      },
-      translateY: (el, i) => {
-        const orig = parseInt(el.dataset.origIdx);
-        return [r1[orig].top - r2[i].top, 0];
-      },
-      opacity: [0, 1],
-      delay: anime.stagger(staggerMs(n * n, 700)),
-      duration: 420,
-      easing: 'easeOutCubic',
+      anime({
+        targets: sq2,
+        translateX: (el, i) => {
+          const orig = parseInt(el.dataset.origIdx);
+          return [r1[orig].left - r2[i].left, 0];
+        },
+        translateY: (el, i) => {
+          const orig = parseInt(el.dataset.origIdx);
+          return [r1[orig].top - r2[i].top, 0];
+        },
+        opacity: [0, 1],
+        delay: anime.stagger(staggerMs(n * n, 700)),
+        duration: 420,
+        easing: 'easeOutCubic',
+        complete: resolve,
+      });
     });
   });
 }
@@ -160,13 +163,19 @@ function buildGrid2() {
 function buildBars() {
   barsEl.innerHTML = '';
   const { n, c, colors } = state;
-  if (n === 0) return;
+  if (n === 0) return Promise.resolve();
+
+  const cell = cellSize(n);
+
+  // Pour chaque couleur, liste des indices grid1 dans l'ordre d'apparition
+  const colorToGrid1 = Array.from({ length: c }, () => []);
+  colors.forEach((ci, idx) => colorToGrid1[ci].push(idx));
 
   const counts = Array(c).fill(0);
   for (const ci of colors) counts[ci]++;
   const maxCount = Math.max(...counts);
   const bCell = barCellSize(n, maxCount);
-  const perSq = staggerMs(maxCount, 700);
+  const labels = [];
 
   for (let ci = 0; ci < c; ci++) {
     const count = counts[ci];
@@ -180,29 +189,53 @@ function buildBars() {
       const sq = document.createElement('div');
       sq.className = 'bar-square';
       sq.style.cssText = `width:${bCell}px;height:${bCell}px;background:${PALETTE[ci]};opacity:0`;
+      sq.dataset.grid1Idx = colorToGrid1[ci][i];
       stack.appendChild(sq);
     }
 
     const label = document.createElement('div');
     label.className = 'bar-label';
     label.textContent = count;
+    label.style.opacity = '0';
+    labels.push(label);
 
     group.appendChild(stack);
     group.appendChild(label);
     barsEl.appendChild(group);
   }
 
-  // Toutes les barres se remplissent simultanément, de bas en haut
-  barsEl.querySelectorAll('.bar-group').forEach((group) => {
-    const squares = group.querySelectorAll('.bar-square');
-    if (squares.length === 0) return;
-    anime({
-      targets: squares,
-      opacity: [0, 1],
-      scaleY: [0, 1],
-      delay: anime.stagger(perSq),
-      duration: 180,
-      easing: 'easeOutQuad',
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      const sq1 = [...grid1.querySelectorAll('.square')];
+      const sqB = [...barsEl.querySelectorAll('.bar-square')];
+      const r1 = sq1.map(el => el.getBoundingClientRect());
+      const rB = sqB.map(el => el.getBoundingClientRect());
+
+      const offset = (cell - bCell) / 2;
+
+      barsEl.style.overflow = 'visible';
+
+      anime({
+        targets: sqB,
+        translateX: (el, i) => {
+          const orig = parseInt(el.dataset.grid1Idx);
+          return [r1[orig].left - rB[i].left + offset, 0];
+        },
+        translateY: (el, i) => {
+          const orig = parseInt(el.dataset.grid1Idx);
+          return [r1[orig].top - rB[i].top + offset, 0];
+        },
+        scale: [cell / bCell, 1],
+        opacity: [1, 1],
+        delay: anime.stagger(staggerMs(n * n, 700)),
+        duration: 420,
+        easing: 'easeOutCubic',
+        complete: () => {
+          barsEl.style.overflow = '';
+          anime({ targets: labels, opacity: [0, 1], duration: 200, easing: 'easeOutQuad' });
+          resolve();
+        },
+      });
     });
   });
 }
@@ -217,7 +250,7 @@ async function render() {
   barsEl.innerHTML = '';
 
   await buildGrid1();
-  if (state.showSorted) buildGrid2();
+  if (state.showSorted) await buildGrid2();
   if (state.showBars)   buildBars();
 }
 
