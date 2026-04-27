@@ -51,7 +51,7 @@ function barCellSize(n, maxCount) {
   // → bCell ≤ (gridH - maxCount + 1) / maxCount = floor((gridH + 1) / maxCount) - 1
   const gridH = n * cellSize(n) + (n - 1);
   const size = Math.floor((gridH + 1) / Math.max(maxCount, 1)) - 1;
-  return Math.max(4, Math.min(18, size));
+  return Math.max(1, Math.min(18, size));
 }
 
 function generateColors(n, c) {
