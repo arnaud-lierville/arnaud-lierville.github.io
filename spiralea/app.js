@@ -110,7 +110,7 @@ function buildGrid1() {
 
 // ── Colonne 2 : grille triée par couleur ──────────────────────────────────────
 
-function buildGrid2(doFlip) {
+function buildGrid2() {
   grid2.innerHTML = '';
   const { n, colors } = state;
   if (n === 0) return;
@@ -131,39 +131,28 @@ function buildGrid2(doFlip) {
     grid2.appendChild(sq);
   }
 
-  if (doFlip) {
-    requestAnimationFrame(() => {
-      const sq1 = [...grid1.querySelectorAll('.square')];
-      const sq2 = [...grid2.querySelectorAll('.square')];
-      const r1 = sq1.map((el) => el.getBoundingClientRect());
-      const r2 = sq2.map((el) => el.getBoundingClientRect());
+  requestAnimationFrame(() => {
+    const sq1 = [...grid1.querySelectorAll('.square')];
+    const sq2 = [...grid2.querySelectorAll('.square')];
+    const r1 = sq1.map((el) => el.getBoundingClientRect());
+    const r2 = sq2.map((el) => el.getBoundingClientRect());
 
-      anime({
-        targets: sq2,
-        translateX: (el, i) => {
-          const orig = parseInt(el.dataset.origIdx);
-          return [r1[orig].left - r2[i].left, 0];
-        },
-        translateY: (el, i) => {
-          const orig = parseInt(el.dataset.origIdx);
-          return [r1[orig].top - r2[i].top, 0];
-        },
-        opacity: [0, 1],
-        delay: anime.stagger(staggerMs(n * n, 700)),
-        duration: 420,
-        easing: 'easeOutCubic',
-      });
-    });
-  } else {
     anime({
-      targets: grid2.querySelectorAll('.square'),
+      targets: sq2,
+      translateX: (el, i) => {
+        const orig = parseInt(el.dataset.origIdx);
+        return [r1[orig].left - r2[i].left, 0];
+      },
+      translateY: (el, i) => {
+        const orig = parseInt(el.dataset.origIdx);
+        return [r1[orig].top - r2[i].top, 0];
+      },
       opacity: [0, 1],
-      scale: [0, 1],
-      delay: anime.stagger(staggerMs(n * n, 400)),
-      duration: 200,
+      delay: anime.stagger(staggerMs(n * n, 700)),
+      duration: 420,
       easing: 'easeOutCubic',
     });
-  }
+  });
 }
 
 // ── Colonne 3 : histogramme de barres ────────────────────────────────────────
@@ -228,7 +217,7 @@ async function render() {
   barsEl.innerHTML = '';
 
   await buildGrid1();
-  if (state.showSorted) buildGrid2(false);
+  if (state.showSorted) buildGrid2();
   if (state.showBars)   buildBars();
 }
 
@@ -253,7 +242,7 @@ toggleSorted.addEventListener('change', () => {
   state.showSorted = toggleSorted.checked;
   if (state.showSorted) {
     col2El.classList.remove('hidden');
-    if (state.n > 0) buildGrid2(true);
+    if (state.n > 0) buildGrid2();
   } else {
     col2El.classList.add('hidden');
     grid2.innerHTML = '';
