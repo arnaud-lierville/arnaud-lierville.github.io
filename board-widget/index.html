@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Board pour Grist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ebecf0; --card: #ffffff; --fg: #262633; --muted: #7a7f8a;
+    --border: #d9dbe1; --accent: #16b378; --danger: #d64545; --late: #d64545;
+    --shadow: 0 1px 2px rgba(0,0,0,.12); --drop: #16b378;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1b21; --panel: #25252d; --card: #2f2f38; --fg: #e8e8ec; --muted: #9a9aa6;
+      --border: #3c3c46; --accent: #2fd190; --danger: #ff6b6b; --late: #ff7a7a;
+      --shadow: 0 1px 2px rgba(0,0,0,.5); --drop: #2fd190;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--fg); font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; display: flex; flex-direction: column; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  /* Barre d'outils */
+  #bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 6px 10px; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  #bar input[type=search], #bar select { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
+  #bar input[type=search] { width: 180px; }
+  #bar label { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); }
+  #bar .spacer { flex: 1; }
+  #count { color: var(--muted); }
+  .btn { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.danger { color: var(--danger); }
+  .btn.danger.armed { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .hidden { display: none !important; }
+
+  /* Board */
+  #board { flex: 1 1 auto; display: flex; gap: 10px; padding: 10px; overflow-x: auto; overflow-y: hidden; align-items: stretch; min-height: 0; }
+  .col { flex: 0 0 260px; display: flex; flex-direction: column; background: var(--panel); border-radius: 8px; max-height: 100%; border-top: 4px solid var(--col, #8a8f98); }
+  .col-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; }
+  .col-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .col-name[contenteditable=true] { outline: 1px solid var(--accent); border-radius: 4px; padding: 0 3px; white-space: normal; }
+  .col-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .col-count.over { color: var(--danger); font-weight: 600; }
+  .col-add { border: 0; background: transparent; cursor: pointer; font-size: 17px; line-height: 1; color: var(--muted); padding: 0 4px; border-radius: 4px; }
+  .col-add:hover { color: var(--fg); background: var(--border); }
+  .col-body { flex: 1; overflow-y: auto; padding: 2px 8px 10px; min-height: 40px; }
+  .col.nostatus { --col: #8a8f98; opacity: .9; }
+  .col.nostatus .col-name { font-style: italic; }
+  .new-col { flex: 0 0 200px; align-self: flex-start; }
+
+  .card { background: var(--card); border-radius: 6px; box-shadow: var(--shadow); padding: 7px 9px; margin-bottom: 7px; cursor: pointer; border: 1px solid transparent; }
+  .card:hover { border-color: var(--border); }
+  .card.dragging { opacity: .4; }
+  .card-title { font-weight: 600; word-break: break-word; }
+  .card-fields { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 5px; color: var(--muted); font-size: 12px; align-items: center; }
+  .card-fields .txt { flex-basis: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-fields .late { color: var(--late); font-weight: 600; }
+  .chip { display: inline-block; border-radius: 10px; padding: 1px 7px; font-size: 11px; background: var(--border); color: var(--fg); white-space: nowrap; }
+  .drop-line { height: 3px; background: var(--drop); border-radius: 2px; margin: -2px 0 5px; }
+
+  #msg { padding: 20px; color: var(--muted); }
+  #toast { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 6px 12px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90%; }
+  #toast.show { opacity: .95; }
+  #toast.err { background: var(--danger); color: #fff; }
+
+  /* Formulaire */
+  #overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex; align-items: flex-start; justify-content: center; padding: 30px 12px; overflow-y: auto; z-index: 10; }
+  #dialog { background: var(--card); color: var(--fg); border-radius: 10px; width: 100%; max-width: 520px; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  #dialog header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; }
+  #form { padding: 12px 16px; display: grid; grid-template-columns: 130px 1fr; gap: 9px 12px; align-items: start; }
+  #form > label { padding-top: 5px; color: var(--muted); }
+  #form input:not([type=checkbox]), #form select, #form textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 5px 7px; }
+  #form textarea { resize: vertical; min-height: 60px; }
+  #form input[type=checkbox] { justify-self: start; }
+  #form .ro { padding-top: 5px; color: var(--muted); white-space: pre-wrap; word-break: break-word; }
+  #form .multi { display: flex; flex-wrap: wrap; gap: 4px 10px; padding-top: 4px; }
+  #form .multi label { display: inline-flex; gap: 4px; align-items: center; }
+  #dialog footer { display: flex; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--border); }
+  #dialog footer .spacer { flex: 1; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <input id="q" type="search" placeholder="Rechercher…">
+    <select id="fPrio" class="hidden" title="Filtrer par priorité"><option value="">Priorité : toutes</option></select>
+    <select id="fTag" class="hidden" title="Filtrer par étiquette"><option value="">Étiquette : toutes</option></select>
+    <label id="fLateWrap" class="hidden"><input id="fLate" type="checkbox"> En retard</label>
+    <span class="spacer"></span>
+    <span id="count"></span>
+    <label>Tri <select id="sort"></select></label>
+    <button id="reset" class="btn hidden" title="Revenir au tri automatique par échéance">Réinitialiser</button>
+    <button id="refresh" class="btn" title="Recharger les statuts et les colonnes">↻</button>
+  </div>
+  <div id="board"></div>
+  <div id="msg" class="hidden"></div>
+  <div id="toast"></div>
+
+  <div id="overlay" class="hidden">
+    <div id="dialog" role="dialog" aria-modal="true">
+      <header id="dlgTitle">Tâche</header>
+      <div id="form"></div>
+      <footer>
+        <button id="dlgDelete" class="btn danger">Supprimer</button>
+        <span class="spacer"></span>
+        <button id="dlgCancel" class="btn">Annuler</button>
+        <button id="dlgSave" class="btn primary">Enregistrer</button>
+      </footer>
+    </div>
+  </div>
+
+<script>
+"use strict";
+/* ============================================================
+   Board pour Grist — widget personnalisé
+   Colonnes = lignes d'une table « Statuts » (Référence) ou choix d'une colonne Choix.
+   ============================================================ */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const HIDDEN_COL = c => /^gristHelper_/.test(c.colId) || c.colId === 'manualSort' || c.type === 'ManualSortPos' || (c.isFormula && !c.formula);
+
+const S = {
+  ready: false,
+  tableId: null,
+  cols: [], colById: {},          // métadonnées des colonnes de la table des tâches
+  map: {},                        // mappings Grist
+  rows: [],                       // tâches
+  statusMode: null,               // 'ref' | 'choice'
+  statusTable: null, statusNameCol: null, statusOrderCol: null,
+  statuts: [],                    // [{id, name, color, limit, order}]
+  refLabels: {},                  // tableId -> {id: label}
+  sort: 'echeance',
+  filters: { q: '', prio: '', tag: '', late: false },
+};
+
+/* ---------- Conversion des valeurs Grist ---------- */
+function toDate(v) {
+  if (v == null || v === '') return null;
+  if (v instanceof Date) return isNaN(v) ? null : v;
+  if (Array.isArray(v) && (v[0] === 'd' || v[0] === 'D')) return new Date(v[1] * 1000);
+  if (typeof v === 'number') return new Date(v * 1000);
+  if (typeof v === 'string') { const d = new Date(v); return isNaN(d) ? null : d; }
+  return null;
+}
+function listVal(v) {
+  if (v == null || v === '') return [];
+  if (Array.isArray(v)) return v[0] === 'L' ? v.slice(1) : v;
+  if (typeof v === 'string') { try { const p = JSON.parse(v); if (Array.isArray(p)) return p; } catch (e) {} return v.split(',').map(s => s.trim()).filter(Boolean); }
+  return [v];
+}
+function refId(v) {
+  if (v == null || v === '') return 0;
+  if (typeof v === 'number') return v;
+  if (Array.isArray(v) && v[0] === 'R') return v[2] || 0;
+  if (typeof v === 'object') return v.id || v.rowId || 0;
+  return +v || 0;
+}
+const pad = n => String(n).padStart(2, '0');
+const utcDay = d => d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
+const fmtDate = d => pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+const fmtDateTime = d => d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+const todayUtc = () => { const n = new Date(); return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) / 1000; };
+const dateSecs = d => d ? Math.floor(d.getTime() / 1000) : null;
+
+function colType(colId) { return (S.colById[colId] || {}).type || 'Any'; }
+function colOpts(colId) { return (S.colById[colId] || {}).opts || {}; }
+function choiceStyle(colId, value) {
+  const o = (colOpts(colId).choiceOptions || {})[value] || {};
+  return (o.fillColor ? 'background:' + o.fillColor + ';' : '') + (o.textColor ? 'color:' + o.textColor + ';' : '');
+}
+
+/* ---------- Chargement de l'API Grist ---------- */
+function loadScript(url) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = url; s.onload = res; s.onerror = () => rej(new Error(url)); document.head.appendChild(s); });
+}
+async function loadGristApi() {
+  if (window.grist) return true;
+  const urls = [];
+  try { if (document.referrer) urls.push(new URL(document.referrer).origin + '/grist-plugin-api.js'); } catch (e) {}
+  try { const a = window.location.ancestorOrigins; if (a && a.length) urls.push(a[0] + '/grist-plugin-api.js'); } catch (e) {}
+  urls.push('https://grist.numerique.gouv.fr/grist-plugin-api.js', 'https://docs.getgrist.com/grist-plugin-api.js');
+  for (const u of [...new Set(urls)]) { try { await loadScript(u); if (window.grist) return true; } catch (e) {} }
+  return false;
+}
+
+/* ---------- Messages ---------- */
+let toastTimer;
+function toast(text, err) {
+  const t = $('toast'); t.textContent = text; t.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', err ? 5000 : 2000);
+}
+function showMsg(html) { $('msg').innerHTML = html; $('msg').classList.remove('hidden'); $('board').classList.add('hidden'); }
+function hideMsg() { $('msg').classList.add('hidden'); $('board').classList.remove('hidden'); }
+async function act(actions, okText) {
+  try { await grist.docApi.applyUserActions(actions); if (okText) toast(okText); return true; }
+  catch (e) { toast('Erreur : ' + (e.message || e), true); return false; }
+}
+
+/* ---------- Métadonnées ---------- */
+function columnsToRows(t) {
+  const keys = Object.keys(t), n = (t.id || []).length, out = [];
+  for (let i = 0; i < n; i++) { const r = {}; keys.forEach(k => r[k] = t[k][i]); out.push(r); }
+  return out;
+}
+async function getTableId() {
+  if (grist.selectedTable && grist.selectedTable.getTableId) { try { return await grist.selectedTable.getTableId(); } catch (e) {} }
+  if (grist.getSelectedTableId) return await grist.getSelectedTableId();
+  return null;
+}
+async function loadMeta() {
+  S.tableId = S.tableId || await getTableId();
+  const [tables, columns] = await Promise.all([grist.docApi.fetchTable('_grist_Tables'), grist.docApi.fetchTable('_grist_Tables_column')]);
+  const tRows = columnsToRows(tables), cRows = columnsToRows(columns);
+  S.allCols = cRows;
+  S.tableRefByName = {}; tRows.forEach(t => S.tableRefByName[t.tableId] = t.id);
+  const tref = S.tableRefByName[S.tableId];
+  S.cols = cRows.filter(c => c.parentId === tref && !HIDDEN_COL(c))
+    .sort((a, b) => a.parentPos - b.parentPos)
+    .map(c => { let opts = {}; try { opts = c.widgetOptions ? JSON.parse(c.widgetOptions) : {}; } catch (e) {}
+                return { colId: c.colId, label: c.label || c.colId, type: c.type, opts, isFormula: !!(c.isFormula && c.formula), visibleCol: c.visibleCol }; });
+  S.colById = {}; S.cols.forEach(c => S.colById[c.colId] = c);
+}
+function displayColOf(refTable, visibleColRef) {
+  const tref = S.tableRefByName[refTable];
+  const inTable = S.allCols.filter(c => c.parentId === tref && !HIDDEN_COL(c)).sort((a, b) => a.parentPos - b.parentPos);
+  const vis = S.allCols.find(c => c.id === visibleColRef);
+  if (vis && vis.parentId === tref) return vis.colId;
+  const byName = inTable.find(c => /^(nom|name|titre|title|libell)/i.test(c.colId));
+  return (byName || inTable.find(c => c.type === 'Text') || inTable[0] || {}).colId;
+}
+async function loadRefLabels(refTable, visibleColRef) {
+  const t = await grist.docApi.fetchTable(refTable);
+  const col = displayColOf(refTable, visibleColRef);
+  const labels = {};
+  (t.id || []).forEach((id, i) => labels[id] = col ? String(t[col][i] ?? '') : '#' + id);
+  S.refLabels[refTable] = labels;
+  return { t, col, labels };
+}
+
+/* ---------- Statuts ---------- */
+async function loadStatuts() {
+  const colId = S.map.Statut; const c = S.colById[colId];
+  if (!c) { S.statuts = []; return; }
+  if (c.type.startsWith('Ref:')) {
+    S.statusMode = 'ref'; S.statusTable = c.type.slice(4);
+    const { t, col } = await loadRefLabels(S.statusTable, c.visibleCol);
+    S.statusNameCol = col;
+    const find = re => Object.keys(t).find(k => re.test(k));
+    const oCol = find(/^(ordre|order|position|rang)$/i), cCol = find(/^(couleur|color|colour)$/i), lCol = find(/^(limite|limit|wip|max)$/i);
+    S.statusOrderCol = oCol || null;
+    S.statuts = (t.id || []).map((id, i) => ({
+      id, name: col ? String(t[col][i] ?? '') : '#' + id,
+      order: oCol ? Number(t[oCol][i]) || 0 : i, color: cCol ? t[cCol][i] || '' : '', limit: lCol ? Number(t[lCol][i]) || 0 : 0,
+    })).sort((a, b) => a.order - b.order || a.id - b.id);
+  } else if (c.type === 'Choice') {
+    S.statusMode = 'choice';
+    const choices = c.opts.choices || [];
+    S.statuts = choices.map((ch, i) => ({ id: ch, name: ch, order: i, color: ((c.opts.choiceOptions || {})[ch] || {}).fillColor || '', limit: 0 }));
+  } else {
+    S.statusMode = null; S.statuts = [];
+  }
+}
+function statusOf(row) {
+  const v = row[S.map.Statut];
+  if (S.statusMode === 'ref') { const id = refId(v); return S.statuts.some(s => s.id === id) ? id : 0; }
+  return S.statuts.some(s => s.id === v) ? v : 0;
+}
+const doneStatus = () => S.statuts.length ? S.statuts[S.statuts.length - 1].id : null;
+
+/* ---------- Tri, filtres ---------- */
+function prioRank(v) {
+  const choices = colOpts(S.map.Priorite).choices || [];
+  const i = choices.indexOf(v); return i < 0 ? 999 : i;
+}
+function sortKey(row) {
+  const ech = S.map.Echeance ? dateSecs(toDate(row[S.map.Echeance])) : null;
+  if (S.sort === 'manuel' && S.map.Ordre) { const o = row[S.map.Ordre]; return [o == null || o === '' ? Infinity : +o, row.id]; }
+  if (S.sort === 'priorite' && S.map.Priorite) return [prioRank(row[S.map.Priorite]), ech ?? Infinity, row.id];
+  if (S.sort === 'titre') return [String(row[S.map.Titre] ?? '').toLowerCase(), row.id];
+  return [ech ?? Infinity, row.id];
+}
+function cmp(a, b) { const ka = sortKey(a), kb = sortKey(b); for (let i = 0; i < ka.length; i++) { if (ka[i] < kb[i]) return -1; if (ka[i] > kb[i]) return 1; } return 0; }
+function isLate(row) {
+  if (!S.map.Echeance) return false;
+  const d = toDate(row[S.map.Echeance]); if (!d) return false;
+  return dateSecs(d) < todayUtc() && statusOf(row) !== doneStatus();
+}
+function matches(row) {
+  const f = S.filters;
+  if (f.late && !isLate(row)) return false;
+  if (f.prio && row[S.map.Priorite] !== f.prio) return false;
+  if (f.tag && !listVal(row[S.map.Etiquettes]).includes(f.tag)) return false;
+  if (f.q) {
+    const q = f.q.toLowerCase();
+    const hay = S.cols.filter(c => c.type === 'Text' || c.type === 'Choice' || c.type === 'ChoiceList')
+      .map(c => c.type === 'ChoiceList' ? listVal(row[c.colId]).join(' ') : String(row[c.colId] ?? '')).join(' ').toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+/* ---------- Rendu ---------- */
+function cardFieldIds() {
+  const m = S.map.Carte;
+  if (Array.isArray(m) && m.length) return m.filter(id => S.colById[id]);
+  return [S.map.Echeance, S.map.Priorite, S.map.Etiquettes].filter(id => id && S.colById[id]);
+}
+function renderValue(colId, v, row) {
+  const t = colType(colId);
+  if (v == null || v === '' || (Array.isArray(v) && !listVal(v).length)) return '';
+  if (t === 'Date') { const d = toDate(v); if (!d) return ''; const late = colId === S.map.Echeance && isLate(row);
+    return '<span class="' + (late ? 'late' : '') + '" title="' + esc(S.colById[colId].label) + '">📅 ' + fmtDate(d) + '</span>'; }
+  if (t === 'DateTime') { const d = toDate(v); return d ? '<span>' + esc(fmtDateTime(d)) + '</span>' : ''; }
+  if (t === 'Choice') return '<span class="chip" style="' + choiceStyle(colId, v) + '">' + esc(v) + '</span>';
+  if (t === 'ChoiceList') return listVal(v).map(x => '<span class="chip" style="' + choiceStyle(colId, x) + '">' + esc(x) + '</span>').join('');
+  if (t === 'Bool') return v ? '<span>✓ ' + esc(S.colById[colId].label) + '</span>' : '';
+  if (t.startsWith('Ref:')) { const id = refId(v); const l = (S.refLabels[t.slice(4)] || {})[id]; return id ? '<span>' + esc(l ?? '#' + id) + '</span>' : ''; }
+  if (t.startsWith('RefList:')) { const labels = S.refLabels[t.slice(8)] || {}; return listVal(v).map(id => '<span class="chip">' + esc(labels[refId(id)] ?? '#' + refId(id)) + '</span>').join(''); }
+  if (t === 'Attachments') { const n = listVal(v).length; return n ? '<span>📎 ' + n + '</span>' : ''; }
+  if (t === 'Text' || t === 'Any') return '<span class="txt">' + esc(v) + '</span>';
+  return '<span>' + esc(v) + '</span>';
+}
+function cardHtml(row) {
+  const fields = cardFieldIds().map(id => renderValue(id, row[id], row)).filter(Boolean).join('');
+  const title = row[S.map.Titre];
+  return '<div class="card" draggable="true" data-id="' + row.id + '"><div class="card-title">' + (title ? esc(title) : '<i style="color:var(--muted)">(sans titre)</i>') + '</div>'
+       + (fields ? '<div class="card-fields">' + fields + '</div>' : '') + '</div>';
+}
+function columnsForBoard() {
+  const cols = S.statuts.map(s => ({ ...s }));
+  const orphan = S.rows.filter(r => statusOf(r) === 0);
+  if (orphan.length || !cols.length) cols.unshift({ id: 0, name: 'Sans statut', color: '', limit: 0, nostatus: true });
+  return cols;
+}
+function render() {
+  if (!S.ready || !S.metaLoaded) return;
+  const board = $('board');
+  const byStatus = new Map();
+  const visible = S.rows.filter(matches);
+  visible.slice().sort(cmp).forEach(r => { const k = statusOf(r); if (!byStatus.has(k)) byStatus.set(k, []); byStatus.get(k).push(r); });
+  const totalByStatus = new Map(); S.rows.forEach(r => { const k = statusOf(r); totalByStatus.set(k, (totalByStatus.get(k) || 0) + 1); });
+
+  const scroll = {}; board.querySelectorAll('.col[data-status]').forEach(c => { const b = c.querySelector('.col-body'); if (b) scroll[c.dataset.status] = b.scrollTop; });
+  const bx = board.scrollLeft;
+  let html = '';
+  for (const col of columnsForBoard()) {
+    const list = byStatus.get(col.id) || [], total = totalByStatus.get(col.id) || 0;
+    const over = col.limit && total > col.limit;
+    const countTxt = (list.length !== total ? list.length + '/' : '') + total + (col.limit ? ' · max ' + col.limit : '');
+    html += '<div class="col' + (col.nostatus ? ' nostatus' : '') + '" data-status="' + esc(col.id) + '"' + (col.color ? ' style="--col:' + esc(col.color) + '"' : '') + '>'
+      + '<div class="col-head"><span class="col-name" title="' + (S.statusMode === 'ref' && !col.nostatus ? 'Double-clic pour renommer' : '') + '">' + esc(col.name) + '</span>'
+      + '<span class="col-count' + (over ? ' over' : '') + '" title="' + (over ? 'Limite dépassée' : '') + '">' + countTxt + '</span>'
+      + '<button class="col-add" title="Ajouter une tâche">+</button></div>'
+      + '<div class="col-body">' + list.map(cardHtml).join('') + '</div></div>';
+  }
+  if (S.statusMode === 'ref') html += '<div class="new-col"><button class="btn" id="addStatus">+ Statut</button></div>';
+  board.innerHTML = html;
+  board.querySelectorAll('.col[data-status]').forEach(c => { if (scroll[c.dataset.status]) c.querySelector('.col-body').scrollTop = scroll[c.dataset.status]; });
+  board.scrollLeft = bx;
+  $('count').textContent = visible.length === S.rows.length ? S.rows.length + ' tâches' : visible.length + ' / ' + S.rows.length + ' tâches';
+}
+function renderToolbar() {
+  const prioChoices = S.map.Priorite ? (colOpts(S.map.Priorite).choices || []) : [];
+  const tagChoices = S.map.Etiquettes ? (colOpts(S.map.Etiquettes).choices || []) : [];
+  const fill = (sel, label, choices, cur) => { sel.innerHTML = '<option value="">' + label + ' : toutes</option>' + choices.map(c => '<option' + (c === cur ? ' selected' : '') + '>' + esc(c) + '</option>').join(''); sel.classList.toggle('hidden', !choices.length); };
+  fill($('fPrio'), 'Priorité', prioChoices, S.filters.prio);
+  fill($('fTag'), 'Étiquette', tagChoices, S.filters.tag);
+  $('fLateWrap').classList.toggle('hidden', !S.map.Echeance);
+  const modes = [];
+  if (S.map.Echeance) modes.push(['echeance', 'Échéance']);
+  if (S.map.Priorite) modes.push(['priorite', 'Priorité']);
+  modes.push(['titre', 'Titre']);
+  if (S.map.Ordre) modes.push(['manuel', 'Manuel']);
+  if (!modes.some(m => m[0] === S.sort)) S.sort = modes[0][0];
+  $('sort').innerHTML = modes.map(([v, l]) => '<option value="' + v + '"' + (v === S.sort ? ' selected' : '') + '>' + l + '</option>').join('');
+  $('reset').classList.toggle('hidden', S.sort !== 'manuel');
+}
+function setSort(mode, persist) {
+  S.sort = mode; renderToolbar(); render();
+  if (persist) { try { Promise.resolve(grist.setOption('tri', mode)).catch(() => {}); } catch (e) {} try { localStorage.setItem('boardSort', mode); } catch (e) {} }
+}
+
+/* ---------- Écriture ---------- */
+function statusValue(statusId) {
+  if (S.statusMode === 'ref') return statusId || 0;
+  return statusId || '';
+}
+function encodeForWrite(colId, v) {
+  const t = colType(colId);
+  if (t === 'ChoiceList') return v && v.length ? ['L', ...v] : null;
+  if (t.startsWith('Ref:')) return v || 0;
+  return v;
+}
+
+/* ---------- Glisser-déposer ---------- */
+let drag = null;   // {id, fromStatus}
+let dropLine = null;
+function clearDropLine() { if (dropLine) dropLine.remove(); dropLine = null; }
+function dropIndex(body, y) {
+  const cards = [...body.querySelectorAll('.card:not(.dragging)')];
+  for (let i = 0; i < cards.length; i++) { const r = cards[i].getBoundingClientRect(); if (y < r.top + r.height / 2) return [i, cards[i]]; }
+  return [cards.length, null];
+}
+function parseStatus(v) { if (S.statusMode === 'ref') return +v || 0; return v === '0' ? 0 : v; }
+
+async function handleDrop(targetStatus, index) {
+  const row = S.rows.find(r => r.id === drag.id); if (!row) return;
+  const from = statusOf(row);
+  const sameCol = from === targetStatus;
+  const actions = [];
+  const upd = {};           // id -> fields
+
+  if (!sameCol) upd[row.id] = { [S.map.Statut]: statusValue(targetStatus) };
+
+  const needOrder = sameCol || S.sort === 'manuel';
+  if (needOrder) {
+    if (!S.map.Ordre) { if (sameCol) toast('Pour réordonner à la main, associe une colonne « Ordre » dans le panneau du widget.', true); }
+    else {
+      const switching = S.sort !== 'manuel';
+      // Ordre de référence : ordre affiché actuel (tri courant), puis cartes filtrées à la suite.
+      const byStatus = new Map();
+      S.rows.slice().sort(cmp).forEach(r => { const k = statusOf(r); if (!byStatus.has(k)) byStatus.set(k, []); byStatus.get(k).push(r); });
+      const target = (byStatus.get(targetStatus) || []).filter(r => r.id !== row.id);
+      const visTarget = target.filter(matches);
+      // index est relatif aux cartes visibles de la colonne cible
+      const anchor = visTarget[index];
+      const pos = anchor ? target.indexOf(anchor) : (visTarget.length ? target.indexOf(visTarget[visTarget.length - 1]) + 1 : target.length);
+      target.splice(pos, 0, row);
+      byStatus.set(targetStatus, target);
+      if (!sameCol) byStatus.set(from, (byStatus.get(from) || []).filter(r => r.id !== row.id));
+      const statusesToWrite = switching ? [...byStatus.keys()] : [targetStatus];
+      for (const st of statusesToWrite) (byStatus.get(st) || []).forEach((r, i) => {
+        const o = (i + 1) * 10;
+        if (r[S.map.Ordre] !== o) (upd[r.id] = upd[r.id] || {})[S.map.Ordre] = o;
+      });
+      if (switching) setSort('manuel', true);
+    }
+  }
+  const ids = Object.keys(upd).map(Number);
+  if (!ids.length) return;
+  // Mise à jour optimiste
+  ids.forEach(id => { const r = S.rows.find(x => x.id === id); if (r) Object.assign(r, upd[id]); });
+  if (S.statusMode === 'ref' && S.map.Statut && upd[row.id] && upd[row.id][S.map.Statut] !== undefined) row[S.map.Statut] = upd[row.id][S.map.Statut];
+  render();
+  ids.forEach(id => actions.push(['UpdateRecord', S.tableId, id, upd[id]]));
+  await act(actions);
+}
+
+function bindBoard() {
+  const board = $('board');
+  board.addEventListener('dragstart', e => {
+    const card = e.target.closest('.card'); if (!card) return;
+    drag = { id: +card.dataset.id }; card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', card.dataset.id);
+  });
+  board.addEventListener('dragend', e => { const c = e.target.closest('.card'); if (c) c.classList.remove('dragging'); drag = null; clearDropLine(); });
+  board.addEventListener('dragover', e => {
+    if (!drag) return; const col = e.target.closest('.col'); if (!col) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    const body = col.querySelector('.col-body'); const [, before] = dropIndex(body, e.clientY);
+    if (!dropLine) { dropLine = document.createElement('div'); dropLine.className = 'drop-line'; }
+    if (before) body.insertBefore(dropLine, before); else body.appendChild(dropLine);
+  });
+  board.addEventListener('dragleave', e => { if (!e.relatedTarget || !board.contains(e.relatedTarget)) clearDropLine(); });
+  board.addEventListener('drop', e => {
+    if (!drag) return; const col = e.target.closest('.col'); if (!col) return;
+    e.preventDefault(); clearDropLine();
+    const body = col.querySelector('.col-body'); const [index] = dropIndex(body, e.clientY);
+    handleDrop(parseStatus(col.dataset.status), index);
+  });
+  board.addEventListener('click', e => {
+    if (e.target.id === 'addStatus') return addStatus(e.target);
+    const add = e.target.closest('.col-add');
+    if (add) return openForm(null, parseStatus(add.closest('.col').dataset.status));
+    const card = e.target.closest('.card');
+    if (card) { const r = S.rows.find(x => x.id === +card.dataset.id); if (r) openForm(r); }
+  });
+  board.addEventListener('dblclick', e => {
+    const name = e.target.closest('.col-name'); if (!name || S.statusMode !== 'ref') return;
+    const col = name.closest('.col'); const id = +col.dataset.status; if (!id) return;
+    renameStatus(name, id);
+  });
+}
+
+/* ---------- Statuts : ajout / renommage ---------- */
+function inlineEdit(el, initial, onCommit) {
+  el.contentEditable = 'true'; el.textContent = initial; el.focus();
+  const range = document.createRange(); range.selectNodeContents(el); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  let done = false;
+  const finish = ok => { if (done) return; done = true; el.contentEditable = 'false'; const v = el.textContent.trim(); if (ok && v && v !== initial) onCommit(v); else render(); };
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); finish(true); } if (e.key === 'Escape') finish(false); });
+  el.addEventListener('blur', () => finish(true), { once: true });
+}
+function renameStatus(el, id) {
+  const s = S.statuts.find(x => x.id === id); if (!s || !S.statusNameCol) return;
+  inlineEdit(el, s.name, async v => { s.name = v; render(); if (await act([['UpdateRecord', S.statusTable, id, { [S.statusNameCol]: v }]], 'Statut renommé')) refreshStatuts(); });
+}
+function addStatus(btn) {
+  const wrap = btn.parentElement; wrap.innerHTML = '<div class="col" style="--col:#8a8f98"><div class="col-head"><span class="col-name"></span></div></div>';
+  const el = wrap.querySelector('.col-name');
+  inlineEdit(el, '', async v => {
+    const fields = { [S.statusNameCol]: v };
+    if (S.statusOrderCol) fields[S.statusOrderCol] = (S.statuts.reduce((m, s) => Math.max(m, s.order), 0) || 0) + 1;
+    if (await act([['AddRecord', S.statusTable, null, fields]], 'Statut ajouté')) refreshStatuts();
+  });
+}
+async function refreshStatuts() { try { await loadStatuts(); render(); } catch (e) {} }
+
+/* ---------- Formulaire ---------- */
+let formState = null;   // {row, statusId, inputs: {colId: getter}}
+async function openForm(row, statusId) {
+  const isNew = !row;
+  $('dlgTitle').textContent = isNew ? 'Nouvelle tâche' : 'Modifier la tâche';
+  $('dlgDelete').classList.toggle('hidden', isNew);
+  $('dlgDelete').classList.remove('armed'); $('dlgDelete').textContent = 'Supprimer';
+  const form = $('form'); form.innerHTML = '';
+  const inputs = {};
+  // Libellés des références (pour les listes déroulantes)
+  const refTables = [...new Set(S.cols.filter(c => c.type.startsWith('Ref:') && c.colId !== S.map.Statut).map(c => c.type.slice(4)))];
+  await Promise.all(refTables.map(t => loadRefLabels(t, (S.cols.find(c => c.type === 'Ref:' + t) || {}).visibleCol).catch(() => {})));
+
+  const ordered = [S.colById[S.map.Titre], ...S.cols.filter(c => c.colId !== S.map.Titre)].filter(Boolean);
+  for (const c of ordered) {
+    if (c.colId === S.map.Ordre) continue;
+    const id = 'f_' + c.colId;
+    const val = isNew ? (c.colId === S.map.Statut ? statusValue(statusId) : null) : row[c.colId];
+    const label = document.createElement('label'); label.htmlFor = id; label.textContent = c.label; form.appendChild(label);
+    let el, get;
+    const t = c.type;
+    if (c.isFormula) {
+      el = document.createElement('div'); el.className = 'ro'; el.innerHTML = isNew ? '<i>calculé</i>' : (renderValue(c.colId, val, row || {}) || '—');
+    } else if (c.colId === S.map.Statut) {
+      el = document.createElement('select'); el.id = id;
+      const cur = isNew ? statusId : statusOf(row);
+      el.innerHTML = '<option value="0">— Sans statut —</option>' + S.statuts.map(s => '<option value="' + esc(s.id) + '"' + (s.id === cur ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
+      get = () => statusValue(parseStatus(el.value));
+    } else if (t === 'Bool') {
+      el = document.createElement('input'); el.type = 'checkbox'; el.id = id; el.checked = !!val; el.style.marginTop = '6px'; get = () => el.checked;
+    } else if (t === 'Date') {
+      el = document.createElement('input'); el.type = 'date'; el.id = id; const d = toDate(val); el.value = d ? utcDay(d) : '';
+      get = () => { if (!el.value) return null; const [y, m, dd] = el.value.split('-').map(Number); return Date.UTC(y, m - 1, dd) / 1000; };
+    } else if (t.startsWith('DateTime')) {
+      el = document.createElement('input'); el.type = 'datetime-local'; el.id = id; const d = toDate(val);
+      el.value = d ? d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()) : '';
+      get = () => el.value ? new Date(el.value).getTime() / 1000 : null;
+    } else if (t === 'Numeric' || t === 'Int') {
+      el = document.createElement('input'); el.type = 'number'; el.id = id; if (t === 'Numeric') el.step = 'any'; el.value = val ?? '';
+      get = () => el.value === '' ? null : (t === 'Int' ? parseInt(el.value, 10) : parseFloat(el.value));
+    } else if (t === 'Choice') {
+      el = document.createElement('select'); el.id = id;
+      const ch = c.opts.choices || []; const opts = ch.includes(val) || val == null || val === '' ? ch : [...ch, val];
+      el.innerHTML = '<option value=""></option>' + opts.map(o => '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>').join('');
+      get = () => el.value || null;
+    } else if (t === 'ChoiceList') {
+      el = document.createElement('div'); el.className = 'multi'; el.id = id;
+      const cur = listVal(val); const ch = [...new Set([...(c.opts.choices || []), ...cur])];
+      el.innerHTML = ch.length ? ch.map(o => '<label><input type="checkbox" value="' + esc(o) + '"' + (cur.includes(o) ? ' checked' : '') + '> ' + esc(o) + '</label>').join('') : '<span class="ro">Aucun choix défini dans Grist</span>';
+      get = () => [...el.querySelectorAll('input:checked')].map(i => i.value);
+    } else if (t.startsWith('Ref:')) {
+      el = document.createElement('select'); el.id = id;
+      const labels = S.refLabels[t.slice(4)] || {}; const cur = refId(val);
+      el.innerHTML = '<option value="0"></option>' + Object.entries(labels).sort((a, b) => a[1].localeCompare(b[1], 'fr')).map(([k, l]) => '<option value="' + k + '"' + (+k === cur ? ' selected' : '') + '>' + esc(l || '#' + k) + '</option>').join('');
+      get = () => +el.value || 0;
+    } else if (t === 'Text' || t === 'Any') {
+      if (c.colId === S.map.Titre) { el = document.createElement('input'); el.type = 'text'; }
+      else { el = document.createElement('textarea'); el.rows = 3; }
+      el.id = id; el.value = val ?? ''; get = () => el.value;
+    } else {
+      el = document.createElement('div'); el.className = 'ro'; el.innerHTML = isNew ? '—' : (renderValue(c.colId, val, row) || '—');
+      el.title = 'Type ' + t + ' : à modifier dans Grist';
+    }
+    form.appendChild(el);
+    if (get) inputs[c.colId] = { get, initial: isNew ? undefined : JSON.stringify(get()) };
+  }
+  formState = { row, statusId, inputs };
+  $('overlay').classList.remove('hidden');
+  const first = $('f_' + S.map.Titre); if (first) first.focus();
+}
+function closeForm() { $('overlay').classList.add('hidden'); formState = null; }
+async function saveForm() {
+  if (!formState) return;
+  const { row, inputs } = formState; const fields = {};
+  for (const [colId, inp] of Object.entries(inputs)) {
+    const v = inp.get();
+    if (row && JSON.stringify(v) === inp.initial) continue;
+    if (!row && (v == null || v === '' || v === false || (Array.isArray(v) && !v.length))) continue;
+    fields[colId] = encodeForWrite(colId, v);
+  }
+  // En tri manuel, une tâche créée ou changée de statut va en bas de sa colonne.
+  if (S.map.Ordre && S.sort === 'manuel' && (!row || S.map.Statut in fields)) {
+    const st = S.map.Statut in fields ? statusOf({ [S.map.Statut]: fields[S.map.Statut] }) : formState.statusId;
+    const max = S.rows.filter(r => statusOf(r) === st && (!row || r.id !== row.id)).reduce((m, r) => Math.max(m, +r[S.map.Ordre] || 0), 0);
+    fields[S.map.Ordre] = max + 10;
+  }
+  closeForm();
+  if (row) { if (Object.keys(fields).length) await act([['UpdateRecord', S.tableId, row.id, fields]], 'Enregistré'); }
+  else await act([['AddRecord', S.tableId, null, fields]], 'Tâche créée');
+}
+async function deleteFromForm() {
+  const btn = $('dlgDelete');
+  if (!btn.classList.contains('armed')) { btn.classList.add('armed'); btn.textContent = 'Confirmer la suppression'; return; }
+  const row = formState && formState.row; closeForm();
+  if (row) await act([['RemoveRecord', S.tableId, row.id]], 'Tâche supprimée');
+}
+
+/* ---------- Barre d'outils ---------- */
+function bindToolbar() {
+  $('q').addEventListener('input', e => { S.filters.q = e.target.value.trim(); render(); });
+  $('fPrio').addEventListener('change', e => { S.filters.prio = e.target.value; render(); });
+  $('fTag').addEventListener('change', e => { S.filters.tag = e.target.value; render(); });
+  $('fLate').addEventListener('change', e => { S.filters.late = e.target.checked; render(); });
+  $('sort').addEventListener('change', e => setSort(e.target.value, true));
+  $('reset').addEventListener('click', () => setSort(S.map.Echeance ? 'echeance' : 'titre', true));
+  $('refresh').addEventListener('click', async () => { await refreshAll(); toast('Rechargé'); });
+  $('dlgSave').addEventListener('click', saveForm);
+  $('dlgCancel').addEventListener('click', closeForm);
+  $('dlgDelete').addEventListener('click', deleteFromForm);
+  $('overlay').addEventListener('mousedown', e => { if (e.target.id === 'overlay') closeForm(); });
+  document.addEventListener('keydown', e => {
+    if (!formState) return;
+    if (e.key === 'Escape') closeForm();
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveForm();
+    if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') { e.preventDefault(); saveForm(); }
+  });
+}
+
+/* ---------- Grist ---------- */
+async function refreshAll() {
+  try {
+    await loadMeta();
+    await loadStatuts();
+    S.metaLoaded = true;
+    const refCols = cardFieldIds().filter(id => /^Ref(List)?:/.test(colType(id)));
+    await Promise.all(refCols.map(id => { const c = S.colById[id]; return loadRefLabels(c.type.replace(/^Ref(List)?:/, ''), c.visibleCol).catch(() => {}); }));
+    renderToolbar(); render();
+  } catch (e) { showMsg('Erreur de chargement : ' + esc(e.message || e)); }
+}
+let refreshTimer = null;
+function scheduleRefresh() { clearTimeout(refreshTimer); refreshTimer = setTimeout(refreshAll, 150); }
+
+function initGrist() {
+  grist.ready({
+    requiredAccess: 'full',
+    allowSelectBy: true,
+    columns: [
+      { name: 'Titre', title: 'Titre de la tâche', type: 'Text' },
+      { name: 'Statut', title: 'Statut (Référence vers la table des statuts, ou Choix)', type: 'Any' },
+      { name: 'Echeance', title: 'Échéance', type: 'Date', optional: true },
+      { name: 'Priorite', title: 'Priorité (Choix)', type: 'Choice', optional: true },
+      { name: 'Etiquettes', title: 'Étiquettes (Choix multiple)', type: 'ChoiceList', optional: true },
+      { name: 'Ordre', title: 'Ordre manuel (Numérique)', type: 'Numeric', optional: true },
+      { name: 'Carte', title: 'Champs affichés sur la carte', allowMultiple: true, optional: true },
+    ],
+  });
+  grist.onOptions(opts => {
+    let t = opts && opts.tri;
+    if (!t) { try { t = localStorage.getItem('boardSort'); } catch (e) {} }
+    if (t && t !== S.sort) { S.sort = t; if (S.ready) { renderToolbar(); render(); } }
+  });
+  grist.onRecords((records, mappings) => {
+    if (!mappings || !mappings.Titre || !mappings.Statut) {
+      S.ready = false;
+      showMsg('Dans le panneau de droite (onglet <b>Widget</b>), associe au minimum <b>Titre de la tâche</b> et <b>Statut</b>.');
+      return;
+    }
+    const mapChanged = JSON.stringify(mappings) !== JSON.stringify(S.map);
+    S.map = mappings; S.rows = records || []; S.ready = true; hideMsg();
+    scheduleRefresh();
+    if (S.metaLoaded && !mapChanged) render();
+  }, { includeColumns: 'normal', expandRefs: false });
+  // Les statuts vivent dans une autre table : on les relit régulièrement.
+  setInterval(() => { if (S.ready && !formState && !drag && document.visibilityState === 'visible') refreshStatuts(); }, 15000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.ready) refreshStatuts(); });
+}
+
+bindBoard(); bindToolbar();
+loadGristApi().then(ok => {
+  if (!ok) { showMsg('Impossible de charger l\'API Grist. Ce widget doit être ouvert dans un widget personnalisé Grist.'); return; }
+  if (window.self === window.top && !window.__GRIST_MOCK__) showMsg('Ce widget fonctionne uniquement dans Grist (widget personnalisé → URL personnalisée).');
+  initGrist();
+});
+</script>
+</body>
+</html>
