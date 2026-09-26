@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Éditeur LaTeX pour Grist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #262633; --muted: #8a8f98; --border: #d9d9e0;
+    --bar: #f7f7f9; --accent: #16b378; --err: #c0392b; --env: #f3f6fb; --env-border: #7a9cc6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e24; --fg: #e6e6ea; --muted: #9a9aa5; --border: #3a3a44;
+      --bar: #26262e; --accent: #2fd190; --err: #ff6b5b; --env: #252a33; --env-border: #5a7fae;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 13px; display: flex; flex-direction: column; }
+
+  #bar { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--border); background: var(--bar); flex: 0 0 auto; }
+  #bar .spacer { flex: 1; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .seg button, #save { background: transparent; color: var(--fg); border: 0; padding: 3px 9px; font: inherit; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button.on { background: var(--accent); color: #fff; }
+  #save { border: 1px solid var(--border); border-radius: 6px; }
+  #save:disabled { opacity: .45; cursor: default; }
+  #status { color: var(--muted); white-space: nowrap; }
+  #status.err { color: var(--err); }
+  #status.dirty { color: #b8860b; }
+
+  #main { flex: 1 1 auto; display: flex; min-height: 0; }
+  #edit, #view { flex: 1 1 50%; min-width: 0; min-height: 0; }
+  #edit { border-right: 1px solid var(--border); display: flex; }
+  #edit .CodeMirror { flex: 1; height: 100%; font-size: 13px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  #view { overflow: auto; padding: 12px 16px; font-size: 15px; line-height: 1.55; }
+  body.mode-edit #view, body.mode-view #edit { display: none; }
+  body.mode-view #view { max-width: 60em; margin: 0 auto; }
+
+  @media (prefers-color-scheme: dark) {
+    .CodeMirror { background: #1e1e24; color: #e6e6ea; }
+    .CodeMirror-gutters { background: #26262e; border-right-color: #3a3a44; }
+    .CodeMirror-cursor { border-left-color: #fff; }
+    .CodeMirror-selected, .CodeMirror-focused .CodeMirror-selected { background: #3b4252 !important; }
+    .cm-s-default .cm-tag { color: #7fb4ff; } .cm-s-default .cm-keyword { color: #c792ea; }
+    .cm-s-default .cm-bracket { color: #e6e6ea; } .cm-s-default .cm-comment { color: #7a8a7a; }
+    .cm-s-default .cm-string, .cm-s-default .cm-atom, .cm-s-default .cm-number { color: #f0a868; }
+    .cm-s-default .cm-builtin { color: #7fdbca; }
+  }
+
+  #view h2 { font-size: 1.3em; margin: 1em 0 .4em; } #view h3 { font-size: 1.12em; margin: .9em 0 .35em; }
+  #view h4 { font-size: 1em; margin: .8em 0 .3em; }
+  #view p { margin: .5em 0; }
+  #view ul, #view ol { margin: .4em 0; padding-left: 1.6em; }
+  #view li { margin: .15em 0; }
+  #view .math-display { display: block; margin: .6em 0; overflow-x: auto; overflow-y: hidden; }
+  #view .env { border-left: 3px solid var(--env-border); background: var(--env); padding: 6px 10px; margin: .6em 0; border-radius: 0 6px 6px 0; }
+  #view .env-label { font-weight: 600; font-size: .85em; text-transform: uppercase; letter-spacing: .03em; color: var(--env-border); }
+  #view table.tab { border-collapse: collapse; margin: .6em 0; }
+  #view table.tab td { border: 1px solid var(--border); padding: 3px 8px; }
+  #view code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; }
+  #view .placeholder { color: var(--muted); font-style: italic; }
+  #view .katex-error { color: var(--err); }
+</style>
+</head>
+<body class="mode-both">
+  <div id="bar">
+    <div class="seg" role="group" aria-label="Affichage">
+      <button data-mode="edit">Éditeur</button>
+      <button data-mode="both" class="on">Les deux</button>
+      <button data-mode="view">Aperçu</button>
+    </div>
+    <span class="spacer"></span>
+    <span id="status">—</span>
+    <button id="save" title="Enregistrer (Ctrl/Cmd+S)" disabled>Enregistrer</button>
+  </div>
+  <div id="main">
+    <div id="edit"><textarea id="src"></textarea></div>
+    <div id="view"><p class="placeholder">Sélectionne une ligne.</p></div>
+  </div>
+
+<script id="converter">
+/* ===== Convertisseur LaTeX → HTML (sous-ensemble) + KaTeX pour les maths ===== */
+const MATH_ENVS = ['equation','equation\\*','align','align\\*','gather','gather\\*','multline','multline\\*',
+                   'alignat','alignat\\*','flalign','flalign\\*','eqnarray','eqnarray\\*'];
+const DEFAULT_MACROS = { '\\R': '\\mathbb{R}', '\\N': '\\mathbb{N}', '\\Z': '\\mathbb{Z}',
+                         '\\Q': '\\mathbb{Q}', '\\C': '\\mathbb{C}' };
+
+function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// Contenu entre accolades équilibrées à partir de s[i] === '{'. Renvoie [contenu, indexAprès] ou null.
+function readGroup(s, i) {
+  if (s[i] !== '{') return null;
+  let depth = 0;
+  for (let j = i; j < s.length; j++) {
+    if (s[j] === '\\') { j++; continue; }
+    if (s[j] === '{') depth++;
+    else if (s[j] === '}' && --depth === 0) return [s.slice(i + 1, j), j + 1];
+  }
+  return null;
+}
+
+// Récupère \newcommand, \renewcommand, \DeclareMathOperator, \def et les retire du source.
+function extractMacros(s, macros) {
+  const re = /\\(?:re)?newcommand\*?\s*\{?\s*(\\[A-Za-z]+)\s*\}?\s*(?:\[(\d)\])?\s*(?=\{)|\\DeclareMathOperator\*?\s*\{\s*(\\[A-Za-z]+)\s*\}\s*(?=\{)|\\def\s*(\\[A-Za-z]+)\s*(?=\{)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(s))) {
+    const g = readGroup(s, re.lastIndex);
+    if (!g) continue;
+    if (m[1]) macros[m[1]] = g[0];
+    else if (m[3]) macros[m[3]] = '\\operatorname{' + g[0] + '}';
+    else if (m[4]) macros[m[4]] = g[0];
+    out += s.slice(last, m.index);
+    last = re.lastIndex = g[1];
+  }
+  return out + s.slice(last);
+}
+
+// Remplace \cmd{...} (accolades équilibrées) par fn(contenu).
+function replaceCmd(s, names, fn) {
+  const re = new RegExp('\\\\(' + names.join('|') + ')\\*?\\s*(?=\\{)', 'g');
+  let out = '', last = 0, m;
+  while ((m = re.exec(s))) {
+    const g = readGroup(s, re.lastIndex);
+    if (!g) continue;
+    out += s.slice(last, m.index) + fn(m[1], g[0]);
+    last = re.lastIndex = g[1];
+  }
+  return out + s.slice(last);
+}
+
+function latexToHtml(src, katexLib) {
+  const store = [];
+  const keep = html => { store.push(html); return '\u0000' + (store.length - 1) + '\u0000'; };
+  const macros = Object.assign({}, DEFAULT_MACROS);
+
+  let s = src.replace(/\r\n?/g, '\n');
+  s = s.replace(/(^|[^\\])%.*$/gm, '$1');                 // commentaires
+  s = extractMacros(s, macros);                             // macros (préambule ou corps)
+  const body = s.match(/\\begin\{document\}([\s\S]*?)(?:\\end\{document\}|$)/);
+  if (body) s = body[1];
+
+  s = s.replace(/\\\$/g, '\u0001');                        // \$ littéral
+
+  const math = (tex, display) => {
+    tex = tex.replace(/\u0001/g, '\\$');
+    let html;
+    try {
+      html = katexLib.renderToString(tex, { displayMode: display, throwOnError: false, macros: Object.assign({}, macros), trust: false, strict: 'ignore' });
+    } catch (e) {
+      html = '<span class="katex-error">' + escapeHtml(String(e.message || e)) + '</span>';
+    }
+    return keep(display ? '<span class="math-display">' + html + '</span>' : html);
+  };
+  s = s.replace(new RegExp('\\\\begin\\{(' + MATH_ENVS.join('|') + ')\\}[\\s\\S]*?\\\\end\\{\\1\\}', 'g'),
+                m => math(m.replace(/^\\begin\{eqnarray(\*?)\}/, '\\begin{align$1}').replace(/\\end\{eqnarray(\*?)\}$/, '\\end{align$1}').replace(/&=&/g, '&='), true));
+  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, t) => math(t, true));
+  s = s.replace(/\\\[([\s\S]+?)\\\]/g, (m, t) => math(t, true));
+  s = s.replace(/\\\(([\s\S]+?)\\\)/g, (m, t) => math(t, false));
+  s = s.replace(/\$([^$]+?)\$/g, (m, t) => math(t, false));
+
+  s = escapeHtml(s);
+  s = s.replace(/\u0001/g, '$');
+  s = s.replace(/\\(&amp;|%|#|_|\{|\})/g, (m, c) => keep(c));   // caractères échappés
+  s = s.replace(/\\textbackslash(\{\})?/g, () => keep('\\'));
+
+  // Typographie
+  s = s.replace(/\\og\s*(\{\})?\s*/g, '«&nbsp;').replace(/\s*\\fg\s*(\{\})?/g, '&nbsp;»')
+       .replace(/---/g, '—').replace(/--/g, '–').replace(/``/g, '“').replace(/''/g, '”')
+       .replace(/(^|[^\\])~/g, '$1&nbsp;').replace(/\\ldots|\\dots/g, '…')
+       .replace(/\\(LaTeX|TeX)(\{\})?/g, (m, n) => n);
+
+  // Mise en forme en ligne (accolades équilibrées, imbrication gérée par répétition)
+  const inline = { textbf: 'strong', textit: 'em', emph: 'em', textsl: 'em', underline: 'u', texttt: 'code', textsc: 'span style="font-variant:small-caps"' };
+  for (let k = 0; k < 5; k++) {
+    s = replaceCmd(s, Object.keys(inline), (name, c) => {
+      const tag = inline[name]; return '<' + tag + '>' + c + '</' + tag.split(' ')[0] + '>';
+    });
+    s = replaceCmd(s, ['textrm', 'textup', 'textnormal', 'mbox', 'text', 'textcolor\\{[^}]*\\}'], (n, c) => c);
+  }
+  s = replaceCmd(s, ['section'], (n, c) => '\n\n<h2>' + c + '</h2>\n\n');
+  s = replaceCmd(s, ['subsection'], (n, c) => '\n\n<h3>' + c + '</h3>\n\n');
+  s = replaceCmd(s, ['subsubsection', 'paragraph'], (n, c) => '\n\n<h4>' + c + '</h4>\n\n');
+  s = replaceCmd(s, ['title', 'author', 'date', 'label', 'vspace', 'hspace', 'setlength', 'usepackage', 'documentclass'], () => '');
+  s = s.replace(/\\(usepackage|documentclass)(\[[^\]]*\])?\{[^}]*\}/g, '');
+
+  // Tableaux simples
+  s = s.replace(/\\begin\{tabular\}\{[^}]*\}([\s\S]*?)\\end\{tabular\}/g, (m, body) => {
+    const rows = body.replace(/\\hline|\\cline\{[^}]*\}/g, '').split(/\\\\/).map(r => r.trim()).filter(Boolean);
+    return '\n\n<table class="tab">' + rows.map(r => '<tr>' + r.split('&amp;').map(c => '<td>' + c.trim() + '</td>').join('') + '</tr>').join('') + '</table>\n\n';
+  });
+  s = s.replace(/\\qquad\b/g, '&emsp;&emsp;').replace(/\\quad\b/g, '&emsp;').replace(/\\[,;:]/g, '&thinsp;').replace(/\\!/g, '');
+
+  // Listes
+  s = s.replace(/\\begin\{itemize\}(\[[^\]]*\])?/g, '<ul>').replace(/\\end\{itemize\}/g, '</ul>')
+       .replace(/\\begin\{enumerate\}(\[[^\]]*\])?/g, '<ol>').replace(/\\end\{enumerate\}/g, '</ol>')
+       .replace(/\\begin\{description\}/g, '<ul style="list-style:none;padding-left:.4em">').replace(/\\end\{description\}/g, '</ul>')
+       .replace(/\\item\s*\[([^\]]*)\]/g, '<li style="list-style:none"><strong>$1</strong> ')
+       .replace(/\\item\b/g, '<li>');
+
+  // Alignements
+  s = s.replace(/\\begin\{center\}/g, '<div style="text-align:center">').replace(/\\end\{center\}/g, '</div>')
+       .replace(/\\begin\{flushright\}/g, '<div style="text-align:right">').replace(/\\end\{flushright\}/g, '</div>')
+       .replace(/\\begin\{flushleft\}/g, '<div>').replace(/\\end\{flushleft\}/g, '</div>');
+
+  // Autres environnements (exercice, theoreme, proof, tcolorbox…) → encadré avec étiquette
+  s = s.replace(/\\begin\{([A-Za-z*]+)\}(?:\[([^\]]*)\])?(?:\{([^}]*)\})?/g, (m, env, opt, arg) => {
+    const label = env.replace(/\*$/, '').replace(/^./, c => c.toUpperCase()) + (opt ? ' — ' + opt : arg ? ' — ' + arg : '');
+    return '\n\n<div class="env"><div class="env-label">' + label + '</div>\n\n';
+  });
+  s = s.replace(/\\end\{[A-Za-z*]+\}/g, '\n\n</div>\n\n');
+
+  // Espacements et commandes sans effet visuel
+  s = s.replace(/\\(medskip|bigskip|smallskip|noindent|newpage|clearpage|maketitle|centering|tableofcontents|hfill|vfill|par)\b/g, m => m === '\\par' ? '\n\n' : '');
+  s = s.replace(/\\\\(\[[^\]]*\])?|\\newline\b/g, '<br>');
+
+  // Paragraphes
+  s = s.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean)
+       .map(p => /^<(h\d|ul|ol|li|div|\/div|table)/.test(p) ? p : '<p>' + p + '</p>').join('\n');
+
+  // Restauration
+  for (let k = 0; k < 3 && /\u0000\d+\u0000/.test(s); k++) s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => store[+i]);
+  return s;
+}
+if (typeof module !== 'undefined') module.exports = { latexToHtml };
+</script>
+
+<script>
+/* ===== Widget Grist ===== */
+const $ = id => document.getElementById(id);
+const view = $('view'), statusEl = $('status'), saveBtn = $('save');
+
+let currentId = null, colId = null, dirty = false, applying = false;
+let saveTimer = null, renderTimer = null;
+const AUTOSAVE_MS = 1200;
+
+const editor = CodeMirror.fromTextArea($('src'), {
+  mode: 'stex', lineWrapping: true, lineNumbers: true, matchBrackets: true,
+  autoCloseBrackets: '()[]{}$$', readOnly: 'nocursor', indentUnit: 2,
+  extraKeys: { 'Ctrl-S': () => save(), 'Cmd-S': () => save() }
+});
+
+function setStatus(text, cls) { statusEl.textContent = text; statusEl.className = cls || ''; }
+
+function render() {
+  const src = editor.getValue();
+  if (currentId == null) { view.innerHTML = '<p class="placeholder">Sélectionne une ligne.</p>'; return; }
+  if (!src.trim()) { view.innerHTML = '<p class="placeholder">Cellule vide — tape du LaTeX à gauche.</p>'; return; }
+  try { view.innerHTML = latexToHtml(src, katex); }
+  catch (e) { view.innerHTML = '<p class="katex-error">Erreur de rendu : ' + escapeHtml(String(e.message || e)) + '</p>'; }
+}
+function scheduleRender() { clearTimeout(renderTimer); renderTimer = setTimeout(render, 120); }
+
+function setValue(v) {
+  applying = true;
+  editor.setValue(v || '');
+  editor.clearHistory();
+  applying = false;
+  dirty = false; saveBtn.disabled = true;
+  render();
+}
+
+async function save() {
+  clearTimeout(saveTimer);
+  if (!dirty || currentId == null || !colId) return;
+  const id = currentId, text = editor.getValue();
+  dirty = false; saveBtn.disabled = true;
+  setStatus('Enregistrement…');
+  try {
+    await grist.selectedTable.update({ id, fields: { [colId]: text } });
+    if (!dirty) setStatus('Enregistré');
+  } catch (e) {
+    if (id === currentId) { dirty = true; saveBtn.disabled = false; }
+    setStatus('Erreur : ' + (e.message || e), 'err');
+  }
+}
+
+editor.on('change', () => {
+  if (applying) return;
+  dirty = true; saveBtn.disabled = false;
+  setStatus('Modifié', 'dirty');
+  scheduleRender();
+  clearTimeout(saveTimer); saveTimer = setTimeout(save, AUTOSAVE_MS);
+});
+saveBtn.addEventListener('click', save);
+window.addEventListener('beforeunload', () => { if (dirty) save(); });
+
+// Modes d'affichage
+function setMode(mode) {
+  document.body.className = 'mode-' + mode;
+  document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+  try { localStorage.setItem('latexWidgetMode', mode); } catch (e) {}
+  setTimeout(() => editor.refresh(), 0);
+}
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+try { const m = localStorage.getItem('latexWidgetMode'); if (m) setMode(m); } catch (e) {}
+
+// Chargement de l'API Grist : d'abord depuis l'instance Grist qui affiche le widget
+// (ex. grist.numerique.gouv.fr), puis depuis docs.getgrist.com en secours.
+function loadScript(url) {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement('script');
+    el.src = url; el.onload = resolve; el.onerror = () => reject(new Error(url));
+    document.head.appendChild(el);
+  });
+}
+async function loadGristApi() {
+  const urls = [];
+  try { if (document.referrer) urls.push(new URL(document.referrer).origin + '/grist-plugin-api.js'); } catch (e) {}
+  try { const a = window.location.ancestorOrigins; if (a && a.length) urls.push(a[0] + '/grist-plugin-api.js'); } catch (e) {}
+  urls.push('https://grist.numerique.gouv.fr/grist-plugin-api.js', 'https://docs.getgrist.com/grist-plugin-api.js');
+  for (const u of [...new Set(urls)]) {
+    try { await loadScript(u); if (window.grist) return true; } catch (e) { console.warn('API Grist introuvable :', e.message); }
+  }
+  return false;
+}
+
+loadGristApi().then(ok => {
+  if (!ok) {
+    view.innerHTML = '<p class="katex-error">Impossible de charger l\'API Grist (grist-plugin-api.js). Ce widget doit être ouvert dans un widget personnalisé Grist.</p>';
+    setStatus('API Grist absente', 'err');
+    return;
+  }
+  if (window.self === window.top) setStatus('Hors de Grist', 'err');
+  initGrist();
+});
+
+function initGrist() {
+grist.ready({
+  requiredAccess: 'full',
+  allowSelectBy: false,
+  columns: [{ name: 'Source', title: 'Source LaTeX', type: 'Text', description: 'Colonne texte contenant le code LaTeX' }]
+});
+
+grist.onRecord((record, mappings) => {
+  const mapped = grist.mapColumnNames(record);
+  if (!mapped || !mappings || !mappings.Source) {
+    currentId = null; editor.setOption('readOnly', 'nocursor');
+    view.innerHTML = '<p class="placeholder">Dans le panneau de droite (onglet Widget), associe « Source LaTeX » à la colonne qui contient le code.</p>';
+    setStatus('Colonne non associée', 'err');
+    return;
+  }
+  const value = mapped.Source == null ? '' : String(mapped.Source);
+  if (record.id !== currentId) {
+    if (dirty) save();                 // enregistre la ligne précédente avant de changer
+    currentId = record.id; colId = mappings.Source;
+    editor.setOption('readOnly', false);
+    setValue(value);
+    setStatus('Ligne ' + record.id);
+  } else if (!dirty && value !== editor.getValue()) {
+    const cur = editor.getCursor();     // mise à jour externe (autre utilisateur, formule…)
+    setValue(value); editor.setCursor(cur);
+  }
+});
+
+grist.onNewRecord(() => {
+  if (dirty) save();
+  currentId = null;
+  editor.setOption('readOnly', 'nocursor');
+  setValue('');
+  view.innerHTML = '<p class="placeholder">Nouvelle ligne : crée-la d\'abord dans la table, puis sélectionne-la.</p>';
+  setStatus('—');
+});
+}
+</script>
+</body>
+</html>
